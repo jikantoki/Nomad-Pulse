@@ -77,6 +77,8 @@ div(style="height: 100%; width: 100%")
         requestGeoPermissionDialog: false,
         /** 自分の現在地 */
         myLocation: [0, 0],
+        /** 最後に取得した位置情報 */
+        lastGetLocation: [0, 0],
       }
     },
     mounted () {
@@ -100,10 +102,15 @@ div(style="height: 100%; width: 100%")
     methods: {
       /** 現在地を取得し、地図の中心も移動 */
       async setCurrentPosition () {
+        /** 仮で最後に取得した位置情報を地図の中心に設定 */
+        this.leaflet.center = this.lastGetLocation
+        this.leaflet.zoom = 15
+
         const position = await Geolocation.getCurrentPosition()
 
         this.leaflet.center = [position.coords.latitude, position.coords.longitude]
         this.myLocation = [position.coords.latitude, position.coords.longitude]
+        this.lastGetLocation = [position.coords.latitude, position.coords.longitude]
       },
       /** 位置情報の許可を求める */
       async requestGeoPermission () {
