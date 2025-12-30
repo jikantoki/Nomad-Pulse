@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NomadPulse</string>
+    <string name="title_activity_main">NomadPulse</string>
+    <string name="package_name">xyz.enoki.nomadpulse</string>
+    <string name="custom_url_scheme">xyz.enoki.nomadpulse</string>
+</resources>

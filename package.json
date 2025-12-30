@@ -12,6 +12,9 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
     "@fontsource/roboto": "5.2.7",
     "@mdi/font": "7.4.47",
     "vue": "^3.5.21",
