@@ -90,7 +90,8 @@ lint/tmp/
 *.hprof
 
 # Cordova plugins for Capacitor
-capacitor-cordova-android-plugins
+# （AndroidManifest.xmlを追跡したいので個人的に無効化している）
+# capacitor-cordova-android-plugins
 
 # Copied web assets
 app/src/main/assets/public
