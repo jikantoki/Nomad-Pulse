@@ -1,0 +1,45 @@
+{
+  "short_name": "Nomad Pulse",
+  "name": "Nomad Pulse",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "lang": "ja-JP",
+  "start_url": "./",
+  "id": "./",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["social"],
+  "icons": [
+    {
+      "src": "img/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "img/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "メインページ",
+      "description": "地図を表示します",
+      "url": "/",
+      "icons": [
+        {
+          "src": "img/icon96.png",
+          "size": "96x96"
+        }
+      ]
+    }
+  ],
+  "description": "位置情報記録アプリ"
+}
