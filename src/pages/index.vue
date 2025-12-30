@@ -21,7 +21,7 @@ div(style="height: 100%; width: 100%")
         div(style="display: flex; align-items: center; width: 1000em;")
           img(src="/account_default.jpg" style="height: 32px; width: 32px; border-radius: 9999px;")
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-            | あなたの現在地
+            | あなたの現在地 {{ myBatteryPersent !== undefined ? ` - バッテリー残量: ${myBatteryPersent}%` : '' }}{{ chargeingNow ? ' (充電中)' : '' }}
   .right-bottom-buttons
     .current-button
       v-btn(
@@ -55,6 +55,7 @@ div(style="height: 100%; width: 100%")
 
 <script lang="ts">
   import { Capacitor } from '@capacitor/core'
+  import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
   import 'leaflet/dist/leaflet.css'
@@ -79,6 +80,10 @@ div(style="height: 100%; width: 100%")
         myLocation: [0, 0],
         /** 最後に取得した位置情報 */
         lastGetLocation: [0, 0],
+        /** 自分のバッテリー残量 */
+        myBatteryPersent: 0 as number | undefined,
+        /** 充電中かどうか */
+        chargeingNow: false as boolean | undefined,
       }
     },
     mounted () {
@@ -105,6 +110,13 @@ div(style="height: 100%; width: 100%")
         /** 仮で最後に取得した位置情報を地図の中心に設定 */
         this.leaflet.center = this.lastGetLocation
         this.leaflet.zoom = 15
+
+        Device.getBatteryInfo().then(info => {
+          if (info.batteryLevel) {
+            this.myBatteryPersent = info.batteryLevel * 100
+          }
+          this.chargeingNow = info.isCharging
+        })
 
         const position = await Geolocation.getCurrentPosition()
 
