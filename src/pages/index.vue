@@ -117,6 +117,7 @@ div(style="height: 100%; width: 100%")
             v-btn.my-2(
               v-else
               text
+              @click="$router.push('/login')"
               append-icon="mdi-login"
               style="background-color: rgb(var(--v-theme-primary)); color: white;"
             ) ログイン

@@ -13,7 +13,10 @@ v-card(
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
     .settings-list
-      .setting-item(v-ripple)
+      .setting-item(
+        v-ripple
+        @click="$router.push('/settings/display')"
+        )
         .icon
           v-icon mdi-palette-outline
         .text
@@ -27,7 +30,6 @@ v-card(
           p.description メール、プッシュ通知
       .setting-item(
         v-ripple
-        @click="$router.push('/terms')"
         )
         .icon
           v-icon mdi-file-document-outline
@@ -66,6 +68,7 @@ v-card(
       .setting-item(
         v-ripple
         @click="logoutRequest()"
+        v-if="myUserId"
         )
         .icon(style="background: rgba(var(--v-theme-error), 1);")
           v-icon mdi-logout
@@ -106,6 +109,7 @@ v-dialog(
         logoutDialog: false,
         developerOptionEnabled: false,
         isAndroid15OrHigher: false,
+        myUserId: null as string | null,
       }
     },
     async mounted () {
@@ -126,6 +130,9 @@ v-dialog(
           this.isAndroid15OrHigher = options.statusBarNotch
         }
       }
+
+      const userId = localStorage.getItem('myUserId')
+      this.myUserId = userId
     },
     methods: {
       logoutRequest () {

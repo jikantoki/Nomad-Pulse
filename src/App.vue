@@ -39,6 +39,29 @@ v-app
         }
       }
 
+      const themeOptions = localStorage.getItem('themeOptions')
+      if (themeOptions) {
+        const options = JSON.parse(themeOptions)
+        switch (options.theme) {
+          case true: {
+            this.$vuetify.theme.change('light')
+
+            break
+          }
+          case false: {
+            this.$vuetify.theme.change('dark')
+
+            break
+          }
+          case undefined: {
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            systemTheme ? this.$vuetify.theme.change('dark') : this.$vuetify.theme.change('light')
+
+            break
+          }
+        }
+      }
+
       /**
        * mountedの最後に記述
        */
@@ -71,5 +94,14 @@ hr {
 main {
   height: 100vh;
   overflow: hidden;
+}
+
+//テーマカラーの変更
+//青紫がテーマカラー！
+.v-theme--dark {
+  --v-theme-primary: 145,56,213!important;
+}
+:root {
+  --v-theme-primary: 145,56,213!important;
 }
 </style>
