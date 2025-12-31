@@ -77,7 +77,6 @@ div(style="height: 100%; width: 100%")
   //-- オプションダイアログ --
   v-dialog(
     v-model="optionsDialog"
-    persistent
     transition="dialog-bottom-transition"
     fullscreen
   )
@@ -109,16 +108,22 @@ div(style="height: 100%; width: 100%")
               text
               append-icon="mdi-login"
             ) ログイン
-        v-list
-          v-list-item( @click="$router.push('/settings')" )
-            v-list-item-icon
+        v-list.options-list
+          v-list-item.item( @click="$router.push('/timeline')" )
+            .icon-and-text
+              v-icon mdi-chart-timeline-variant
+              v-list-item-title タイムライン
+          v-list-item.item( @click="$router.push('/settings')" )
+            .icon-and-text
               v-icon mdi-cog
-            v-list-item-content
               v-list-item-title 設定
-          v-list-item( @click="$router.push('/about')" )
-            v-list-item-icon
+          v-list-item.item( @click="$router.push('/terms')" )
+            .icon-and-text
+              v-icon mdi-file-document-outline
+              v-list-item-title 利用規約
+          v-list-item.item( @click="$router.push('/about')" )
+            .icon-and-text
               v-icon mdi-information
-            v-list-item-content
               v-list-item-title このアプリについて
   //-- 位置情報利用許可ダイアログ --
   v-dialog(
@@ -331,6 +336,27 @@ div(style="height: 100%; width: 100%")
       font-size: 10px;
       margin: 0;
       padding: 0;
+    }
+  }
+}
+
+.options-list {
+  .item {
+    padding : 12px 16px;
+    border-radius: 12px!important;
+    margin: 8px 0;
+    cursor: pointer;
+    &:hover {
+      background-color: rgba(var(--v-theme-primary), 0.1);
+    }
+    .icon-and-text {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      v-icon {
+        font-size: 24px;
+      }
     }
   }
 }
