@@ -287,18 +287,18 @@ div(style="height: 100%; width: 100%")
 
       /** バックボタンのリスナーを追加 */
       App.addListener('backButton', () => {
-        if (this.detailCardTarget) {
-          /** 詳細カードを閉じる */
-          this.detailCardTarget = null
+        if (this.timelineMode) {
+          /** タイムラインモードを閉じる */
+          this.timelineMode = false
         } else if (this.optionsDialog) {
           /** オプションダイアログを閉じる */
           this.optionsDialog = false
         } else if (this.requestGeoPermissionDialog) {
           /** 位置情報利用許可ダイアログを閉じる */
           this.requestGeoPermissionDialog = false
-        } else if (this.timelineMode) {
-          /** タイムラインモードを閉じる */
-          this.timelineMode = false
+        } else if (this.detailCardTarget) {
+          /** 詳細カードを閉じる */
+          this.detailCardTarget = null
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを終了 */
           App.exitApp()

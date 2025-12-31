@@ -101,6 +101,9 @@ main {
 .v-theme--dark {
   --v-theme-primary: 145,56,213!important;
 }
+.v-theme--light {
+  --v-theme-primary: 145,56,213!important;
+}
 :root {
   --v-theme-primary: 145,56,213!important;
 }
