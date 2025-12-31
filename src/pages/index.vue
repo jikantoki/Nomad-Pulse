@@ -161,6 +161,7 @@ div(style="height: 100%; width: 100%")
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
+  import { watch } from 'vue'
   import 'leaflet/dist/leaflet.css'
 
   export default {
@@ -224,6 +225,7 @@ div(style="height: 100%; width: 100%")
           })
         }
       })
+
       /** バックボタンのリスナーを追加 */
       App.addListener('backButton', () => {
         if (this.detailCardTarget) {
@@ -243,8 +245,28 @@ div(style="height: 100%; width: 100%")
           this.$router.back()
         }
       })
+
+      /** 現在地を監視 */
+      Geolocation.watchPosition({
+        enableHighAccuracy: true,
+        timeout: 100_000,
+        interval: 100_000,
+      }, position =>
+        this.watchPosition(position),
+      )
     },
     methods: {
+      /** 位置情報監視のコールバック */
+      watchPosition (position: any) {
+        if (position) {
+          const lat: number = position.coords.latitude
+          const lng: number = position.coords.longitude
+          this.lastGetLocation = [lat, lng]
+          this.myLocation = [lat, lng]
+          localStorage.setItem('latlng', JSON.stringify(this.myLocation))
+        }
+        return
+      },
       /** 現在地を取得し、地図の中心も移動 */
       async setCurrentPosition () {
         /** 仮で最後に取得した位置情報を地図の中心に設定 */
