@@ -50,10 +50,56 @@ v-card(
         .text
           p.title このアプリについて
           p.description バージョン情報
+      .setting-item(
+        v-ripple
+        @click="logoutRequest()"
+        )
+        .icon(style="background: rgba(var(--v-theme-error), 1);")
+          v-icon mdi-logout
+        .text
+          p.title ログアウト
+          p.description またお会いしましょう！
+v-dialog(
+  v-model="logoutDialog"
+  max-width="400"
+  )
+  v-card
+    v-card-title(class="headline") ログアウトしますか？
+    v-card-text
+      | ログアウトすると、再度ログインするまでデータの同期が行われません。
+    v-card-actions
+      v-spacer
+      v-btn(
+        text
+        @click="logoutDialog = false"
+        append-icon="mdi-close"
+        ) キャンセル
+      v-btn(
+        text
+        style="background: rgba(var(--v-theme-error), 1); color: white;"
+        append-icon="mdi-logout"
+        @click="logout"
+        ) ログアウト
 </template>
 
 <script lang="ts">
-  export default {}
+  export default {
+    name: 'SettingsPage',
+    data () {
+      return {
+        logoutDialog: false,
+      }
+    },
+    methods: {
+      logoutRequest () {
+        this.logoutDialog = true
+      },
+      logout () {
+        this.logoutDialog = false
+        this.$router.push('/login')
+      },
+    },
+  }
 </script>
 
 <style lang="scss" scoped>

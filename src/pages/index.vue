@@ -113,10 +113,6 @@ div(style="height: 100%; width: 100%")
               text
               append-icon="mdi-account-edit"
             ) アカウント情報を編集
-            v-btn(
-              text
-              append-icon="mdi-login"
-            ) ログイン
         v-list.options-list
           v-list-item.item( @click="$router.push('/timeline')" )
             .icon-and-text
@@ -144,6 +140,8 @@ div(style="height: 100%; width: 100%")
       v-card-title(class="headline") 位置情報の利用許可
       v-card-text
         | このアプリは位置情報を利用します。 位置情報の利用を許可してください。
+        br
+        | また、バックグラウンドでの位置情報取得と通知の許可も必要です。
       v-card-actions
         v-spacer
         v-btn(
@@ -161,6 +159,7 @@ div(style="height: 100%; width: 100%")
 
 <script lang="ts">
   import { App } from '@capacitor/app'
+  import { BackgroundRunner } from '@capacitor/background-runner'
   import { Capacitor } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
@@ -217,21 +216,30 @@ div(style="height: 100%; width: 100%")
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
       /** 位置情報の許可を確認 */
-      Geolocation.checkPermissions().then(result => {
-        if (result.location === 'granted') {
-          this.setCurrentPosition()
-        } else {
-          Geolocation.requestPermissions().then(result => {
-            if (result.location === 'granted') {
-              this.setCurrentPosition()
-            }
-          }).catch(() => {
-            if (Capacitor.getPlatform() === 'web') {
-              this.requestGeoPermissionDialog = true
-            }
-          })
+      if (Capacitor.getPlatform() === 'web') {
+        /** 位置情報の許可を確認 */
+        Geolocation.checkPermissions().then(result => {
+          if (result.location === 'granted') {
+            this.setCurrentPosition()
+          } else {
+            Geolocation.requestPermissions().then(result => {
+              if (result.location === 'granted') {
+                this.setCurrentPosition()
+              }
+            }).catch(() => {
+              if (Capacitor.getPlatform() === 'web') {
+                this.requestGeoPermissionDialog = true
+              }
+            })
+          }
+        })
+      } else {
+        /** スマホの場合、この方法で位置情報と通知を許可してもらう */
+        const permission = await BackgroundRunner.checkPermissions()
+        if (permission.geolocation !== 'granted') {
+          this.requestGeoPermissionDialog = true
         }
-      })
+      }
 
       /** バックボタンのリスナーを追加 */
       App.addListener('backButton', () => {
@@ -300,10 +308,14 @@ div(style="height: 100%; width: 100%")
           this.requestGeoPermissionDialog = false
           return
         }
-        const result = await Geolocation.requestPermissions()
-        if (result.location === 'granted') {
+
+        const permissions = await BackgroundRunner.requestPermissions({
+          apis: ['geolocation', 'notifications'],
+        })
+        if (permissions.geolocation === 'granted') {
           this.setCurrentPosition()
         }
+
         this.requestGeoPermissionDialog = false
       },
       /** 2地点間の距離を計算 */

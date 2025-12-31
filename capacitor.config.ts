@@ -8,6 +8,14 @@ const config: CapacitorConfig = {
     StatusBar: {
       overlaysWebView: false,
     },
+    BackgroundRunner: {
+      label: 'xyz.enoki.nomadpulse.background',
+      src: 'runners/background-runner.js',
+      event: 'NomadPulseBackgroundRunner',
+      repeat: true,
+      interval: 1,
+      autoStart: true,
+    },
   },
   server: {
     androidScheme: 'https',
