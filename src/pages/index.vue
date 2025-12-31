@@ -3,7 +3,7 @@ div(style="height: 100%; width: 100%")
   LMap(
     :zoom="leaflet.zoom"
     :center="leaflet.center"
-    style="height: calc(100% - 4em); width: 100%"
+    style="height: calc(100% - 5em); width: 100%"
     :useGlobalLeaflet="false"
     @update:zoom="leaflet.zoom = $event"
     @update:center="leaflet.center = $event"
@@ -285,7 +285,7 @@ div(style="height: 100%; width: 100%")
 .right-bottom-buttons {
   position: fixed;
   right: 16px;
-  bottom: calc(16px + 3em);
+  bottom: calc(16px + 4em);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -337,7 +337,7 @@ div(style="height: 100%; width: 100%")
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    height: 3em;
+    height: 4em;
     .button {
       display: flex;
       flex-direction: column;
@@ -345,6 +345,7 @@ div(style="height: 100%; width: 100%")
       justify-content: center;
       width: 6em;
       border-radius: 1em;
+      height: 80%;
       cursor: pointer;
       color: rgb(var(--v-theme-on-surface));
 

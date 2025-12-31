@@ -7,7 +7,6 @@ v-app
 </template>
 
 <script lang="ts">
-  import { App } from '@capacitor/app'
   import { Device } from '@capacitor/device'
   import { StatusBar } from '@capacitor/status-bar'
 
@@ -27,7 +26,7 @@ v-app
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .status-bar-padding.android-15-or-higher {
   height: 40px;
   width: 100vw;
