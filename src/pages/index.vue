@@ -196,9 +196,18 @@ div(style="height: 100%; width: 100%")
       }
     },
     async mounted () {
+      /** ローカルストレージから最後に取得した位置情報を読み込み */
+      const localStorageLatlng = localStorage.getItem('latlng')
+      if (localStorageLatlng) {
+        this.myLocation = JSON.parse(localStorageLatlng)
+        this.lastGetLocation = JSON.parse(localStorageLatlng)
+        this.leaflet.center = this.myLocation
+      }
+
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
       /** 位置情報の許可を確認 */
       Geolocation.checkPermissions().then(result => {
         if (result.location === 'granted') {
@@ -254,6 +263,7 @@ div(style="height: 100%; width: 100%")
         this.leaflet.center = [position.coords.latitude, position.coords.longitude]
         this.myLocation = [position.coords.latitude, position.coords.longitude]
         this.lastGetLocation = [position.coords.latitude, position.coords.longitude]
+        localStorage.setItem('latlng', JSON.stringify(this.myLocation))
       },
       /** 位置情報の許可を求める */
       async requestGeoPermission () {
