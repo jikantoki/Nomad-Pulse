@@ -3,25 +3,42 @@ div(style="height: 100%; width: 100%")
   LMap(
     :zoom="leaflet.zoom"
     :center="leaflet.center"
-    style="height: 100%; width: 100%"
+    style="height: calc(100% - 4em); width: 100%"
     :useGlobalLeaflet="false"
     @update:zoom="leaflet.zoom = $event"
     @update:center="leaflet.center = $event"
+    :options="{ zoomControl: false }"
     )
     LTileLayer(
       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
     )
-    LMarker(:lat-lng="myLocation")
+    //- 自分の現在地マーカー
+    LMarker(
+      :lat-lng="myLocation"
+      @click="detailCardTarget = 'myUser'"
+      )
       LIcon(
         :icon-size="[0,0]"
         style="border: none;"
         :icon-anchor="[16, 16]"
         )
-        div(style="display: flex; align-items: center; width: 1000em;")
+        div(style="display: flex; align-items: center; width: auto;")
           img(src="/account_default.jpg" style="height: 32px; width: 32px; border-radius: 9999px;")
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-            | あなたの現在地 {{ myBatteryPersent !== undefined ? ` - バッテリー残量: ${myBatteryPersent}%` : '' }}{{ chargeingNow ? ' (充電中)' : '' }}
+            span あなたの現在地
+  //-- 下部のアクションバー --
+  .action-bar(style="height: 3em; width: 100%; position: fixed; bottom: 0; left: 0; background-color: rgb(var(--v-theme-surface)); z-index: 500; display: flex; align-items: center;box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);")
+    .button(v-ripple @click="$router.push('/')")
+      v-icon mdi-map-marker
+      p マップ
+    .button(v-ripple @click="$router.push('/timeline')")
+      v-icon mdi-chart-timeline-variant
+      p タイムライン
+    .button(v-ripple @click="optionsDialog = true")
+      v-icon mdi-dots-vertical
+      p その他
+  //-- 右下の現在地ボタン --
   .right-bottom-buttons
     .current-button
       v-btn(
@@ -31,6 +48,79 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-crosshairs-gps
+  //-- 右上のアカウントボタン --
+  .right-top-buttons
+    .account-button
+      .button(
+        v-ripple
+        @click="optionsDialog = true"
+        style="cursor: pointer; border-radius: 9999px; height: 3em; width: 3em;"
+        )
+        img(src="/account_default.jpg" style="height: 3em; width: 3em; border-radius: 9999px;")
+  //- 地図で押したアカウントの詳細カード
+  .detail-card-target
+    v-card(
+      v-if="detailCardTarget"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 16em;"
+    )
+      v-card-actions
+        p {{ detailCardTarget }}
+        v-spacer
+        v-btn(
+          text
+          @click="detailCardTarget = null"
+          ) 閉じる
+      v-card-text
+        div
+          p バッテリー残量: {{ myBatteryPersent !== undefined ? myBatteryPersent.toFixed(0) + '%' : '取得できませんでした' }}
+          p 充電中: {{ chargeingNow !== undefined ? (chargeingNow ? 'はい' : 'いいえ') : '取得できませんでした' }}
+  //-- オプションダイアログ --
+  v-dialog(
+    v-model="optionsDialog"
+    persistent
+    transition="dialog-bottom-transition"
+    fullscreen
+  )
+    v-card
+      v-card-actions
+        p.ml-2(class="headline" style="font-size: 1.3em") ようこそ
+        v-spacer
+        v-btn(
+          text
+          @click="optionsDialog = false"
+          icon="mdi-close"
+          )
+      v-card-text
+        .account-details(
+          style="display: flex; flex-direction: column; align-items: center; gap: 1em; margin-bottom: 1em;"
+        )
+          .account-img
+            img(src="/account_default.jpg" style="height: 8em; width: 8em; border-radius: 9999px;")
+          .account-info(
+            style="text-align: center;"
+          )
+            p(style="font-size: 1.2em; margin: 0; padding: 0;") ゲストユーザー
+            p(style="margin: 0; padding: 0;") ID: guest-0001
+            v-btn(
+              text
+              append-icon="mdi-account-edit"
+            ) アカウント情報を編集
+            v-btn(
+              text
+              append-icon="mdi-login"
+            ) ログイン
+        v-list
+          v-list-item( @click="$router.push('/settings')" )
+            v-list-item-icon
+              v-icon mdi-cog
+            v-list-item-content
+              v-list-item-title 設定
+          v-list-item( @click="$router.push('/about')" )
+            v-list-item-icon
+              v-icon mdi-information
+            v-list-item-content
+              v-list-item-title このアプリについて
+  //-- 位置情報利用許可ダイアログ --
   v-dialog(
     v-model="requestGeoPermissionDialog"
     persistent
@@ -45,15 +135,18 @@ div(style="height: 100%; width: 100%")
         v-btn(
           text
           @click="requestGeoPermissionDialog = false"
+          prepend-icon="mdi-close"
           ) 嫌だ！
         v-btn(
           style="background-color: rgb(var(--v-theme-primary)); color: white"
           text
           @click="requestGeoPermission"
+          prepend-icon="mdi-check"
           ) ええで！
 </template>
 
 <script lang="ts">
+  import { App } from '@capacitor/app'
   import { Capacitor } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
@@ -84,6 +177,10 @@ div(style="height: 100%; width: 100%")
         myBatteryPersent: 0 as number | undefined,
         /** 充電中かどうか */
         chargeingNow: false as boolean | undefined,
+        /** 詳細カードのターゲット */
+        detailCardTarget: null as string | null,
+        /** オプションダイアログの表示フラグ */
+        optionsDialog: false,
       }
     },
     mounted () {
@@ -101,6 +198,25 @@ div(style="height: 100%; width: 100%")
               this.requestGeoPermissionDialog = true
             }
           })
+        }
+      })
+      /** バックボタンのリスナーを追加 */
+      App.addListener('backButton', () => {
+        if (this.detailCardTarget) {
+          /** 詳細カードを閉じる */
+          this.detailCardTarget = null
+        } else if (this.optionsDialog) {
+          /** オプションダイアログを閉じる */
+          this.optionsDialog = false
+        } else if (this.requestGeoPermissionDialog) {
+          /** 位置情報利用許可ダイアログを閉じる */
+          this.requestGeoPermissionDialog = false
+        } else if (this.$route.path === '/') {
+          /** ルートページならアプリを終了 */
+          App.exitApp()
+        } else {
+          /** ルート以外のページなら1つ戻る */
+          this.$router.back()
         }
       })
     },
@@ -137,6 +253,15 @@ div(style="height: 100%; width: 100%")
         }
         this.requestGeoPermissionDialog = false
       },
+      /** 2地点間の距離を計算 */
+      calcDistance (latlng1: [number, number], latlng2: [number, number]) {
+        const R = Math.PI / 180
+        const lat1 = latlng1[0] * R
+        const lat2 = latlng2[0] * R
+        const lng1 = latlng1[1] * R
+        const lng2 = latlng2[1] * R
+        return 6371e3 * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1))
+      },
     },
   }
 </script>
@@ -145,7 +270,7 @@ div(style="height: 100%; width: 100%")
 .right-bottom-buttons {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: calc(16px + 3em);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -157,13 +282,56 @@ div(style="height: 100%; width: 100%")
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }
+.right-top-buttons {
+  position: fixed;
+  right: 16px;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+
+  .account-button {
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
 
 .name-space {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 500;
   white-space: nowrap;
-  -webkit-text-stroke: 1px black;
+  -webkit-text-stroke: 2px black;
+  paint-order: stroke;
   color: white;
   transition: all 1s;
+}
+
+.action-bar{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 100%;
+  .button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 6em;
+    border-radius: 1em;
+    cursor: pointer;
+    color: rgb(var(--v-theme-on-surface));
+
+    v-icon {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 10px;
+      margin: 0;
+      padding: 0;
+    }
+  }
 }
 </style>

@@ -31,4 +31,8 @@ v-app
 .android-15-or-higher {
   height: env(titlebar-area-height, 40px);
 }
+
+body {
+  user-select: none;
+}
 </style>
