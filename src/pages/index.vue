@@ -65,19 +65,23 @@ div(style="height: 100%; width: 100%")
   .detail-card-target
     v-card(
       v-if="detailCardTarget"
-      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 16em;"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 16em; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
-        p {{ detailCardTarget }}
+        p.ml-2 {{ detailCardTarget }}
         v-spacer
         v-btn(
           text
           @click="detailCardTarget = null"
-          ) 閉じる
+          icon="mdi-close"
+          )
       v-card-text
-        div
-          p バッテリー残量: {{ myBatteryPersent !== undefined ? myBatteryPersent.toFixed(0) + '%' : '取得できませんでした' }}
-          p 充電中: {{ chargeingNow !== undefined ? (chargeingNow ? 'はい' : 'いいえ') : '取得できませんでした' }}
+        .info
+          v-icon {{ chooseBatteryIcon(myBatteryPersent, chargeingNow) }}
+          p {{ myBatteryPersent !== undefined ? myBatteryPersent.toFixed(0) + '%' : '取得できませんでした' }}
+        .info
+          v-icon mdi-map-marker-account
+          p {{ myLocation }}
   //-- オプションダイアログ --
   v-dialog(
     v-model="optionsDialog"
@@ -278,6 +282,8 @@ div(style="height: 100%; width: 100%")
       async setCurrentPosition () {
         /** 仮で最後に取得した位置情報を地図の中心に設定 */
         this.leaflet.center = this.lastGetLocation
+        /** バグるので0.5秒待つ */
+        await setTimeout(() => {}, 500)
         this.leaflet.zoom = 15
       },
       /** 位置情報の許可を求める */
@@ -301,6 +307,31 @@ div(style="height: 100%; width: 100%")
         const lng1 = latlng1[1] * R
         const lng2 = latlng2[1] * R
         return 6371e3 * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1))
+      },
+      /** バッテリーアイコンを選択 */
+      chooseBatteryIcon (batteryPersent: number | undefined, chargingNow: boolean | undefined) {
+        if (batteryPersent === undefined || chargingNow === undefined) {
+          return 'mdi-battery-unknown'
+        }
+        let returnText = 'mdi-battery-'
+        if (chargingNow) {
+          returnText += 'charging-'
+        }
+        if (batteryPersent >= 95) {
+          return returnText + '100'
+        } else if (batteryPersent >= 90) {
+          return returnText + '90'
+        } else if (batteryPersent >= 80) {
+          return returnText + '80'
+        } else if (batteryPersent >= 60) {
+          return returnText + '60'
+        } else if (batteryPersent >= 40) {
+          return returnText + '40'
+        } else if (batteryPersent >= 20) {
+          return returnText + '20'
+        } else {
+          return returnText + '10'
+        }
       },
     },
   }
@@ -415,6 +446,16 @@ div(style="height: 100%; width: 100%")
         font-size: 24px;
       }
     }
+  }
+}
+
+.detail-card-target {
+  .info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    margin: 1em 0;
   }
 }
 </style>
