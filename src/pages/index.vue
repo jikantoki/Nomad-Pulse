@@ -265,6 +265,14 @@ div(style="height: 100%; width: 100%")
           this.myLocation = [lat, lng]
           localStorage.setItem('latlng', JSON.stringify(this.myLocation))
         }
+
+        /** バッテリー情報を取得 */
+        Device.getBatteryInfo().then(info => {
+          if (info.batteryLevel) {
+            this.myBatteryPersent = info.batteryLevel * 100
+          }
+          this.chargeingNow = info.isCharging
+        })
         return
       },
       /** 現在地を取得し、地図の中心も移動 */
@@ -272,20 +280,6 @@ div(style="height: 100%; width: 100%")
         /** 仮で最後に取得した位置情報を地図の中心に設定 */
         this.leaflet.center = this.lastGetLocation
         this.leaflet.zoom = 15
-
-        Device.getBatteryInfo().then(info => {
-          if (info.batteryLevel) {
-            this.myBatteryPersent = info.batteryLevel * 100
-          }
-          this.chargeingNow = info.isCharging
-        })
-
-        const position = await Geolocation.getCurrentPosition()
-
-        this.leaflet.center = [position.coords.latitude, position.coords.longitude]
-        this.myLocation = [position.coords.latitude, position.coords.longitude]
-        this.lastGetLocation = [position.coords.latitude, position.coords.longitude]
-        localStorage.setItem('latlng', JSON.stringify(this.myLocation))
       },
       /** 位置情報の許可を求める */
       async requestGeoPermission () {
