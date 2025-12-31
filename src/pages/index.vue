@@ -205,7 +205,11 @@ div(style="height: 100%; width: 100%")
       if (localStorageLatlng) {
         this.myLocation = JSON.parse(localStorageLatlng)
         this.lastGetLocation = JSON.parse(localStorageLatlng)
-        this.leaflet.center = this.myLocation
+        /** バグるので0.1秒待ってから地図の中心を設定 */
+        setTimeout(() => {
+          this.leaflet.center = this.myLocation
+          this.leaflet.zoom = 15
+        }, 100)
       }
 
       /** ステータスバーがWebViewをオーバーレイしないように設定 */

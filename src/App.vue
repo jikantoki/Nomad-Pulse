@@ -39,4 +39,9 @@ v-app
 body {
   user-select: none;
 }
+
+hr {
+  border-color: rgba(var(--v-theme-on-surface), 0.3);
+  margin: 0.5em 1em;
+}
 </style>

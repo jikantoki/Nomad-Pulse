@@ -4,17 +4,20 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
+import { defineCustomElements } from '@ionic/pwa-elements/loader'
+
+// Composables
+import { createApp } from 'vue'
+
 // Plugins
 import { registerPlugins } from '@/plugins'
 
 // Components
 import App from './App.vue'
 
-// Composables
-import { createApp } from 'vue'
-
 // Styles
 import 'unfonts.css'
+defineCustomElements(window)
 
 const app = createApp(App)
 

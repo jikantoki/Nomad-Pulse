@@ -81,6 +81,11 @@
   resolved "https://registry.yarnpkg.com/@capacitor/background-runner/-/background-runner-3.0.0.tgz#79cf28c70bc4299cde54a9851ddabfd23e892ae6"
   integrity sha512-BSUypHc9P7p8A8O7a686ifzUWq6W03n384C+WVpUrXHvwZdtpvm7gJO3NIXACb9mvYuKv+bh4CYv7YfB4rBIcg==
 
+"@capacitor/browser@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/browser/-/browser-8.0.0.tgz#2c8689b95d47d22bab394289a3bec171d6bfcec5"
+  integrity sha512-xey7maszGABKuStvXDV4vXN+EzIyz0o7zlyzw4JKG6o/1GzqeqHqVuE+8Ux+Hks3DZji4LoriWZVgVF6mR6RGg==
+
 "@capacitor/cli@^5.3.0":
   version "5.7.8"
   resolved "https://registry.yarnpkg.com/@capacitor/cli/-/cli-5.7.8.tgz#0fd28569b286192db71335dbd16222c341322785"
@@ -155,6 +160,11 @@
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@capacitor/synapse/-/synapse-1.0.4.tgz#c6beb33119d9656b1f04cb7783989fb78933ef6d"
   integrity sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==
+
+"@capacitor/toast@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/toast/-/toast-8.0.0.tgz#3f060340eeada2b4c9448f1502ad0525e3e00c8a"
+  integrity sha512-khWSYsBd+kc28s+nTfswxEfTQ3edY2f0BbvPZmEoBnXclunZbC7Bn1/ZyjKtM9wEA1RC5Umq4RUeFh8TtP+02g==
 
 "@clack/core@0.5.0":
   version "0.5.0"
@@ -426,6 +436,11 @@
     "@ionic/utils-terminal" "2.3.5"
     debug "^4.0.0"
     tslib "^2.0.1"
+
+"@ionic/pwa-elements@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@ionic/pwa-elements/-/pwa-elements-3.3.0.tgz#971c806ebe410c677740f9e4b32bbf26ac29bb93"
+  integrity sha512-vbykpxd2nGRlA67AnqDwsiVf8PUmInLyi6lQdnPDjeiML1WZa0CPe6r632nGDV9PTi+sWNde9Xexg9SD6Pwyqw==
 
 "@ionic/utils-array@2.1.6":
   version "2.1.6"
