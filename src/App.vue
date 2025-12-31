@@ -23,17 +23,6 @@ v-app
       })
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      /** バックボタンのリスナーを追加 */
-      App.addListener('backButton', () => {
-        if (this.$route.path === '/') {
-          /** ルートページならアプリを終了 */
-          App.exitApp()
-        } else {
-          /** ルート以外のページなら1つ戻る */
-          this.$router.back()
-        }
-      })
     },
   }
 </script>
