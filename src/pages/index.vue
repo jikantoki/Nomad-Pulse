@@ -161,7 +161,6 @@ div(style="height: 100%; width: 100%")
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
-  import { watch } from 'vue'
   import 'leaflet/dist/leaflet.css'
 
   export default {
@@ -249,8 +248,8 @@ div(style="height: 100%; width: 100%")
       /** 現在地を監視 */
       Geolocation.watchPosition({
         enableHighAccuracy: true,
-        timeout: 100_000,
-        interval: 100_000,
+        timeout: 10_000,
+        interval: 5000,
       }, position =>
         this.watchPosition(position),
       )
