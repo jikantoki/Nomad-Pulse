@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card(
-  style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;"
+  style="width: 100%; height: 100%;"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 設定

@@ -1,5 +1,6 @@
 <template lang="pug">
 v-app
+  common-splash-vue(v-show="splashScreen")
   v-main
     .status-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
     router-view(:style="isAndroid15OrHigher ? 'height: calc(100vh - 40px - 16px);' : ''")
@@ -9,11 +10,17 @@ v-app
 <script lang="ts">
   import { Device } from '@capacitor/device'
   import { StatusBar } from '@capacitor/status-bar'
+  import commonSplashVue from './components/common/commonSplash.vue'
 
   export default {
+    name: 'App',
+    components: {
+      commonSplashVue,
+    },
     data () {
       return {
         isAndroid15OrHigher: true,
+        splashScreen: true,
       }
     },
     async mounted () {
@@ -22,6 +29,13 @@ v-app
       })
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      /**
+       * mountedの最後に記述
+       */
+      window.setTimeout(() => {
+        this.splashScreen = false
+      }, 2000)
     },
   }
 </script>

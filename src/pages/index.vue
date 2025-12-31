@@ -261,6 +261,9 @@ div(style="height: 100%; width: 100%")
       }, position =>
         this.watchPosition(position),
       )
+
+      /** 現在地を取得し、地図の中心も移動 */
+      await this.setCurrentPosition()
     },
     methods: {
       /** 位置情報監視のコールバック */
