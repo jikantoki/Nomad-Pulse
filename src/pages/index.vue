@@ -30,10 +30,10 @@ div(style="height: 100%; width: 100%")
   //-- 下部のアクションバー --
   .action-bar
     .buttons
-      .button(v-ripple @click="$router.push('/')")
+      .button(v-ripple @click="timelineMode = false")
         v-icon mdi-map-marker
         p マップ
-      .button(v-ripple @click="$router.push('/timeline')")
+      .button(v-ripple @click="timelineMode = true")
         v-icon mdi-chart-timeline-variant
         p タイムライン
       .button(v-ripple @click="optionsDialog = true")
@@ -107,14 +107,21 @@ div(style="height: 100%; width: 100%")
           .account-info(
             style="text-align: center;"
           )
-            p(style="font-size: 1.2em; margin: 0; padding: 0;") ゲストユーザー
-            p(style="margin: 0; padding: 0;") ID: guest-0001
-            v-btn(
+            p(style="font-size: 1.2em; margin: 0; padding: 0;") {{ myUserId ? myUserId : 'ログインしていません' }}
+            p(style="margin: 0; padding: 0;") {{ myUserId ? `@${myUserId}` : 'データは同期されていません' }}
+            v-btn.my-2(
+              v-if="myUserId"
               text
               append-icon="mdi-account-edit"
             ) アカウント情報を編集
+            v-btn.my-2(
+              v-else
+              text
+              append-icon="mdi-login"
+              style="background-color: rgb(var(--v-theme-primary)); color: white;"
+            ) ログイン
         v-list.options-list
-          v-list-item.item( @click="$router.push('/timeline')" )
+          v-list-item.item( @click="timelineMode = true" )
             .icon-and-text
               v-icon mdi-chart-timeline-variant
               v-list-item-title タイムライン
@@ -155,6 +162,24 @@ div(style="height: 100%; width: 100%")
           @click="requestGeoPermission"
           prepend-icon="mdi-check"
           ) ええで！
+  //-- タイムラインモード --
+  v-dialog(
+    v-model="timelineMode"
+    fullscreen
+    transition="dialog-bottom-transition"
+  )
+    v-card
+      .top-android-15-or-higher(v-if="isAndroid15OrHigher")
+      v-card-actions
+        p.ml-2(class="headline" style="font-size: 1.3em") タイムライン
+        v-spacer
+        v-btn(
+          text
+          @click="timelineMode = false"
+          icon="mdi-close"
+          )
+      v-card-text
+        p ここにタイムラインコンテンツを表示します。
 </template>
 
 <script lang="ts">
@@ -196,9 +221,18 @@ div(style="height: 100%; width: 100%")
         optionsDialog: false,
         /** Android 15以上かどうか */
         isAndroid15OrHigher: true,
+        /** タイムラインモードかどうか */
+        timelineMode: false,
+        /** 自分のユーザーID */
+        myUserId: null as string | null,
       }
     },
     async mounted () {
+      /** ログイン情報確認 */
+      if (localStorage.getItem('userId')) {
+        this.myUserId = localStorage.getItem('userId')
+      }
+
       /** ローカルストレージから最後に取得した位置情報を読み込み */
       const localStorageLatlng = localStorage.getItem('latlng')
       if (localStorageLatlng) {
@@ -214,6 +248,15 @@ div(style="height: 100%; width: 100%")
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
+      }
 
       /** 位置情報の許可を確認 */
       if (Capacitor.getPlatform() === 'web') {
@@ -252,6 +295,9 @@ div(style="height: 100%; width: 100%")
         } else if (this.requestGeoPermissionDialog) {
           /** 位置情報利用許可ダイアログを閉じる */
           this.requestGeoPermissionDialog = false
+        } else if (this.timelineMode) {
+          /** タイムラインモードを閉じる */
+          this.timelineMode = false
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを終了 */
           App.exitApp()

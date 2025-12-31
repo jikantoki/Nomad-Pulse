@@ -209,17 +209,6 @@ export default {
       }
     },
     /**
-     * 言語切替
-     */
-    async changeLocale (locale) {
-      try {
-        this.$i18n.locale = locale
-      } catch {
-        this.$i18n.locale = 'ja'
-      }
-      this.localeStore.setLocale(locale)
-    },
-    /**
      * 省略された言語名を展開
      * @param {string} locale 言語名
      * @returns string

@@ -1,6 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
+  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") このアプリについて
@@ -46,10 +47,13 @@ v-card(
           p.title バージョン情報
           p.description v{{ packageJson.version }}
       .setting-item(
+        v-if="developerOptionEnabled"
         v-ripple
         @click="$router.push('/settings/developer-options')"
         )
-        .icon
+        .icon(
+          style="background-color: rgba(var(--v-theme-primary), 1)"
+        )
           v-icon mdi-cog-outline
         .text
           p.title 開発者オプション
@@ -94,10 +98,12 @@ v-card(
         .text
           p.title GitHub
           p.description https://github.com/jikantoki
+      .my-16
 </template>
 
 <script lang="ts">
   import { Browser } from '@capacitor/browser'
+  import { Device } from '@capacitor/device'
   import { Toast } from '@capacitor/toast'
   import PackageJson from '../../package.json'
 
@@ -107,12 +113,26 @@ v-card(
         packageJson: PackageJson,
         developerOptionClickCount: 0,
         developerOptionEnabled: false,
+        isAndroid15OrHigher: true,
       }
     },
-    mounted () {
+    async mounted () {
       const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
       if (developerOptionEnabled === 'true') {
         this.developerOptionEnabled = true
+      }
+
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
+      const info = await Device.getInfo()
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
       }
     },
     methods: {
@@ -163,6 +183,7 @@ v-card(
         background: rgba(var(--v-theme-on-surface), 0.1);
         border-radius: 50%;
         width: 40px;
+        min-width: 40px;
         height: 40px;
         display: flex;
         align-items: center;
@@ -179,5 +200,8 @@ v-card(
         }
       }
     }
+  }
+  .top-android-15-or-higher {
+    height: calc(100vh - 40px - 16px)!important;
   }
 </style>

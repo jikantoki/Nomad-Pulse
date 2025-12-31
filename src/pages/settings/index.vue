@@ -1,6 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
+  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 設定
@@ -10,7 +11,7 @@ v-card(
       @click="$router.back()"
       icon="mdi-close"
       )
-  v-card-text
+  v-card-text(style="height: inherit; overflow-y: auto;")
     .settings-list
       .setting-item(v-ripple)
         .icon
@@ -51,6 +52,18 @@ v-card(
           p.title このアプリについて
           p.description バージョン情報
       .setting-item(
+        v-if="developerOptionEnabled"
+        v-ripple
+        @click="$router.push('/settings/developer-options')"
+        )
+        .icon(
+          style="background-color: rgba(var(--v-theme-primary), 1)"
+        )
+          v-icon mdi-cog-outline
+        .text
+          p.title 開発者オプション
+          p.description 特定のモバイル向けの機能を強制有効
+      .setting-item(
         v-ripple
         @click="logoutRequest()"
         )
@@ -59,6 +72,7 @@ v-card(
         .text
           p.title ログアウト
           p.description またお会いしましょう！
+      .my-16
 v-dialog(
   v-model="logoutDialog"
   max-width="400"
@@ -83,11 +97,34 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { Device } from '@capacitor/device'
+
   export default {
     name: 'SettingsPage',
     data () {
       return {
         logoutDialog: false,
+        developerOptionEnabled: false,
+        isAndroid15OrHigher: false,
+      }
+    },
+    async mounted () {
+      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
+      if (developerOptionEnabled === 'true') {
+        this.developerOptionEnabled = true
+      }
+
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
+      const info = await Device.getInfo()
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
       }
     },
     methods: {
@@ -119,6 +156,7 @@ v-dialog(
         background: rgba(var(--v-theme-on-surface), 0.1);
         border-radius: 50%;
         width: 40px;
+        min-width: 40px;
         height: 40px;
         display: flex;
         align-items: center;
@@ -135,5 +173,9 @@ v-dialog(
         }
       }
     }
+  }
+
+  .top-android-15-or-higher {
+    height: calc(100vh - 40px - 16px)!important;
   }
 </style>

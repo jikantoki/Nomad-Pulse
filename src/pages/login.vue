@@ -138,16 +138,16 @@
           .then(async e => {
             if (e.body.status === 'ok') {
               const now = new URL(window.location.href)
-              this.userStore.setId(e.body.id)
-              this.userStore.setToken(e.body.token)
+              localStorage.setItem('userId', e.body.id)
+              localStorage.setItem('userToken', e.body.token)
               const profile = await this.getProfile(e.body.id)
-              this.userStore.setProfile(profile)
+              localStorage.setItem('profile', JSON.stringify(profile))
               // ログイン中のユーザーの情報で、プッシュ通知に関する情報をDB登録
               const push = await webpush.get()
               if (push) {
                 await this.sendAjaxWithAuth('/insertPushToken.php', {
-                  id: this.userStore.userId,
-                  token: this.userStore.userToken,
+                  id: localStorage.getItem('userId'),
+                  token: localStorage.getItem('userToken'),
                   endPoint: push.endpoint,
                   publicKey: push.publicKey,
                   pushToken: push.authToken,

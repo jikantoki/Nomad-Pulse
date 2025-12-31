@@ -30,6 +30,15 @@ v-app
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
+      }
+
       /**
        * mountedの最後に記述
        */
@@ -57,5 +66,10 @@ body {
 hr {
   border-color: rgba(var(--v-theme-on-surface), 0.3);
   margin: 0.5em 1em;
+}
+
+main {
+  height: 100vh;
+  overflow: hidden;
 }
 </style>

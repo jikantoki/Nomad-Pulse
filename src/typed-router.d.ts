@@ -25,6 +25,8 @@ declare module 'vue-router/auto-routes' {
     '/password_reset': RouteRecordInfo<'/password_reset', '/password_reset', Record<never, never>, Record<never, never>>,
     '/registar': RouteRecordInfo<'/registar', '/registar', Record<never, never>, Record<never, never>>,
     '/settings/': RouteRecordInfo<'/settings/', '/settings', Record<never, never>, Record<never, never>>,
+    '/settings/developer-options': RouteRecordInfo<'/settings/developer-options', '/settings/developer-options', Record<never, never>, Record<never, never>>,
+    '/terms': RouteRecordInfo<'/terms', '/terms', Record<never, never>, Record<never, never>>,
   }
 
   /**
@@ -64,6 +66,14 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/settings/index.vue': {
       routes: '/settings/'
+      views: never
+    }
+    'src/pages/settings/developer-options.vue': {
+      routes: '/settings/developer-options'
+      views: never
+    }
+    'src/pages/terms.vue': {
+      routes: '/terms'
       views: never
     }
   }
