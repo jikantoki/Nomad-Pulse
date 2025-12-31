@@ -28,16 +28,18 @@ div(style="height: 100%; width: 100%")
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
             span あなたの現在地
   //-- 下部のアクションバー --
-  .action-bar(style="height: 3em; width: 100%; position: fixed; bottom: 0; left: 0; background-color: rgb(var(--v-theme-surface)); z-index: 500; display: flex; align-items: center;box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);")
-    .button(v-ripple @click="$router.push('/')")
-      v-icon mdi-map-marker
-      p マップ
-    .button(v-ripple @click="$router.push('/timeline')")
-      v-icon mdi-chart-timeline-variant
-      p タイムライン
-    .button(v-ripple @click="optionsDialog = true")
-      v-icon mdi-dots-vertical
-      p その他
+  .action-bar
+    .buttons
+      .button(v-ripple @click="$router.push('/')")
+        v-icon mdi-map-marker
+        p マップ
+      .button(v-ripple @click="$router.push('/timeline')")
+        v-icon mdi-chart-timeline-variant
+        p タイムライン
+      .button(v-ripple @click="optionsDialog = true")
+        v-icon mdi-dots-vertical
+        p その他
+    .bottom-android-15-or-higher(v-if="isAndroid15OrHigher")
   //-- 右下の現在地ボタン --
   .right-bottom-buttons
     .current-button
@@ -48,8 +50,10 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-crosshairs-gps
+    .bottom-android-15-or-higher(v-if="isAndroid15OrHigher")
   //-- 右上のアカウントボタン --
   .right-top-buttons
+    .top-android-15-or-higher(v-if="isAndroid15OrHigher")
     .account-button
       .button(
         v-ripple
@@ -81,6 +85,7 @@ div(style="height: 100%; width: 100%")
     fullscreen
   )
     v-card
+      .top-android-15-or-higher(v-if="isAndroid15OrHigher")
       v-card-actions
         p.ml-2(class="headline" style="font-size: 1.3em") ようこそ
         v-spacer
@@ -186,9 +191,14 @@ div(style="height: 100%; width: 100%")
         detailCardTarget: null as string | null,
         /** オプションダイアログの表示フラグ */
         optionsDialog: false,
+        /** Android 15以上かどうか */
+        isAndroid15OrHigher: true,
       }
     },
-    mounted () {
+    async mounted () {
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
+      const info = await Device.getInfo()
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
       /** 位置情報の許可を確認 */
       Geolocation.checkPermissions().then(result => {
         if (result.location === 'granted') {
@@ -313,31 +323,53 @@ div(style="height: 100%; width: 100%")
 }
 
 .action-bar{
-  display: flex;
-  flex-direction: row;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: rgb(var(--v-theme-surface));
+  z-index: 500;
+  width: 100%;
   align-items: center;
-  justify-content: space-evenly;
-  height: 100%;
-  .button {
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
+  height: 3em;
+  .buttons{
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    width: 6em;
-    border-radius: 1em;
-    cursor: pointer;
-    color: rgb(var(--v-theme-on-surface));
+    justify-content: space-evenly;
+    height: 100%;
+    .button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 6em;
+      border-radius: 1em;
+      cursor: pointer;
+      color: rgb(var(--v-theme-on-surface));
 
-    v-icon {
-      font-size: 24px;
-    }
+      v-icon {
+        font-size: 24px;
+      }
 
-    p {
-      font-size: 10px;
-      margin: 0;
-      padding: 0;
+      p {
+        font-size: 10px;
+        margin: 0;
+        padding: 0;
+      }
     }
   }
+  .bottom-android-15-or-higher {
+    width: 100%;
+  }
+}
+
+.bottom-android-15-or-higher {
+  height: 16px;
+}
+.top-android-15-or-higher {
+  height: 40px;
 }
 
 .options-list {

@@ -2,7 +2,8 @@
 v-app
   v-main
     .status-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
-    router-view
+    router-view(:style="isAndroid15OrHigher ? 'height: calc(100vh - 40px - 16px);' : ''")
+    .nav-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
 </template>
 
 <script lang="ts">
@@ -13,7 +14,7 @@ v-app
   export default {
     data () {
       return {
-        isAndroid15OrHigher: false,
+        isAndroid15OrHigher: true,
       }
     },
     async mounted () {
@@ -21,9 +22,7 @@ v-app
         overlay: false,
       })
       const info = await Device.getInfo()
-      if (info.platform === 'android' && Number(info.osVersion) >= 15) {
-        this.isAndroid15OrHigher = true
-      }
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
       /** バックボタンのリスナーを追加 */
       App.addListener('backButton', () => {
@@ -40,8 +39,13 @@ v-app
 </script>
 
 <style lang="scss" scoped>
-.android-15-or-higher {
-  height: env(titlebar-area-height, 40px);
+.status-bar-padding.android-15-or-higher {
+  height: 40px;
+  width: 100vw;
+}
+.nav-bar-padding.android-15-or-higher {
+  height: 16px;
+  width: 100vw;
 }
 
 body {
