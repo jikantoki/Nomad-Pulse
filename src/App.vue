@@ -57,7 +57,13 @@ v-app
           }
           case undefined: {
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-            systemTheme ? this.$vuetify.theme.change('dark') : this.$vuetify.theme.change('light')
+            if (systemTheme) {
+              StatusBar.setStyle({ style: Style.Dark })
+              this.$vuetify.theme.change('dark')
+            } else {
+              StatusBar.setStyle({ style: Style.Light })
+              this.$vuetify.theme.change('light')
+            }
 
             break
           }
