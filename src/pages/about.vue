@@ -20,18 +20,21 @@ v-card(
       .account-info(
         style="text-align: center;"
       )
-        v-btn(
+        v-btn.mr-2(
           text
           append-icon="mdi-github"
           @click="openURL('https://github.com/jikantoki/Nomad-Pulse')"
         ) Github
-        v-btn(
+        v-btn.ml-2(
           text
           append-icon="mdi-web"
           @click="openURL('https://nomadpulse.enoki.xyz')"
         ) ホームページ
     .settings-list
-      .setting-item(v-ripple)
+      .setting-item(
+        v-ripple
+        @click="openURL('https://nomadpulse.enoki.xyz')"
+        )
         .icon
           v-icon mdi-application-outline
         .text
@@ -52,7 +55,7 @@ v-card(
         @click="$router.push('/settings/developer-options')"
         )
         .icon(
-          style="background-color: rgba(var(--v-theme-primary), 1)"
+          style="background-color: rgba(var(--v-theme-primary), 1); color: white;"
         )
           v-icon mdi-cog-outline
         .text
@@ -61,7 +64,10 @@ v-card(
     hr
     p.ma-4(style="font-size: 1.3em;") 製作者情報
     .settings-list
-      .setting-item(v-ripple)
+      .setting-item(
+        v-ripple
+        @click="openURL('https://enoki.xyz')"
+        )
         .icon
           img(src="/jikantoki.jpg" width="36" height="36" style="border-radius: 50%;")
         .text
@@ -81,7 +87,7 @@ v-card(
         @click="openURL('https://twitter.com/jikantoki')"
         )
         .icon(
-          style="background: #1DA1F2;"
+          style="background: #1DA1F2; color: white;"
         )
           v-icon mdi-twitter
         .text
@@ -92,7 +98,7 @@ v-card(
         @click="openURL('https://github.com/jikantoki')"
         )
         .icon(
-          style="background: #111111;"
+          style="background: #111111; color: white;"
         )
           v-icon mdi-github
         .text

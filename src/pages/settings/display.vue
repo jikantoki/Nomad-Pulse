@@ -46,6 +46,7 @@ v-card(
 
 <script lang="ts">
   import { Device } from '@capacitor/device'
+  import { StatusBar, Style } from '@capacitor/status-bar'
 
   export default {
     data () {
@@ -64,11 +65,12 @@ v-card(
           switch (newOptions.theme) {
             case true: {
               this.$vuetify.theme.change('light')
-
+              StatusBar.setStyle({ style: Style.Light })
               break
             }
             case false: {
               this.$vuetify.theme.change('dark')
+              StatusBar.setStyle({ style: Style.Dark })
 
               break
             }

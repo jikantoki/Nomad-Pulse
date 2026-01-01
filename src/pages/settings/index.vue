@@ -59,7 +59,7 @@ v-card(
         @click="$router.push('/settings/developer-options')"
         )
         .icon(
-          style="background-color: rgba(var(--v-theme-primary), 1)"
+          style="background-color: rgba(var(--v-theme-primary), 1); color: white;"
         )
           v-icon mdi-cog-outline
         .text

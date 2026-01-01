@@ -9,7 +9,7 @@ v-app
 
 <script lang="ts">
   import { Device } from '@capacitor/device'
-  import { StatusBar } from '@capacitor/status-bar'
+  import { StatusBar, Style } from '@capacitor/status-bar'
   import commonSplashVue from './components/common/commonSplash.vue'
 
   export default {
@@ -39,17 +39,19 @@ v-app
         }
       }
 
+      // テーマに関する設定
       const themeOptions = localStorage.getItem('themeOptions')
       if (themeOptions) {
         const options = JSON.parse(themeOptions)
         switch (options.theme) {
           case true: {
             this.$vuetify.theme.change('light')
-
+            StatusBar.setStyle({ style: Style.Light })
             break
           }
           case false: {
             this.$vuetify.theme.change('dark')
+            StatusBar.setStyle({ style: Style.Dark })
 
             break
           }
