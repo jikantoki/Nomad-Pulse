@@ -21,7 +21,7 @@ export default {
         })
       }
       if ('Notification' in window) {
-        let permission = Notification.permission
+        const permission = Notification.permission
 
         if (permission === 'denied') {
           console.warn(
@@ -32,8 +32,8 @@ export default {
 
         if (permission === 'granted') {
           console.log('すでにWebPushを許可済みです')
-          //ここでreturnしてもシステム上問題ないが、トークンをconsole.logしたいので続行
-          //return 'allowed
+          // ここでreturnしてもシステム上問題ないが、トークンをconsole.logしたいので続行
+          // return 'allowed
         }
         const request = await getRequest()
 
@@ -61,7 +61,7 @@ export default {
    * @param {bool} listenFlag Trueの場合はリクエストを出す、Falseなら現在の権限に委ねる
    * @returns object
    */
-  get: async (listenFlag) => {
+  get: async listenFlag => {
     return await getRequest(listenFlag)
   },
 }
@@ -69,7 +69,7 @@ export default {
  * トークンを変換するときに使うロジック
  * @param {*} base64String
  */
-function urlB64ToUint8Array(base64String) {
+function urlB64ToUint8Array (base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/')
 
@@ -88,8 +88,8 @@ function urlB64ToUint8Array(base64String) {
  * @param ListenFlag {string} Trueの場合はユーザーに尋ねる、falseの場合は権限に委ねる
  * @returns リクエスト、エラーはfalse、PWAによるリクエスト不可はnull
  */
-const getRequest = async (listenFlag = false) => {
-  const env = useRuntimeConfig().public.env
+async function getRequest (listenFlag = false) {
+  const env = import.meta.env
   /**
    * 共通変数
    */
@@ -100,10 +100,10 @@ const getRequest = async (listenFlag = false) => {
   // push managerにサーバーキーを渡し、トークンを取得
   let subscription
 
-  let permission = Notification.permission
+  const permission = Notification.permission
   if (permission === 'granted' || listenFlag) {
     try {
-      //スマホで特定の環境だと止まる？？？
+      // スマホで特定の環境だと止まる？？？
       if (permission !== 'granted') {
         if (window.matchMedia('(display-mode: standalone)').matches) {
           // ここにPWA環境下でのみ実行するコードを記述
@@ -116,13 +116,13 @@ const getRequest = async (listenFlag = false) => {
         userVisibleOnly: true,
         applicationServerKey,
       })
-    } catch (e) {
-      //エラーで取得不可
-      console.warn(e)
+    } catch (error) {
+      // エラーで取得不可
+      console.warn(error)
       return undefined
     }
   } else {
-    //Permission denied
+    // Permission denied
     console.warn('Permission denied')
     return undefined
   }

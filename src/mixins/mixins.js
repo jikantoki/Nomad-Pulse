@@ -44,7 +44,7 @@ export default {
         })
       }
     }
-    this.env = process.env
+    this.env = import.meta.env
   },
   methods: {
     sendAjax: ajaxFunctions.send,

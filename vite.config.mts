@@ -51,6 +51,7 @@ export default defineConfig({
     ],
   },
   define: { 'process.env': {} },
+  envPrefix: ['VUE_APP_', 'VITE_'],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('src', import.meta.url)),

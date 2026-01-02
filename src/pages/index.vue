@@ -229,6 +229,7 @@ div(style="height: 100%; width: 100%")
       }
     },
     async mounted () {
+      console.log(import.meta.env)
       /** ログイン情報確認 */
       if (localStorage.getItem('userId')) {
         this.myUserId = localStorage.getItem('userId')
