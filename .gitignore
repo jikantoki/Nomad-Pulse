@@ -26,3 +26,4 @@ android-keystore
 env.php
 .env
 /vendor
+.htaccess
