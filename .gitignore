@@ -23,3 +23,5 @@ pnpm-debug.log*
 
 # オリジナル設定
 android-keystore
+env.php
+.env
