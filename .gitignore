@@ -25,3 +25,4 @@ pnpm-debug.log*
 android-keystore
 env.php
 .env
+/vendor
