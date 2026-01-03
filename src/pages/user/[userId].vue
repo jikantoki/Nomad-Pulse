@@ -1,5 +1,13 @@
 <template lang="pug">
 .user-page(v-if="param")
+  v-card-actions
+    p.ml-2(style="font-size: 1.3em") アカウント詳細
+    v-spacer
+    v-btn(
+      text
+      @click="$router.push('/')"
+      icon="mdi-close"
+      )
   .profile-zone
     .cover
       img.cover-img(v-if="userData && userData.coverImg" :src="userData.coverImg")

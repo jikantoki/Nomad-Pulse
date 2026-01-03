@@ -14,6 +14,7 @@
   "dependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
+    "@capacitor/app-launcher": "^8.0.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/background-runner": "^3.0.0",
     "@capacitor/browser": "^8.0.0",
