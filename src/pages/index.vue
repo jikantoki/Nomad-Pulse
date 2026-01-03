@@ -484,6 +484,7 @@ div(style="height: 100%; width: 100%")
           }
           this.chargeingNow = info.isCharging
 
+          console.log('get geolocation')
           if (this.myProfile && !this.myProfile.guest) {
             /** 取得した情報をサーバーに送信 */
             const res = await this.sendAjaxWithAuth(

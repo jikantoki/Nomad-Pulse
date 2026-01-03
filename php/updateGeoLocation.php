@@ -24,7 +24,7 @@ if (isset($_SERVER['HTTP_BATTERYLEVEL'])) {
   $batteryLevel = null;
 }
 if (isset($_SERVER['HTTP_BATTERYCHARGING'])) {
-  $batteryCharging = $_SERVER['BATTERYCHARGING'];
+  $batteryCharging = $_SERVER['HTTP_BATTERYCHARGING'];
 } else {
   $batteryCharging = null;
 }
