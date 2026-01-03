@@ -191,7 +191,7 @@ export default {
         id: userId,
       })
       const res = profile.body.res
-      console.log(res)
+      console.log(profile.body)
       // eslint-disable-next-line unicorn/prefer-ternary
       if (res) {
         return {
