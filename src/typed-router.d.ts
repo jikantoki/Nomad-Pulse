@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     '/settings/developer-options': RouteRecordInfo<'/settings/developer-options', '/settings/developer-options', Record<never, never>, Record<never, never>>,
     '/settings/display': RouteRecordInfo<'/settings/display', '/settings/display', Record<never, never>, Record<never, never>>,
     '/terms': RouteRecordInfo<'/terms', '/terms', Record<never, never>, Record<never, never>>,
+    '/user/[userId]': RouteRecordInfo<'/user/[userId]', '/user/:userId', { userId: ParamValue<true> }, { userId: ParamValue<false> }>,
   }
 
   /**
@@ -79,6 +80,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/terms.vue': {
       routes: '/terms'
+      views: never
+    }
+    'src/pages/user/[userId].vue': {
+      routes: '/user/[userId]'
       views: never
     }
   }

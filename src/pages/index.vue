@@ -105,7 +105,7 @@ div(style="height: 100%; width: 100%")
         v-btn.mr-4(
           text
           v-if="!detailCardTarget.guest"
-          @click="$router.push(`/${detailCardTarget.userId}`)"
+          @click="$router.push(`/user/${detailCardTarget.userId}`)"
           prepend-icon="mdi-account-circle"
           style="background-color: rgb(var(--v-theme-primary));"
         ) プロフィールを表示
@@ -163,7 +163,7 @@ div(style="height: 100%; width: 100%")
             v-btn.my-2(
               v-if="myProfile && myProfile.userId && !myProfile.guest"
               text
-              @click="$router.push(`/${myProfile.userId}`)"
+              @click="$router.push(`/user/${myProfile.userId}`)"
               append-icon="mdi-account-outline"
               style="background-color: rgb(var(--v-theme-primary));"
             ) プロフィールを表示
