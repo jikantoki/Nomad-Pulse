@@ -110,6 +110,9 @@ v-dialog(
         developerOptionEnabled: false,
         isAndroid15OrHigher: false,
         myUserId: null as string | null,
+        myProfile: {} as {
+          [key: string]: any
+        } | null,
       }
     },
     async mounted () {
@@ -131,8 +134,17 @@ v-dialog(
         }
       }
 
-      const userId = localStorage.getItem('myUserId')
-      this.myUserId = userId
+      /** ログイン情報 */
+      const myProfile = localStorage.getItem('profile')
+      if (myProfile) {
+        this.myProfile = JSON.parse(myProfile)
+        if (this.myProfile?.lastGetLocationTime) {
+          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
+        }
+        if (this.myProfile?.userId) {
+          this.myUserId = this.myProfile.userId
+        }
+      }
     },
     methods: {
       logoutRequest () {
@@ -140,6 +152,8 @@ v-dialog(
       },
       logout () {
         this.logoutDialog = false
+        localStorage.removeItem('userId')
+        localStorage.removeItem('profile')
         this.$router.push('/login')
       },
     },

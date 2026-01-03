@@ -1,5 +1,13 @@
 <template lang="pug">
 .login(v-if="isShow")
+  v-card-actions
+    p.ml-2(style="font-size: 1.3em") パスワードリセット
+    v-spacer
+    v-btn(
+      text
+      @click="$router.push('/')"
+      icon="mdi-close"
+      )
   v-form.center(@submit.prevent)
     img.ma-8(src="/icon.png")
     p.form-p.text-h6 {{ pageTitle }}

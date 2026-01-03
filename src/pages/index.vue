@@ -286,6 +286,7 @@ div(style="height: 100%; width: 100%")
       }
     },
     watch: {
+      /** プロフィール詳細を押された時に、現在の住所を表示する */
       detailCardTarget: {
         handler: async function (newProfile) {
           if (!newProfile || !newProfile.location) {
@@ -318,15 +319,6 @@ div(style="height: 100%; width: 100%")
       },
     },
     async mounted () {
-      /** 逆ジオコーディングAPIが使うので必要 */
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-var
-      var GSI = {}
-
-      /** ログイン情報確認 */
-      if (localStorage.getItem('userId')) {
-        this.myUserId = localStorage.getItem('userId')
-      }
-
       /** ローカルストレージから最後に取得した位置情報を読み込み */
       const localStorageLatlng = localStorage.getItem('latlng')
       if (localStorageLatlng) {
@@ -345,6 +337,9 @@ div(style="height: 100%; width: 100%")
         this.myProfile = JSON.parse(myProfile)
         if (this.myProfile?.lastGetLocationTime) {
           this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
+        }
+        if (this.myProfile?.userId) {
+          this.myUserId = this.myProfile.userId
         }
       }
 
