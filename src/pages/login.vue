@@ -150,7 +150,7 @@
               profile.userToken = e.body.token
               localStorage.setItem('profile', JSON.stringify(profile))
               // ログイン中のユーザーの情報で、プッシュ通知に関する情報をDB登録
-              const push = await webpush.get()
+              /* const push = await webpush.get()
               if (push) {
                 await this.sendAjaxWithAuth('/insertPushToken.php', {
                   id: localStorage.getItem('userId'),
@@ -160,6 +160,7 @@
                   pushToken: push.authToken,
                 })
               }
+                */
               const redirect = now.searchParams.get('redirect')
               if (redirect && redirect !== '') {
                 this.a(redirect)

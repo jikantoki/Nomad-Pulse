@@ -71,7 +71,10 @@ div(style="height: 100%; width: 100%")
         @click="optionsDialog = true"
         style="cursor: pointer; border-radius: 9999px; height: 3em; width: 3em;"
         )
-        img(src="/account_default.jpg" style="height: 3em; width: 3em; border-radius: 9999px;")
+        img(
+          :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
+          style="height: 3em; width: 3em; border-radius: 9999px;"
+          )
   //- 地図で押したアカウントの詳細カード
   .detail-card-target
     v-card(
@@ -140,7 +143,10 @@ div(style="height: 100%; width: 100%")
           style="display: flex; flex-direction: column; align-items: center; gap: 1em; margin-bottom: 1em;"
         )
           .account-img
-            img(src="/account_default.jpg" style="height: 8em; width: 8em; border-radius: 9999px;")
+            img(
+              :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
+              style="height: 8em; width: 8em; border-radius: 9999px;"
+              )
           .account-info(
             style="text-align: center;"
           )
