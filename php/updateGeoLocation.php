@@ -43,7 +43,7 @@ if (!$res) {
     'ipAddress' => ''
   ]);
 }
-SQL(`
+$sql = `
   update location_list set
   lat = {$lat},
   lng = {$lng},
@@ -51,8 +51,9 @@ SQL(`
   ipAddress = {$ipAddress},
   batteryLevel = {$batteryLevel},
   batteryCharging = {$batteryCharging}
-  where secretId = {$secretId}
-`);
+  where secretId = {$secretId};
+`;
+SQL($sql);
 
 echo json_encode([
   'status' => 'ok',
