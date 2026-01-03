@@ -20,6 +20,10 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
   },
+  deepLinks: {
+    enabled: true,
+    prefixes: ['nomadpulse://', 'https://nomadpulse.enoki.xyz'],
+  },
 }
 
 export default config

@@ -184,17 +184,12 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
           this.myUserId = this.myProfile.userId
         }
       }
-      console.log(this.$route)
 
       this.param = this.$route.params
       this.userData = await this.getProfile(this.param.userId)
-      if (this.userData) {
-        if (this.userData.status == 'invalid') {
-          // ログインしていないので閲覧不可
-          this.isInvalid = true
-        }
-      } else {
-        this.setTitle('unknown user')
+      if (this.userData && this.userData.status == 'invalid') {
+        // ログインしていないので閲覧不可
+        this.isInvalid = true
       }
       this.myLink = `https://nomadpulse.enoki.xyz/${this.param.userId}`
     },

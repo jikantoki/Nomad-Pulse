@@ -24,6 +24,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="nomadpulse.enoki.xyz" />
+                <data android:scheme="https" android:host="nomad-pulse.enoki.xyz" />
+                <data android:scheme="https" android:host="np.enoki.xyz" />
             </intent-filter>
         </activity>
 

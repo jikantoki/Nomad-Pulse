@@ -79,7 +79,7 @@ div(style="height: 100%; width: 100%")
   .detail-card-target
     v-card(
       v-if="detailCardTarget"
-      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 20em; border-radius: 16px 16px 0 0;"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 24em; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
         p.ml-2 {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
@@ -102,25 +102,25 @@ div(style="height: 100%; width: 100%")
         .info
           v-icon mdi-clock-outline
           p {{ diffLastGetTime(detailCardTarget.lastGetLocationTime) }}
-        v-btn.mr-4(
+        v-btn.my-2(
           text
           v-if="!detailCardTarget.guest"
           @click="$router.push(`/user/${detailCardTarget.userId}`)"
           prepend-icon="mdi-account-circle"
-          style="background-color: rgb(var(--v-theme-primary));"
+          style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
         ) プロフィールを表示
-        v-btn.mr-4(
+        v-btn.my-2(
           text
           v-else
           @click="$router.push(`/login`)"
           prepend-icon="mdi-login"
-          style="background-color: rgb(var(--v-theme-primary));"
+          style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
         ) ログイン
-        v-btn(
+        v-btn.my-2(
           text
           @click="openGoogleMaps(detailCardTarget.location)"
           prepend-icon="mdi-map-marker"
-          style="background-color: rgb(var(--v-theme-primary));"
+          style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
         ) Google Mapsで開く
   //-- オプションダイアログ --
   v-dialog(
@@ -490,7 +490,6 @@ div(style="height: 100%; width: 100%")
           }
           this.chargeingNow = info.isCharging
 
-          console.log('get geolocation')
           if (this.myProfile && !this.myProfile.guest) {
             /** 取得した情報をサーバーに送信 */
             const res = await this.sendAjaxWithAuth(
@@ -503,7 +502,6 @@ div(style="height: 100%; width: 100%")
                 batteryCharging,
               },
             )
-            console.log(res)
           }
         }
 

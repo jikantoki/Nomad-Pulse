@@ -23,6 +23,7 @@ pnpm-debug.log*
 
 # オリジナル設定
 android-keystore
+*.keystore
 env.php
 .env
 /vendor
