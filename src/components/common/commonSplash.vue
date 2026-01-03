@@ -2,7 +2,7 @@
 .wait
   .wait-wrap(style="background:rgb(var(--v-theme-background));")
     img.splash-img(src="/img/icon512.png")
-    p.text-h4.splash-text Nomad Pulse
+    p.mt-4.text-h5.splash-text Nomad Pulse
     .ma-16
     .loading
       v-progress-linear(indeterminate)

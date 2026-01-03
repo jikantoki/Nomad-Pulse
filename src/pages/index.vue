@@ -16,7 +16,7 @@ div(style="height: 100%; width: 100%")
     //- 自分の現在地マーカー
     LMarker(
       :lat-lng="myLocation"
-      @click="detailCardTarget = 'myUser'"
+      @click="detailCardTarget = myProfile"
       )
       LIcon(
         :icon-size="[0,0]"
@@ -33,10 +33,18 @@ div(style="height: 100%; width: 100%")
       .button(v-ripple @click="timelineMode = false")
         v-icon mdi-map-marker
         p マップ
-      .button(v-ripple @click="timelineMode = true")
+      .button(
+        v-ripple
+        @click="timelineMode = true"
+        style="opacity: 0.8;"
+        )
         v-icon mdi-chart-timeline-variant
         p タイムライン
-      .button(v-ripple @click="optionsDialog = true")
+      .button(
+        v-ripple
+        @click="optionsDialog = true"
+        style="opacity: 0.8;"
+        )
         v-icon mdi-dots-vertical
         p その他
     .bottom-android-15-or-higher(v-if="isAndroid15OrHigher")
@@ -65,10 +73,10 @@ div(style="height: 100%; width: 100%")
   .detail-card-target
     v-card(
       v-if="detailCardTarget"
-      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 16em; border-radius: 16px 16px 0 0;"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 18em; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
-        p.ml-2 {{ detailCardTarget }}
+        p.ml-2 {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
         v-spacer
         v-btn(
           text
@@ -77,11 +85,26 @@ div(style="height: 100%; width: 100%")
           )
       v-card-text
         .info
-          v-icon {{ chooseBatteryIcon(myBatteryPersent, chargeingNow) }}
-          p {{ myBatteryPersent !== undefined ? myBatteryPersent.toFixed(0) + '%' : '取得できませんでした' }}
+          v-icon {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
+          p {{ detailCardTarget.battery.parsent ? detailCardTarget.battery.parsent.toFixed(0) + '%' : '取得できませんでした' }}
         .info
           v-icon mdi-map-marker-account
-          p {{ myLocation }}
+          p {{ detailCardTargetAddress ?? '住所取得中...' }}
+        .info
+          v-icon mdi-clock-outline
+          p {{ diffLastGetTime(detailCardTarget.lastGetLocationTime) }}
+        v-btn(
+          text
+          @click="$router.push(`/${detailCardTarget.userId}`)"
+          prepend-icon="mdi-account-circle"
+          style="background-color: rgb(var(--v-theme-primary));"
+        ) プロフィールを表示
+        v-btn(
+          text
+          @click="openGoogleMaps(detailCardTarget.location)"
+          prepend-icon="mdi-map-marker"
+          style="background-color: rgb(var(--v-theme-primary));"
+        ) Google Mapsで開く
   //-- オプションダイアログ --
   v-dialog(
     v-model="optionsDialog"
@@ -107,12 +130,21 @@ div(style="height: 100%; width: 100%")
           .account-info(
             style="text-align: center;"
           )
-            p(style="font-size: 1.2em; margin: 0; padding: 0;") {{ myUserId ? myUserId : 'ログインしていません' }}
-            p(style="margin: 0; padding: 0;") {{ myUserId ? `@${myUserId}` : 'データは同期されていません' }}
+            p(
+              v-if="myProfile && myProfile.userId"
+              style="font-size: 1.2em; margin: 0; padding: 0;"
+              ) {{ myProfile.name ? myProfile.name : myProfile.userId }}
+            p(
+              v-else
+              style="font-size: 1.2em; margin: 0; padding: 0;"
+              ) ログインしていません
+            p(style="margin: 0; padding: 0;")
+              | {{ myUserId ? `@${myUserId}` : 'データは同期されていません' }}
             v-btn.my-2(
               v-if="myUserId"
               text
               append-icon="mdi-account-edit"
+              style="background-color: rgb(var(--v-theme-primary));"
             ) アカウント情報を編集
             v-btn.my-2(
               v-else
@@ -186,10 +218,12 @@ div(style="height: 100%; width: 100%")
 <script lang="ts">
   import { App } from '@capacitor/app'
   import { BackgroundRunner } from '@capacitor/background-runner'
+  import { Browser } from '@capacitor/browser'
   import { Capacitor } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
+  import muniArray from '@/js/muni'
   import 'leaflet/dist/leaflet.css'
 
   export default {
@@ -217,7 +251,9 @@ div(style="height: 100%; width: 100%")
         /** 充電中かどうか */
         chargeingNow: false as boolean | undefined,
         /** 詳細カードのターゲット */
-        detailCardTarget: null as string | null,
+        detailCardTarget: null as {} | null,
+        /** 詳細カードに現在の住所を表示 */
+        detailCardTargetAddress: null as string | null,
         /** オプションダイアログの表示フラグ */
         optionsDialog: false,
         /** Android 15以上かどうか */
@@ -226,10 +262,66 @@ div(style="height: 100%; width: 100%")
         timelineMode: false,
         /** 自分のユーザーID */
         myUserId: null as string | null,
+        /** 自分のプロフィール */
+        myProfile: null as {
+          coverImg: string | null
+          createdAt: number | null
+          icon: string | null
+          message: string | null
+          name: string | null
+          status: string | null
+          userId: string
+          lastGetLocationTime: Date | null
+          location: [
+            lat: number,
+            lng: number,
+          ] | null
+          battery: {
+            parsent: number
+            chargingNow: boolean | undefined
+          } | null
+        } | null | undefined,
+        /** 自分の位置情報を最後にいつ取得したか？ */
+        lastGetMyLocationTime: null as Date | null,
       }
     },
+    watch: {
+      detailCardTarget: {
+        handler: async function (newProfile) {
+          if (!newProfile || !newProfile.location) {
+            this.detailCardTargetAddress = null
+            return
+          } else {
+            const latlng = newProfile.location
+            const geoCodingUrl = new URL(
+              'https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress',
+            )
+            geoCodingUrl.searchParams.set('lat', latlng[0])
+            geoCodingUrl.searchParams.set('lon', latlng[1])
+            const res = await fetch(geoCodingUrl.toString())
+            const json = await res.json()
+            const data = json.results
+            const muniData = muniArray[data.muniCd]
+            if (!muniData) {
+              return '住所不明'
+            }
+            const splitedMuniData = muniData.split(',')
+            const pref = splitedMuniData[1]
+            const city = splitedMuniData[3]
+            const address = data.lv01Nm
+            this.detailCardTargetAddress = `${pref}${city}${address}`
+            return
+          }
+        },
+        deep: true,
+        immediate: true,
+      },
+    },
     async mounted () {
-      console.log(import.meta.env)
+      /** 逆ジオコーディングAPIが使うので必要 */
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-var
+      var GSI = {}
+
       /** ログイン情報確認 */
       if (localStorage.getItem('userId')) {
         this.myUserId = localStorage.getItem('userId')
@@ -245,6 +337,15 @@ div(style="height: 100%; width: 100%")
           this.leaflet.center = this.myLocation
           this.leaflet.zoom = 15
         }, 100)
+      }
+
+      /** ログイン情報 */
+      const myProfile = localStorage.getItem('profile')
+      if (myProfile) {
+        this.myProfile = JSON.parse(myProfile)
+        if (this.myProfile?.lastGetLocationTime) {
+          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
+        }
       }
 
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
@@ -329,13 +430,25 @@ div(style="height: 100%; width: 100%")
           const lng: number = position.coords.longitude
           this.lastGetLocation = [lat, lng]
           this.myLocation = [lat, lng]
+          const lastGetMyLocationTime = new Date()
           localStorage.setItem('latlng', JSON.stringify(this.myLocation))
+          if (this.myProfile) {
+            this.myProfile.lastGetLocationTime = lastGetMyLocationTime
+            this.myProfile.location = [lat, lng]
+            localStorage.setItem('profile', JSON.stringify(this.myProfile))
+          }
         }
 
         /** バッテリー情報を取得 */
         Device.getBatteryInfo().then(info => {
           if (info.batteryLevel) {
             this.myBatteryPersent = info.batteryLevel * 100
+            if (this.myProfile) {
+              this.myProfile.battery = {
+                parsent: info.batteryLevel * 100,
+                chargingNow: info.isCharging,
+              }
+            }
           }
           this.chargeingNow = info.isCharging
         })
@@ -385,7 +498,8 @@ div(style="height: 100%; width: 100%")
           returnText += 'charging-'
         }
         if (batteryPersent >= 95) {
-          return returnText + '100'
+          // 100%表示の時だけこれ
+          return 'mdi-battery'
         } else if (batteryPersent >= 90) {
           return returnText + '90'
         } else if (batteryPersent >= 80) {
@@ -399,6 +513,37 @@ div(style="height: 100%; width: 100%")
         } else {
           return returnText + '10'
         }
+      },
+      /** 現在時刻と位置情報を最後に取得した時間を比較 */
+      diffLastGetTime (date: Date | null | undefined) {
+        if (!date) {
+          return ''
+        }
+        const now = new Date()
+        /** 差分秒 */
+        const diff = (now.getTime() - date.getTime()) / 1000
+        if (diff < 30) {
+          return 'たった今'
+        } else if (diff < 60) {
+          return `${Math.floor(diff)}秒前`
+        } else if (diff < 60 * 60) {
+          return `${Math.floor(diff / 60)}分前`
+        } else if (diff < 60 * 60 * 24) {
+          return `${Math.floor(diff / 60 / 60)}時間前`
+        } else {
+          return `${Math.floor(diff / 60 / 60 / 24)}日前`
+        }
+      },
+      openGoogleMaps (latlng: [
+        number, number,
+      ]) {
+        this.openURL(
+          `https://www.google.com/maps/search/?api=1&query=${latlng[0]},${latlng[1]}`,
+        )
+      },
+      /** URLをブラウザで開く */
+      async openURL (url: string) {
+        await Browser.open({ url: url })
       },
     },
   }

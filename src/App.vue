@@ -115,4 +115,22 @@ main {
 :root {
   --v-theme-primary: 145,56,213!important;
 }
+
+:root {
+  font-size: 16px;
+  --color-allow: #cceeff;
+  --color-error: #ffcccc;
+  --color-error: #cc2222;
+  --color-success: #338833;
+  /** アプリの色 */
+  --accent-color: rgb(var(--v-theme-primary));
+  /** アプリの色に合わせた文字色 */
+  --accent-text-color: #ffffff;
+  /** デフォルトのボーダー角の大きさ */
+  --border-radius: 16px;
+}
+
+button {
+  text-transform: none !important;
+}
 </style>

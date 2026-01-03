@@ -61,7 +61,7 @@ v-card(
         .icon(
           style="background-color: rgba(var(--v-theme-primary), 1); color: white;"
         )
-          v-icon mdi-cog-outline
+          v-icon mdi-bug-outline
         .text
           p.title 開発者オプション
           p.description 特定のモバイル向けの機能を強制有効
