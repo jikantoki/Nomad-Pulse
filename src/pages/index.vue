@@ -100,6 +100,13 @@ div(style="height: 100%; width: 100%")
           prepend-icon="mdi-account-circle"
           style="background-color: rgb(var(--v-theme-primary));"
         ) プロフィールを表示
+        v-btn.mr-4(
+          text
+          v-else
+          @click="$router.push(`/login`)"
+          prepend-icon="mdi-login"
+          style="background-color: rgb(var(--v-theme-primary));"
+        ) ログイン
         v-btn(
           text
           @click="openGoogleMaps(detailCardTarget.location)"
