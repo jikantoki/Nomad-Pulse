@@ -16,7 +16,7 @@ div(style="height: 100%; width: 100%")
     //- 自分の現在地マーカー
     LMarker(
       :lat-lng="myLocation"
-      @click="detailCardTarget = myProfile;console.log(myProfile)"
+      @click="detailCardTarget = myProfile"
       )
       LIcon(
         :icon-size="[0,0]"
@@ -24,9 +24,12 @@ div(style="height: 100%; width: 100%")
         :icon-anchor="[16, 16]"
         )
         div(style="display: flex; align-items: center; width: auto;")
-          img(src="/account_default.jpg" style="height: 32px; width: 32px; border-radius: 9999px;")
+          img(
+            :src="myProfile.icon ?? '/account_default.jpg'"
+            style="height: 32px; width: 32px; border-radius: 9999px;"
+            )
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-            span あなたの現在地
+            span {{ myProfile.name ?? myProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -73,7 +76,7 @@ div(style="height: 100%; width: 100%")
   .detail-card-target
     v-card(
       v-if="detailCardTarget"
-      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 18em; border-radius: 16px 16px 0 0;"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 20em; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
         p.ml-2 {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
@@ -84,6 +87,9 @@ div(style="height: 100%; width: 100%")
           icon="mdi-close"
           )
       v-card-text
+        .info
+          v-icon mdi-card-account-details-outline
+          p @{{ detailCardTarget.userId }}
         .info
           v-icon {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
           p {{ detailCardTarget.battery && detailCardTarget.battery.parsent ? detailCardTarget.battery.parsent.toFixed(0) + '%' : '取得できませんでした' }}
