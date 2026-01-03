@@ -4,6 +4,8 @@
 
 <img src="./public/icon.png" width="256px" alt="アイコン">
 
+[最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/Nomad-Pulse/refs/heads/master/nomad-pulse.apk)
+
 ## Nuxt4 Template
 
 Nuxt を簡単にインストールしてすぐ使うためのテンプレート
