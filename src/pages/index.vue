@@ -16,7 +16,7 @@ div(style="height: 100%; width: 100%")
     //- 自分の現在地マーカー
     LMarker(
       :lat-lng="myLocation"
-      @click="detailCardTarget = myProfile"
+      @click="detailCardTarget = myProfile;console.log(myProfile)"
       )
       LIcon(
         :icon-size="[0,0]"
@@ -86,15 +86,16 @@ div(style="height: 100%; width: 100%")
       v-card-text
         .info
           v-icon {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
-          p {{ detailCardTarget.battery.parsent ? detailCardTarget.battery.parsent.toFixed(0) + '%' : '取得できませんでした' }}
+          p {{ detailCardTarget.battery && detailCardTarget.battery.parsent ? detailCardTarget.battery.parsent.toFixed(0) + '%' : '取得できませんでした' }}
         .info
           v-icon mdi-map-marker-account
           p {{ detailCardTargetAddress ?? '住所取得中...' }}
         .info
           v-icon mdi-clock-outline
           p {{ diffLastGetTime(detailCardTarget.lastGetLocationTime) }}
-        v-btn(
+        v-btn.mr-4(
           text
+          v-if="!detailCardTarget.guest"
           @click="$router.push(`/${detailCardTarget.userId}`)"
           prepend-icon="mdi-account-circle"
           style="background-color: rgb(var(--v-theme-primary));"
@@ -280,6 +281,7 @@ div(style="height: 100%; width: 100%")
             parsent: number
             chargingNow: boolean | undefined
           } | null
+          guest: boolean | undefined
         } | null | undefined,
         /** 自分の位置情報を最後にいつ取得したか？ */
         lastGetMyLocationTime: null as Date | null,
@@ -340,6 +342,20 @@ div(style="height: 100%; width: 100%")
         }
         if (this.myProfile?.userId) {
           this.myUserId = this.myProfile.userId
+        }
+      } else {
+        this.myProfile = {
+          coverImg: null,
+          createdAt: null,
+          icon: null,
+          message: null,
+          name: 'ゲスト',
+          status: null,
+          userId: 'guest',
+          lastGetLocationTime: null,
+          location: null,
+          battery: null,
+          guest: true,
         }
       }
 
@@ -485,7 +501,7 @@ div(style="height: 100%; width: 100%")
       },
       /** バッテリーアイコンを選択 */
       chooseBatteryIcon (batteryPersent: number | undefined, chargingNow: boolean | undefined) {
-        if (batteryPersent === undefined || chargingNow === undefined) {
+        if (batteryPersent === undefined) {
           return 'mdi-battery-unknown'
         }
         let returnText = 'mdi-battery-'
