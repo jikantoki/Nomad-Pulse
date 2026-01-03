@@ -53,6 +53,7 @@ $sql = `
   batteryCharging = {$batteryCharging}
   where secretId = {$secretId};
 `;
+echo $sql;
 SQL($sql);
 
 echo json_encode([
