@@ -18,13 +18,13 @@ if (
 $id = $_SERVER['HTTP_ID'];
 $lat = $_SERVER['HTTP_LAT'];
 $lng = $_SERVER['HTTP_LNG'];
-if (isset($_SERVER['HTTP_BATTERY_LEVEL'])) {
-  $batteryLevel = $_SERVER['HTTP_BATTERY_LEVEL'];
+if (isset($_SERVER['HTTP_BATTERYLEVEL'])) {
+  $batteryLevel = $_SERVER['HTTP_BATTERYLEVEL'];
 } else {
   $batteryLevel = null;
 }
-if (isset($_SERVER['HTTP_BATTERY_CHARGING'])) {
-  $batteryCharging = $_SERVER['BATTERY_CHARGING'];
+if (isset($_SERVER['HTTP_BATTERYCHARGING'])) {
+  $batteryCharging = $_SERVER['BATTERYCHARGING'];
 } else {
   $batteryCharging = null;
 }

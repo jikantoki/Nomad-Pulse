@@ -239,6 +239,8 @@ div(style="height: 100%; width: 100%")
   import { Geolocation } from '@capacitor/geolocation'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
   import muniArray from '@/js/muni'
+  // @ts-ignore
+  import mixins from '@/mixins/mixins'
   import 'leaflet/dist/leaflet.css'
 
   export default {
@@ -248,6 +250,7 @@ div(style="height: 100%; width: 100%")
       LTileLayer,
       LIcon,
     },
+    mixins: [mixins],
     data () {
       return {
         /** Leafletの設定 */
@@ -286,6 +289,7 @@ div(style="height: 100%; width: 100%")
           name: string | null
           status: string | null
           userId: string
+          userToken: string | null | undefined
           lastGetLocationTime: Date | null
           location: [
             lat: number,
@@ -449,7 +453,7 @@ div(style="height: 100%; width: 100%")
     },
     methods: {
       /** 位置情報監視のコールバック */
-      watchPosition (position: any) {
+      async watchPosition (position: any) {
         if (position) {
           const lat: number = position.coords.latitude
           const lng: number = position.coords.longitude
@@ -462,21 +466,40 @@ div(style="height: 100%; width: 100%")
             this.myProfile.location = [lat, lng]
             localStorage.setItem('profile', JSON.stringify(this.myProfile))
           }
-        }
 
-        /** バッテリー情報を取得 */
-        Device.getBatteryInfo().then(info => {
+          /** バッテリー情報を取得 */
+          const info = await Device.getBatteryInfo()
+          let batteryLevel = null
+          let batteryCharging = null
           if (info.batteryLevel) {
-            this.myBatteryPersent = info.batteryLevel * 100
+            batteryLevel = info.batteryLevel * 100
+            batteryCharging = info.isCharging
+            this.myBatteryPersent = batteryLevel
             if (this.myProfile) {
               this.myProfile.battery = {
                 parsent: info.batteryLevel * 100,
-                chargingNow: info.isCharging,
+                chargingNow: batteryCharging,
               }
             }
           }
           this.chargeingNow = info.isCharging
-        })
+
+          if (this.myProfile && !this.myProfile.guest) {
+            /** 取得した情報をサーバーに送信 */
+            const res = await this.sendAjaxWithAuth(
+              '/updateGeoLocation.php', {
+                id: this.myProfile.userId,
+                token: this.myProfile.userToken,
+                lat,
+                lng,
+                batteryLevel,
+                batteryCharging,
+              },
+            )
+            console.log(res)
+          }
+        }
+
         return
       },
       /** 現在地を取得し、地図の中心も移動 */

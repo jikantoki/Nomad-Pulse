@@ -146,10 +146,10 @@
           .then(async e => {
             if (e.body.status === 'ok') {
               const now = new URL(window.location.href)
-              localStorage.setItem('userId', e.body.id)
-              localStorage.setItem('userToken', e.body.token)
-              const profile = await this.getProfile(e.body.id)
-              localStorage.setItem('profile', JSON.stringify(profile))
+              const jsonProfile = await this.getProfile(e.body.id)
+              const profile = JSON.stringify(jsonProfile)
+              profile.userToken = e.body.token
+              localStorage.setItem('profile', profile)
               // ログイン中のユーザーの情報で、プッシュ通知に関する情報をDB登録
               const push = await webpush.get()
               if (push) {

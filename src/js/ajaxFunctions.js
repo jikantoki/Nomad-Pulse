@@ -44,14 +44,14 @@ export default {
    * @returns object Webサイトから貰ったデータはobject.bodyに格納
    */
   send: (url, obj = null, header = null, isPost = false) => {
-    let methods = isPost ? 'POST' : 'GET'
+    const methods = isPost ? 'POST' : 'GET'
     /**
      * resolve(hogehoge)で実行環境のthenが発火する
      * reject(piyopiyo)で実行環境のcatchが発火する
      */
     return new Promise((resolve, reject) => {
-      let request = new XMLHttpRequest()
-      request.onreadystatechange = () => {
+      const request = new XMLHttpRequest()
+      request.addEventListener('readystatechange', () => {
         if (request.readyState == 4) {
           if (request.status === 200) {
             let response = {}
@@ -84,20 +84,20 @@ export default {
             })
           }
         }
-      }
+      })
       let params = ''
       let postMethod = ''
       if (obj) {
         const objKeys = Object.keys(obj)
-        objKeys.forEach((key) => {
+        for (const key of objKeys) {
           const encoded = encodeURIComponent(obj[key])
           params += `${key}=${encoded}&`
-        })
+        }
         params = params.slice(0, -1)
-        if (!isPost) {
-          url += '?' + params
-        } else {
+        if (isPost) {
           postMethod = params
+        } else {
+          url += '?' + params
         }
       }
       request.open(methods, url, true)
@@ -105,7 +105,7 @@ export default {
         'content-type',
         'application/x-www-form-urlencoded;charset=UTF-8',
       )
-      //ヘッダ情報の追加
+      // ヘッダ情報の追加
       if (isObject(header)) {
         const keys = Object.keys(header)
         for (const key of keys) {
@@ -117,7 +117,7 @@ export default {
     })
   },
 }
-//is this object? t/f
-const isObject = (obj) => {
-  return obj instanceof Object && !(obj instanceof Array) ? true : false
+// is this object? t/f
+function isObject (obj) {
+  return obj instanceof Object && !(Array.isArray(obj)) ? true : false
 }
