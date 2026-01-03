@@ -145,7 +145,7 @@ div(style="height: 100%; width: 100%")
             style="text-align: center;"
           )
             p(
-              v-if="myProfile && myProfile.userId"
+              v-if="myProfile && myProfile.userId && !myProfile.guest"
               style="font-size: 1.2em; margin: 0; padding: 0;"
               ) {{ myProfile.name ? myProfile.name : myProfile.userId }}
             p(
@@ -153,13 +153,14 @@ div(style="height: 100%; width: 100%")
               style="font-size: 1.2em; margin: 0; padding: 0;"
               ) ログインしていません
             p(style="margin: 0; padding: 0;")
-              | {{ myUserId ? `@${myUserId}` : 'データは同期されていません' }}
+              | {{ myProfile && myProfile.userId && !myProfile.guest ? `@${myProfile.userId}` : 'データは同期されていません' }}
             v-btn.my-2(
-              v-if="myUserId"
+              v-if="myProfile && myProfile.userId && !myProfile.guest"
               text
-              append-icon="mdi-account-edit"
+              @click="$router.push(`/${myProfile.userId}`)"
+              append-icon="mdi-account-outline"
               style="background-color: rgb(var(--v-theme-primary));"
-            ) アカウント情報を編集
+            ) プロフィールを表示
             v-btn.my-2(
               v-else
               text
