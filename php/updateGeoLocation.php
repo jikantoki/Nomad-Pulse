@@ -21,12 +21,12 @@ $lng = $_SERVER['HTTP_LNG'];
 if (isset($_SERVER['HTTP_BATTERYLEVEL'])) {
   $batteryLevel = $_SERVER['HTTP_BATTERYLEVEL'];
 } else {
-  $batteryLevel = null;
+  $batteryLevel = 'null';
 }
 if (isset($_SERVER['HTTP_BATTERYCHARGING'])) {
   $batteryCharging = $_SERVER['HTTP_BATTERYCHARGING'];
 } else {
-  $batteryCharging = null;
+  $batteryCharging = 'null';
 }
 $secretId = idToSecretId($id);
 $ipAddress = $_SERVER['REMOTE_ADDR'];
