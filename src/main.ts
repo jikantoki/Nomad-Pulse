@@ -7,6 +7,8 @@
 import type { URLOpenListenerEvent } from '@capacitor/app'
 import { App as capacitorApp } from '@capacitor/app'
 
+import { Browser } from '@capacitor/browser'
+
 import { Toast } from '@capacitor/toast'
 
 import { defineCustomElements } from '@ionic/pwa-elements/loader'
@@ -19,7 +21,6 @@ import { registerPlugins } from '@/plugins'
 
 // Components
 import App from './App.vue'
-
 import router from './router'
 // Styles
 import 'unfonts.css'
@@ -35,8 +36,10 @@ app.mount('#app')
 capacitorApp.addListener('appUrlOpen', function (event: URLOpenListenerEvent) {
   const url = new URL(event.url)
   const slug = url.pathname
-  if (slug) {
+  if (slug.startsWith('/user/')) {
     router.push(slug)
+  } else if (slug) {
+    Browser.open({ url: `https://nomadpulse.enoki.xyz${slug}` })
   } else {
     Toast.show({ text: '対応する動作が見つかりませんでした。' })
   }

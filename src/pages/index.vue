@@ -33,7 +33,10 @@ div(style="height: 100%; width: 100%")
   //-- 下部のアクションバー --
   .action-bar
     .buttons
-      .button(v-ripple @click="timelineMode = false")
+      .button(
+        v-ripple
+        @click="setCurrentPosition"
+        )
         v-icon mdi-map-marker
         p マップ
       .button(
