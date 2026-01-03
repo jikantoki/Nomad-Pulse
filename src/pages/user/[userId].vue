@@ -16,9 +16,13 @@
       .icon
         img.icon-img(src="/account_default.jpg")
       .button
-        a(v-if="myProfile.userId == param.userId" href="/settings/profile")
+        a(v-if="myProfile && myProfile.userId && !myProfile.guest == param.userId" href="/settings/profile")
           v-btn.follow-button プロフィールを編集
-        v-btn.follow-button(v-else disabled) フォロー
+        v-btn.follow-button(v-else-if="myProfile && myProfile.userId && !myProfile.guest") フォロー
+        v-btn.follow-button(
+          v-else
+          @click="$router.push('/login')"
+          ) ログインしてフォロー
     .name-and-id.pl-2
       .name.text-h5(v-if="!userData")
         ContentLoader.text-h5.loading-text(width="3em")
@@ -90,34 +94,6 @@
           color="#f7e91e"
           @click="shareMyLinkDialog = true"
         )
-    .push-message.mt-4.px-2(v-if="userData && userData.userId")
-      v-text-field(
-        v-model="pushMessage"
-        placeholder="インターネットからお邪魔します！"
-        :label="`${userData.userId}にメッセージを送ってみよう！`"
-        prepend-inner-icon="mdi-email-edit-outline"
-        @keydown.enter="sendPushForAccount(userData.userId)"
-        clearable
-      )
-      v-btn(@click="sendPushForAccount(userData.userId)") {{ userData.userId }}に通知を送信
-  commonMainContent(
-    :target="param.userId"
-  )
-v-dialog(v-model="errorMessage" style="max-width: 500px;")
-  v-card
-    v-card-title 送信失敗
-    v-card-text この機能は、ログインしたユーザーのみ使えます！（荒らし対策）
-    v-card-actions
-      v-spacer
-      v-btn(@click="a('/login')") ログイン
-      v-btn(@click="errorMessage = false") 閉じる
-v-dialog(v-model="successMessage" v-if="userData && userData.userId" style="max-width: 500px;")
-  v-card
-    v-card-title 送信完了
-    v-card-text {{ userData.userId }}に通知を送信しました！
-    v-card-actions
-      v-spacer
-      v-btn(@click="successMessage = false") 閉じる
 v-dialog(v-model="isInvalid" style="max-width: 500px;" persistent)
   v-card
     v-card-title 閲覧不可

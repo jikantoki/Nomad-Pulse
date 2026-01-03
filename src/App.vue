@@ -133,4 +133,12 @@ main {
 button {
   text-transform: none !important;
 }
+
+/** URLや日報をコピー用 */
+pre {
+  background: #cccccc;
+  color: #000000;
+  user-select: all;
+  overflow-x: auto;
+}
 </style>
