@@ -18,6 +18,16 @@ if (
 $id = $_SERVER['HTTP_ID'];
 $lat = $_SERVER['HTTP_LAT'];
 $lng = $_SERVER['HTTP_LNG'];
+if (isset($_SERVER['HTTP_BATTERY_LEVEL'])) {
+  $batteryLevel = $_SERVER['HTTP_BATTERY_LEVEL'];
+} else {
+  $batteryLevel = null;
+}
+if (isset($_SERVER['HTTP_BATTERY_CHARGING'])) {
+  $batteryCharging = $_SERVER['BATTERY_CHARGING'];
+} else {
+  $batteryCharging = null;
+}
 $secretId = idToSecretId($id);
 $ipAddress = $_SERVER['REMOTE_ADDR'];
 $unixtime = time();
@@ -38,7 +48,9 @@ SQL(`
   lat = {$lat},
   lng = {$lng},
   unixtime = {$unixtime},
-  ipAddress = {$ipAddress}
+  ipAddress = {$ipAddress},
+  batteryLevel = {$batteryLevel},
+  batteryCharging = {$batteryCharging}
   where secretId = {$secretId}
 `);
 
