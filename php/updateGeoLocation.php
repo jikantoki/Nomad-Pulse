@@ -48,10 +48,10 @@ $sql = "
   lat = {$lat},
   lng = {$lng},
   unixtime = {$unixtime},
-  ipAddress = {$ipAddress},
+  ipAddress = '{$ipAddress}',
   batteryLevel = {$batteryLevel},
   batteryCharging = {$batteryCharging}
-  where secretId = {$secretId};
+  where secretId = '{$secretId}';
 ";
 SQL($sql);
 
