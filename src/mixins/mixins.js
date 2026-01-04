@@ -193,7 +193,6 @@ export default {
         token: myUserToken,
         targetId: targetUserId,
       })
-      console.log(profile)
       const res = profile.body.res
       // eslint-disable-next-line unicorn/prefer-ternary
       if (res) {
@@ -205,7 +204,7 @@ export default {
           coverImg: res.coverImg === '' ? null : res.coverImg,
           name: res.name === '' ? null : res.name,
           message: res.message === '' ? null : res.message,
-          friendStatus: res.friendStatus,
+          friendStatus: profile.body.friendStatus,
         }
       } else {
         // 存在しない

@@ -25,11 +25,22 @@
           href="/settings/profile"
           )
           v-btn.follow-button プロフィールを編集
-        v-btn.follow-button(
+        .follow-button-cover(
           v-else-if="myProfile && myProfile.userId && !myProfile.guest"
-          @click="friendRequest(param.userId)"
-          :loading="followLoadingNow"
-          ) 友達申請
+          )
+          v-btn.follow-button(
+            v-if="!userData.friendStatus"
+            @click="friendRequest(param.userId)"
+            :loading="followLoadingNow"
+            ) 友達申請
+          v-btn.follow-button(
+            v-if="userData.friendStatus === 'friend'"
+            disabled
+            ) 既に友達です！
+          v-btn.follow-button(
+            v-else
+            disabled
+            ) 友達申請中
         v-btn.follow-button(
           v-else
           @click="$router.push('/login')"
@@ -173,6 +184,8 @@ v-dialog(v-model="followDialogMessage")
         followDialogMessage: null,
         /** ユーザー情報取得中フラグ */
         loading: false,
+        /** 友達申請の状態 */
+        friendStatus: null,
       }
     },
     async mounted () {
