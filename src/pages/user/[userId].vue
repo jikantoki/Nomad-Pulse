@@ -193,8 +193,8 @@ v-dialog(v-model="followDialogMessage")
       this.param = this.$route.params
       this.userData = await this.getProfile(
         this.param.userId,
-        myProfile ?? myProfile.userId,
-        myProfile ?? myProfile.userToken,
+        this.myProfile ?? this.myProfile.userId,
+        this.myProfile ?? this.myProfile.userToken,
       )
       if (this.userData && this.userData.status == 'invalid') {
         // ログインしていないので閲覧不可

@@ -36,7 +36,7 @@ if ($res) {
   if ($friendStatus1) {
     $friendStatus = $friendStatus1['status'];
   } else if ($friendStatus2) {
-    $friendStatus = $friendStatus1['status'];
+    $friendStatus = $friendStatus2['status'];
   } else {
     $friendStatus = null;
   }

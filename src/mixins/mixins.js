@@ -187,12 +187,13 @@ export default {
      * @param {string} myUserId 自分のユーザーのID
      * @returns アカウントの公開情報
      */
-    async getProfile (userId, myUserId = null, myUserToken = null) {
+    async getProfile (targetUserId, myUserId = null, myUserToken = null) {
       const profile = await this.sendAjaxWithAuth('/getProfile.php', {
         id: myUserId,
         token: myUserToken,
-        targetId: userId,
+        targetId: targetUserId,
       })
+      console.log(profile)
       const res = profile.body.res
       // eslint-disable-next-line unicorn/prefer-ternary
       if (res) {
