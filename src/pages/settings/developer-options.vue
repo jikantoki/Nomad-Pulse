@@ -44,6 +44,15 @@ v-card(
           p 無効
       .setting-item(
         v-ripple
+        @click="$router.push('/tutorial')"
+        )
+        .icon
+          v-icon mdi-fit-to-screen-outline
+        .text
+          p.title チュートリアルの再表示
+          p.description 初回限定のチュートリアル画面を再度表示
+      .setting-item(
+        v-ripple
         @click="developerOptionLogoutDialog = true"
         )
         .icon(
