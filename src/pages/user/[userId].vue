@@ -16,13 +16,20 @@
       .icon
         img.icon-img(src="/account_default.jpg")
       .button
-        a(v-if="myProfile && myProfile.userId && !myProfile.guest == param.userId" href="/settings/profile")
+        a(
+          v-if="myProfile && myProfile.userId == param.userId && !myProfile.guest"
+          href="/settings/profile"
+          )
           v-btn.follow-button プロフィールを編集
-        v-btn.follow-button(v-else-if="myProfile && myProfile.userId && !myProfile.guest") フォロー
+        v-btn.follow-button(
+          v-else-if="myProfile && myProfile.userId && !myProfile.guest"
+          @click="friendRequest(param.userId)"
+          :loading="followLoadingNow"
+          ) 友達申請
         v-btn.follow-button(
           v-else
           @click="$router.push('/login')"
-          ) ログインしてフォロー
+          ) ログインして友達申請
     .name-and-id.pl-2
       .name.text-h5(v-if="!userData")
         ContentLoader.text-h5.loading-text(width="3em")
@@ -146,6 +153,8 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
         myLink: null,
         shareMyLinkDialog: false,
         myProfile: null,
+        /** フォロー処理中のクルクル表示 */
+        followLoadingNow: false,
       }
     },
     async mounted () {
@@ -203,6 +212,22 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
       /** URLをコピー */
       copyMyLink () {
         navigator.clipboard.writeText(this.myLink)
+      },
+      /** 友達申請 */
+      async friendRequest (userId) {
+        this.followLoadingNow = true
+        /** サーバーに送信 */
+        try {
+          const res = await this.sendAjaxWithAuth(
+            '/friendRequest.php', {
+              id: this.myProfile.userId,
+              token: this.myProfile.userToken,
+              requestUserId: userId,
+            },
+          )
+        } catch {}
+        await setTimeout(() => {}, 500)
+        this.followLoadingNow = false
       },
     },
   }
