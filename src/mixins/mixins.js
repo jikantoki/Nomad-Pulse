@@ -184,14 +184,16 @@ export default {
     /**
      * アカウントのプロフィールを取得
      * @param {string} userId 欲しいユーザーのID
+     * @param {string} myUserId 自分のユーザーのID
      * @returns アカウントの公開情報
      */
-    async getProfile (userId) {
+    async getProfile (userId, myUserId = null, myUserToken = null) {
       const profile = await this.sendAjaxWithAuth('/getProfile.php', {
-        id: userId,
+        id: myUserId,
+        token: myUserToken,
+        targetId: userId,
       })
       const res = profile.body.res
-      console.log(profile.body)
       // eslint-disable-next-line unicorn/prefer-ternary
       if (res) {
         return {
@@ -202,6 +204,7 @@ export default {
           coverImg: res.coverImg === '' ? null : res.coverImg,
           name: res.name === '' ? null : res.name,
           message: res.message === '' ? null : res.message,
+          friendStatus: res.friendStatus,
         }
       } else {
         // 存在しない

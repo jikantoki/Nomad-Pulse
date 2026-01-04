@@ -59,6 +59,6 @@ echo json_encode([
   'status' => 'ok',
   'fromId' => $fromId,
   'toId' => $toId,
-  'status' => 'request',
+  'followStatus' => 'request',
   'unixtime' => $unixtime,
 ]);

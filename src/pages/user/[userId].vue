@@ -15,7 +15,11 @@
     .icon-and-follow.px-2
       .icon
         img.icon-img(src="/account_default.jpg")
-      .button
+      .button(v-if="loading")
+        v-btn.follow-button(
+            disabled
+          ) 友達申請
+      .button(v-if="!loading")
         a(
           v-if="myProfile && myProfile.userId == param.userId && !myProfile.guest"
           href="/settings/profile"
@@ -135,6 +139,17 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
         style="color: white;"
         color="var(--accent-color)"
       ) 閉じる
+v-dialog(v-model="followDialogMessage")
+  v-card
+    v-card-title 友達申請
+    v-card-text
+      p {{ followDialogMessage }}
+    v-card-actions
+      v-spacer
+      v-btn(
+        @click="followDialogMessage = null"
+        style="background-color: rgb(var(--v-theme-primary));"
+      ) 閉じる
 </template>
 
 <script>
@@ -155,9 +170,13 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
         myProfile: null,
         /** フォロー処理中のクルクル表示 */
         followLoadingNow: false,
+        followDialogMessage: null,
+        /** ユーザー情報取得中フラグ */
+        loading: false,
       }
     },
     async mounted () {
+      this.loading = true
       /** ログイン情報 */
       const myProfile = localStorage.getItem('profile')
       if (myProfile) {
@@ -170,13 +189,19 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
         }
       }
 
+      // ユーザー情報の取得
       this.param = this.$route.params
-      this.userData = await this.getProfile(this.param.userId)
+      this.userData = await this.getProfile(
+        this.param.userId,
+        myProfile ?? myProfile.userId,
+        myProfile ?? myProfile.userToken,
+      )
       if (this.userData && this.userData.status == 'invalid') {
         // ログインしていないので閲覧不可
         this.isInvalid = true
       }
       this.myLink = `https://nomadpulse.enoki.xyz/${this.param.userId}`
+      this.loading = false
     },
     methods: {
       sendPushForAccount (userId) {
@@ -225,6 +250,20 @@ v-dialog(v-model="shareMyLinkDialog" max-width="500px")
               requestUserId: userId,
             },
           )
+          switch (res.body.status) {
+            case 'request':
+            case 'ok': {
+              this.followDialogMessage = '友達申請が完了しました！相手の承認をお待ちください'
+              break
+            }
+            case 'cannot': {
+              this.followDialogMessage = '既に友達申請済みです！'
+              break
+            }
+            default: {
+              this.followDialogMessage = '友達申請ができませんでした！'
+            }
+          }
         } catch {}
         await setTimeout(() => {}, 500)
         this.followLoadingNow = false
