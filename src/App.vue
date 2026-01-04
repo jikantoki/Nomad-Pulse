@@ -1,7 +1,7 @@
 <template lang="pug">
 v-app
   common-splash-vue(v-show="splashScreen")
-  v-main
+  v-main(style="height: 100vh;")
     .status-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
     router-view(:style="isAndroid15OrHigher ? 'height: calc(100vh - 40px - 16px);' : ''")
     .nav-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")

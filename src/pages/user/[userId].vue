@@ -1,5 +1,5 @@
 <template lang="pug">
-.user-page(v-if="param")
+.user-page(v-if="param" style="height: 85vh;")
   v-card-actions
     p.ml-2(style="font-size: 1.3em") アカウント詳細
     v-spacer
@@ -8,7 +8,9 @@
       @click="$router.push('/')"
       icon="mdi-close"
       )
-  .profile-zone
+  .profile-zone(
+    style="overflow-y: auto; height: 100%;"
+    )
     .cover
       img.cover-img(v-if="userData && userData.coverImg" :src="userData.coverImg")
       img.cover-img(v-else src="/img/default_cover.jpg")
@@ -116,6 +118,34 @@
           color="#f7e91e"
           @click="shareMyLinkDialog = true"
         )
+    .canvas.ma-4(
+      style="display: flex; flex-direction: column; align-items: center"
+    )
+      p.ma-2(
+        style="font-size: 1.5em;"
+      ) プロフィールを共有
+      v-btn.ma-2(
+        @click="shareMyLinkDialog = true"
+        append-icon="mdi-share-variant"
+        style="background-color: rgb(var(--v-theme-primary)); color: white; border-radius: 8px;"
+        size="large"
+      ) シェア
+      canvas#qr-canvas.ma-2(
+        v-show="!qrLoading"
+        style="border-radius: 10%;"
+      )
+      .qr-loading.ma-2(
+        v-show="qrLoading"
+        style="width: 70vw; height: 70vw; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+      )
+        v-progress-circular.my-4(
+          indeterminate
+          :size="64"
+          color="black"
+          )
+        p.my-4(
+          style="color: black;"
+        ) QRコード読み込み中…
 v-dialog(v-model="isInvalid" style="max-width: 500px;" persistent)
   v-card
     v-card-title 閲覧不可
@@ -164,6 +194,7 @@ v-dialog(v-model="followDialogMessage")
 </template>
 
 <script>
+  import QRCode from 'qrcode'
   import mixins from '~/mixins/mixins'
   export default {
     mixins: [mixins],
@@ -186,10 +217,14 @@ v-dialog(v-model="followDialogMessage")
         loading: false,
         /** 友達申請の状態 */
         friendStatus: null,
+        /** QRコード生成中フラグ */
+        qrLoading: false,
       }
     },
     async mounted () {
       this.loading = true
+      this.qrLoading = true
+
       /** ログイン情報 */
       const myProfile = localStorage.getItem('profile')
       if (myProfile) {
@@ -213,7 +248,21 @@ v-dialog(v-model="followDialogMessage")
         // ログインしていないので閲覧不可
         this.isInvalid = true
       }
-      this.myLink = `https://nomadpulse.enoki.xyz/${this.param.userId}`
+      this.myLink = `https://nomadpulse.enoki.xyz/user/${this.param.userId}`
+
+      setTimeout(() => {
+        QRCode.toCanvas(
+          document.querySelector('#qr-canvas'),
+          this.myLink,
+          {
+            scale: 10,
+          },
+        )
+        document.querySelector('#qr-canvas').style.height = '70vw'
+        document.querySelector('#qr-canvas').style.width = '70vw'
+        this.qrLoading = false
+      }, 500)
+
       this.loading = false
     },
     methods: {

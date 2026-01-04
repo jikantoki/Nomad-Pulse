@@ -182,6 +182,15 @@ div(style="height: 100%; width: 100%")
             .icon-and-text
               v-icon mdi-chart-timeline-variant
               v-list-item-title タイムライン
+          v-list-item.item(
+            style="background-color: var(--color-error); color: white;"
+            @click="$router.push('/friendlist')"
+          )
+            .icon-and-text
+              v-icon mdi-account-multiple
+              v-list-item-title 友達リスト(0人)
+              v-spacer
+              v-icon mdi-alert-circle-outline
           v-list-item.item( @click="$router.push('/settings')" )
             .icon-and-text
               v-icon mdi-cog
