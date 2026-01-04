@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: localhost
--- 生成日時: 2026 年 1 月 02 日 13:56
+-- 生成日時: 2026 年 1 月 04 日 09:33
 -- サーバのバージョン： 5.7.44-log
 -- PHP のバージョン: 7.4.33
 
@@ -43,6 +43,36 @@ CREATE TABLE `api_listForView` (
   `apiAuthor` text COMMENT 'APIの管理者名',
   `apiURL` text COMMENT 'API製作者が誘導に使う用URL'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='api_listの表示に関する部分';
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `follow_list`
+--
+
+CREATE TABLE `follow_list` (
+  `followId` varchar(64) NOT NULL COMMENT '友達登録関係識別用ランダムID',
+  `fromUserId` varchar(64) NOT NULL COMMENT '申請元のランダムユーザーID',
+  `toUserId` varchar(64) NOT NULL COMMENT '申請先のランダムユーザーID',
+  `unixtime` int(11) NOT NULL COMMENT 'フォローした時間unixtime',
+  `status` text NOT NULL COMMENT '承認中or友達登録完了などの情報'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `location_list`
+--
+
+CREATE TABLE `location_list` (
+  `secretId` varchar(64) NOT NULL COMMENT '内部処理用ユーザーID',
+  `lat` double NOT NULL COMMENT '緯度',
+  `lng` double NOT NULL COMMENT '経度',
+  `unixtime` int(11) NOT NULL COMMENT '取得した時間unixtime',
+  `ipAddress` text NOT NULL COMMENT '取得元のIPアドレス',
+  `batteryLevel` int(11) DEFAULT NULL COMMENT '取得時のバッテリー残量',
+  `batteryCharging` tinyint(1) DEFAULT NULL COMMENT '取得時に充電中だったか？'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='位置情報リスト';
 
 -- --------------------------------------------------------
 
@@ -227,6 +257,24 @@ ALTER TABLE `api_list`
 -- テーブルのインデックス `api_listForView`
 --
 ALTER TABLE `api_listForView`
+  ADD PRIMARY KEY (`secretId`);
+
+--
+-- テーブルのインデックス `follow_list`
+--
+ALTER TABLE `follow_list`
+  ADD PRIMARY KEY (`followId`);
+
+--
+-- テーブルのインデックス `location_list`
+--
+ALTER TABLE `location_list`
+  ADD PRIMARY KEY (`secretId`);
+
+--
+-- テーブルのインデックス `mail_list`
+--
+ALTER TABLE `mail_list`
   ADD PRIMARY KEY (`secretId`);
 
 --
