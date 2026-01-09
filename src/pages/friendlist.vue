@@ -27,7 +27,7 @@ v-card(
           .action-buttons
             v-btn.trash(
               icon="mdi-trash-can-outline"
-              @click.stop=""
+              @click.stop="deleteDialog = {userId: 'jikantoki', name: 'えのき'}"
             )
     //-- 承認待ちリスト
     .friend-accept-list
@@ -52,10 +52,31 @@ v-card(
               icon="mdi-check"
               @click.stop=""
             )
+v-dialog(
+  v-model="deleteDialog"
+)
+  v-card
+    v-card-title 友達の削除
+    v-card-text {{ deleteDialog.name }}@{{ deleteDialog.userId }}を友達から削除しますか？
+    v-card-actions
+      v-btn(
+        @click="deleteDialog = false"
+      ) キャンセル
+      v-btn 削除
 </template>
 
 <script lang="ts">
-  export default {}
+  export default {
+    data () {
+      return {
+        /**
+         * 友達削除ダイアログフラグ（userInfoObject）
+         * nullだとエラー出るのでfalse or Object型
+         * */
+        deleteDialog: false as false | any,
+      }
+    },
+  }
 </script>
 
 <style lang="scss" scoped>
