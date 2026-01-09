@@ -12,23 +12,6 @@ v-card(
       icon="mdi-close"
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
-    //-- フレンドリスト
-    .friend-list
-      p 0人の友達
-      .friend-cover
-        .friend(v-ripple)
-          .icon
-            img(src="/account_default.jpg")
-          .name-and-id-and-description
-            .name-and-id
-              span.name 名前
-              span.id @id-hogehoge
-            .description いい感じのアカウントです
-          .action-buttons
-            v-btn.trash(
-              icon="mdi-trash-can-outline"
-              @click.stop="deleteDialog = {userId: 'jikantoki', name: 'えのき'}"
-            )
     //-- 承認待ちリスト
     .friend-accept-list
       p 承認待ち
@@ -51,6 +34,23 @@ v-card(
               color="var(--color-success)"
               icon="mdi-check"
               @click.stop=""
+            )
+    //-- フレンドリスト
+    .friend-list
+      p 0人の友達
+      .friend-cover
+        .friend(v-ripple)
+          .icon
+            img(src="/account_default.jpg")
+          .name-and-id-and-description
+            .name-and-id
+              span.name 名前
+              span.id @id-hogehoge
+            .description いい感じのアカウントです
+          .action-buttons
+            v-btn.trash(
+              icon="mdi-trash-can-outline"
+              @click.stop="deleteDialog = {userId: 'jikantoki', name: 'えのき'}"
             )
 v-dialog(
   v-model="deleteDialog"
