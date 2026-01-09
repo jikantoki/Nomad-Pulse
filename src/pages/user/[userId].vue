@@ -132,11 +132,11 @@
       ) シェア
       canvas#qr-canvas.ma-2(
         v-show="!qrLoading"
-        style="border-radius: 10%;"
+        style="border-radius: 10%; max-width: 20em; max-height: 20em;"
       )
       .qr-loading.ma-2(
         v-show="qrLoading"
-        style="width: 70vw; height: 70vw; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+        style="width: 70vw; height: 70vw; max-width: 20em; max-height: 20em; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
       )
         v-progress-circular.my-4(
           indeterminate
@@ -194,6 +194,7 @@ v-dialog(v-model="followDialogMessage")
 </template>
 
 <script>
+  import { App } from '@capacitor/app'
   import QRCode from 'qrcode'
   import mixins from '~/mixins/mixins'
   export default {
@@ -263,7 +264,14 @@ v-dialog(v-model="followDialogMessage")
         this.qrLoading = false
       }, 500)
 
+      App.addListener('backButton', () => {
+        $router.push('/')
+      })
+
       this.loading = false
+    },
+    unmounted () {
+      App.removeAllListeners()
     },
     methods: {
       sendPushForAccount (userId) {

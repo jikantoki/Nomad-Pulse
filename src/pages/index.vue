@@ -469,6 +469,9 @@ div(style="height: 100%; width: 100%")
       /** 現在地を取得し、地図の中心も移動 */
       await this.setCurrentPosition()
     },
+    unmounted () {
+      App.removeAllListeners()
+    },
     methods: {
       /** 位置情報監視のコールバック */
       async watchPosition (position: any) {
@@ -514,6 +517,9 @@ div(style="height: 100%; width: 100%")
                 batteryCharging,
               },
             )
+            if (!res || !res.body) {
+              console.log('サーバー送信エラー', res)
+            }
           }
         }
 
