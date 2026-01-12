@@ -60,9 +60,14 @@ function SQLConnect()
  */
 function SQL($sql)
 {
-  $pdo = SQLConnect();
-  $stmt = $pdo->query($sql);
-  return $stmt->fetch();
+  try {
+    $pdo = SQLConnect();
+    $stmt = $pdo->query($sql);
+    return $stmt->fetch();
+  } catch (\Throwable $th) {
+    echo $sql;
+    throw $th;
+  }
 }
 
 /**
@@ -73,9 +78,14 @@ function SQL($sql)
  */
 function SQLfetchAll($sql)
 {
-  $pdo = SQLConnect();
-  $stmt = $pdo->query($sql);
-  return $stmt->fetchAll();
+  try {
+    $pdo = SQLConnect();
+    $stmt = $pdo->query($sql);
+    return $stmt->fetchAll();
+  } catch (\Throwable $th) {
+    echo $sql;
+    throw $th;
+  }
 }
 
 function SQLselectTable($tableName)
