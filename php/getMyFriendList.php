@@ -19,7 +19,7 @@ if (
 $id = $_SERVER['HTTP_ID'];
 $secretId = idToSecretId($id);
 
-$res = SQL("
+$res = SQLfetchAll("
 select * from follow_list where
 fromUserId = '{$secretId}'
 or
