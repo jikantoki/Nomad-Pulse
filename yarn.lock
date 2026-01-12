@@ -156,6 +156,11 @@
   dependencies:
     "@capacitor/synapse" "^1.0.4"
 
+"@capacitor/push-notifications@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/push-notifications/-/push-notifications-8.0.0.tgz#031c25e4a61d0fc79ea3a557ceaf520fbc0fffae"
+  integrity sha512-xJWQLqAfC8b2ETqAPmwDnkKB4t/lVrbYc2D8VpA2fSu10JFSL/R722Vk0Lfl9Lo9WusmyIiQbVfILNQ3iFNGKw==
+
 "@capacitor/status-bar@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-8.0.0.tgz#07ad5a765d2aa9a201a7472f6fd5cb44b25d25a5"

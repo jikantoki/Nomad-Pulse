@@ -16,6 +16,9 @@ const config: CapacitorConfig = {
       interval: 1,
       autoStart: true,
     },
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
   },
   server: {
     androidScheme: 'https',

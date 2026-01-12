@@ -50,14 +50,14 @@ v-card(
           .action-buttons
             v-btn.trash(
               icon="mdi-trash-can-outline"
-              @click.stop="deleteDialog = {userId: 'jikantoki', name: 'えのき'}"
+              @click.stop="deleteDialog = true; deleteTarget = {userId: 'jikantoki', name: 'えのき'}"
             )
 v-dialog(
   v-model="deleteDialog"
 )
   v-card
     v-card-title 友達の削除
-    v-card-text {{ deleteDialog.name }}@{{ deleteDialog.userId }}を友達から削除しますか？
+    v-card-text {{ deleteTarget.name }}@{{ deleteTarget.userId }}を友達から削除しますか？
     v-card-actions
       v-btn(
         @click="deleteDialog = false"
@@ -70,10 +70,13 @@ v-dialog(
     data () {
       return {
         /**
-         * 友達削除ダイアログフラグ（userInfoObject）
-         * nullだとエラー出るのでfalse or Object型
+         * 友達削除ダイアログフラグ
          * */
-        deleteDialog: false as false | any,
+        deleteDialog: false as boolean,
+        /**
+         * ダイアログのターゲット（userInfoObject）
+         */
+        deleteTarget: null as null | any,
       }
     },
   }
