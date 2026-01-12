@@ -30,6 +30,5 @@ toUserId = '{$secretId}'
 echo json_encode([
   'status' => 'ok',
   'id' => $id,
-  'unixtime' => $unixtime,
   'friendList' => $res
 ]);
