@@ -66,6 +66,7 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { PushNotifications, type PushNotificationSchema } from '@capacitor/push-notifications'
   export default {
     data () {
       return {
@@ -78,6 +79,27 @@ v-dialog(
          */
         deleteTarget: null as null | any,
       }
+    },
+    async mounted () {
+      // Push Notification APIサンプル
+      PushNotifications.addListener('registration', token => {
+        console.log('通知のトークン:', token.value)
+      })
+      let permStatus = await PushNotifications.checkPermissions()
+      if (permStatus.receive === 'prompt') {
+        permStatus = await PushNotifications.requestPermissions()
+      }
+      if (permStatus.receive !== 'granted') {
+        console.log('通知取得できなかったぽ')
+      }
+      await PushNotifications.register()
+
+      await PushNotifications.addListener('pushNotificationReceived', (Notification: PushNotificationSchema) => {
+        console.log('プッシュ通知を受信しました', Notification)
+        console.log('通知タイトル', Notification.title)
+        console.log('通知の本文', Notification.body)
+      })
+      alert('finish')
     },
   }
 </script>

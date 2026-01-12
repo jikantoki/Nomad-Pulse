@@ -4,4 +4,6 @@
     <string name="title_activity_main">NomadPulse</string>
     <string name="package_name">xyz.enoki.nomadpulse</string>
     <string name="custom_url_scheme">xyz.enoki.nomadpulse</string>
+    <string name="capacitor_background_geolocation_notification_channel_name">バックグラウンド追跡</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_location_status</string>
 </resources>

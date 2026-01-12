@@ -48,6 +48,11 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.10.2.tgz#d7c063301f2a33095fc202f06bf3cce0c138dfcd"
   integrity sha512-uFsRXwIGyu+r6AMdz+XijIIZJYpoWeYzILt5yZ2d3mCjQrWUTVpVD9WL/jZAbvp+Ed04rOhrsk7FiTcEDseB5A==
 
+"@capacitor-community/background-geolocation@^1.2.26":
+  version "1.2.26"
+  resolved "https://registry.yarnpkg.com/@capacitor-community/background-geolocation/-/background-geolocation-1.2.26.tgz#f7036754804acc43d219d284e6dee0e2489c1398"
+  integrity sha512-kuva8VQ6zM+uIKgHUJTP87IYbmGKhX7DZw62JYfGZ888h4Xr5zeN+UTR6KBRHQVrGBpzSfbv+6/HQVuHYa7W5A==
+
 "@capacitor/android@^8.0.0":
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-8.0.0.tgz#8cd63ed432460c70db0770dccd9234700152f31a"

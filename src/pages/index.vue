@@ -219,13 +219,42 @@ div(style="height: 100%; width: 100%")
         v-spacer
         v-btn(
           text
-          @click="requestGeoPermissionDialog = false"
+          @click="requestGeoPermissionDialog = false; requestBackgroundDialog = true"
           prepend-icon="mdi-close"
           ) 嫌だ！
         v-btn(
           style="background-color: rgb(var(--v-theme-primary)); color: white"
           text
           @click="requestGeoPermission"
+          prepend-icon="mdi-check"
+          ) ええで！
+  //-- バックグラウンド許可ダイアログ
+  v-dialog(
+    v-model="requestBackgroundDialog"
+    persistent
+    max-width="600"
+  )
+    v-card
+      v-card-title(class="headline") バックグラウンドでの通知の許可
+      v-card-text
+        p このアプリはバックグラウンドでも動き続けます。端末側の設定画面より、以下の操作を実行してください。
+        ol.ma-6
+          li 「アプリ情報」画面から、「バッテリー使用量」を開く
+          li 「バックグラウンドでの実行を許可」を開き、「制限なし」を選択
+          li その後、「戻る」操作でこのアプリまで戻ってきてください！
+        br
+        p ちなみに、タスクキルをすると位置情報が更新できなくなるため、タスクキルはしないようにお願いします。
+      v-card-actions
+        v-spacer
+        v-btn(
+          text
+          @click="requestBackgroundDialog = false"
+          prepend-icon="mdi-close"
+          ) 嫌だ！
+        v-btn(
+          style="background-color: rgb(var(--v-theme-primary)); color: white"
+          text
+          @click="requestBackground"
           prepend-icon="mdi-check"
           ) ええで！
   //-- タイムラインモード --
@@ -249,17 +278,20 @@ div(style="height: 100%; width: 100%")
 </template>
 
 <script lang="ts">
+  import type { BackgroundGeolocationPlugin } from '@capacitor-community/background-geolocation'
   import { App } from '@capacitor/app'
   import { BackgroundRunner } from '@capacitor/background-runner'
   import { Browser } from '@capacitor/browser'
-  import { Capacitor } from '@capacitor/core'
+  import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { Geolocation } from '@capacitor/geolocation'
+  import { Toast } from '@capacitor/toast'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
   import muniArray from '@/js/muni'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
   import 'leaflet/dist/leaflet.css'
+  const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>('BackgroundGeolocation')
 
   export default {
     components: {
@@ -321,6 +353,8 @@ div(style="height: 100%; width: 100%")
         } | null | undefined,
         /** 自分の位置情報を最後にいつ取得したか？ */
         lastGetMyLocationTime: null as Date | null,
+        /** バックグラウンド許可が欲しいダイアログフラグ */
+        requestBackgroundDialog: false,
       }
     },
     watch: {
@@ -449,25 +483,62 @@ div(style="height: 100%; width: 100%")
           /** 詳細カードを閉じる */
           this.detailCardTarget = null
         } else if (this.$route.path === '/') {
-          /** ルートページならアプリを終了 */
-          App.exitApp()
+          /** ルートページならアプリを最小化 */
+          App.minimizeApp()
+          Toast.show({ text: 'アプリはバックグラウンドで実行されます' })
         } else {
           /** ルート以外のページなら1つ戻る */
           this.$router.back()
         }
       })
 
-      /** 現在地を監視 */
-      Geolocation.watchPosition({
-        enableHighAccuracy: true,
-        timeout: 10_000,
-        interval: 5000,
-      }, position =>
-        this.watchPosition(position),
-      )
+      // Webの場合は従来のAPIで位置情報追跡
+      if (Capacitor.getPlatform() === 'web') {
+        /** 現在地を監視 */
+        Geolocation.watchPosition({
+          enableHighAccuracy: true,
+          timeout: 20_000,
+          interval: 20_000,
+        }, position =>
+          this.watchPosition(position),
+        )
+      }
+
+      // ネイティブアプリでは位置情報のバックグラウンド追跡
+      if (Capacitor.getPlatform() !== 'web') {
+        BackgroundGeolocation.addWatcher({
+          backgroundMessage: 'バックグラウンドで位置情報を取得しています。タスクキルしないでください。',
+          backgroundTitle: '位置情報取得中',
+        }, (location, error) => {
+          if (error) {
+            if (error.code === 'NOT_AUTHORIZED' && window.confirm(
+              'バックグラウンドでの位置情報権限が必要なので、許可してください！',
+            )) {
+              BackgroundGeolocation.openSettings()
+            }
+            return console.log(error)
+          }
+
+          const position = {
+            coords: {
+              latitude: location?.latitude,
+              longitude: location?.longitude,
+            },
+          }
+          this.watchPosition(position)
+          return location
+        }).then(watcherId => {
+          localStorage.setItem('watcherId', watcherId)
+        })
+      }
 
       /** 現在地を取得し、地図の中心も移動 */
       await this.setCurrentPosition()
+
+      /** 遅延も考慮して0.5秒後に再度中心移動 */
+      setTimeout(() => {
+        this.setCurrentPosition()
+      }, 500)
     },
     unmounted () {
       App.removeAllListeners()
@@ -507,18 +578,34 @@ div(style="height: 100%; width: 100%")
 
           if (this.myProfile && !this.myProfile.guest) {
             /** 取得した情報をサーバーに送信 */
-            const res = await this.sendAjaxWithAuth(
-              '/updateGeoLocation.php', {
-                id: this.myProfile.userId,
-                token: this.myProfile.userToken,
-                lat,
-                lng,
-                batteryLevel,
-                batteryCharging,
-              },
-            )
-            if (!res || !res.body) {
-              console.log('サーバー送信エラー', res)
+            try {
+              const response = await CapacitorHttp.post({
+                url: 'api.nomadpulse.enoki.xyz/updateGeoLocation.php',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'id': this.myProfile.userId,
+                  'token': this.myProfile.userToken,
+                  'lat': String(lat),
+                  'lng': String(lng),
+                  'batteryLevel': String(batteryLevel),
+                  'batteryCharging': String(batteryCharging),
+                },
+              })
+            } catch (error) {
+              console.log(error)
+              const res = await this.sendAjaxWithAuth(
+                '/updateGeoLocation.php', {
+                  id: this.myProfile.userId,
+                  token: this.myProfile.userToken,
+                  lat,
+                  lng,
+                  batteryLevel,
+                  batteryCharging,
+                },
+              )
+              if (!res || !res.body) {
+                console.log('サーバー送信エラー', res)
+              }
             }
           }
         }
@@ -549,6 +636,9 @@ div(style="height: 100%; width: 100%")
         }
 
         this.requestGeoPermissionDialog = false
+
+        /** バックグラウンドでの使用許可設定メソッドへの準備 */
+        this.requestBackgroundDialog = true
       },
       /** 2地点間の距離を計算 */
       calcDistance (latlng1: [number, number], latlng2: [number, number]) {
@@ -615,6 +705,11 @@ div(style="height: 100%; width: 100%")
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
+      },
+      /** 位置情報のバックグラウンド追跡設定を開く */
+      async requestBackground () {
+        await BackgroundGeolocation.openSettings()
+        this.requestBackgroundDialog = false
       },
     },
   }

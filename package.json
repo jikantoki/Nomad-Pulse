@@ -12,6 +12,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@capacitor-community/background-geolocation": "^1.2.26",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/app-launcher": "^8.0.0",

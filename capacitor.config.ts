@@ -19,6 +19,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
   server: {
     androidScheme: 'https',
@@ -26,6 +29,10 @@ const config: CapacitorConfig = {
   deepLinks: {
     enabled: true,
     prefixes: ['nomadpulse://', 'https://nomadpulse.enoki.xyz'],
+  },
+  android: {
+    useLegacyBridge: true,
+    notificationIcon: 'ic_location_status',
   },
 }
 
