@@ -17,3 +17,19 @@ if (
 }
 
 $id = $_SERVER['HTTP_ID'];
+$secretId = idToSecretId($id);
+
+$res = SQL("
+select * from follow_list where
+fromUserId = '{$secretId}'
+or
+toUserId = '{$toUserId}'
+;
+");
+
+echo json_encode([
+  'status' => 'ok',
+  'id' => $id,
+  'unixtime' => $unixtime,
+  'friendList' => $res
+]);
