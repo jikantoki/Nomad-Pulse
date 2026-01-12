@@ -36,7 +36,7 @@ foreach ($res as $friend) {
     $friendRealId = secretIdToId($friend['fromUserId']);
   }
   $res[$cnt]['friendRealId'] = $friendRealId;
-  $res[$cnt]['friendProfile'] = SQLfind('USER_PROFILE_VIEW', 'userId', $friendRealId);
+  $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'userId', $friendRealId);
   $cnt++;
 }
 
