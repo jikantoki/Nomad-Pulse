@@ -28,3 +28,4 @@ env.php
 .env
 /vendor
 .htaccess
+google-services.json
