@@ -30,14 +30,14 @@ toUserId = '{$secretId}'
 $cnt = 0;
 foreach ($res as $friend) {
   $friendRealId = null;
-  print_r($friend);
   if ($friend['fromUserId'] == $secretId) {
     $friendRealId = secretIdToId($friend['toUserId']);
+    $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['toUserId']);
   } else {
     $friendRealId = secretIdToId($friend['fromUserId']);
+    $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['fromUserId']);
   }
   $res[$cnt]['friendRealId'] = $friendRealId;
-  $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'userId', $friendRealId);
   $cnt++;
 }
 

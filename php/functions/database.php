@@ -65,7 +65,7 @@ function SQL($sql)
     $stmt = $pdo->query($sql);
     return $stmt->fetch();
   } catch (\Throwable $th) {
-    echo $sql;
+    echo "SQL構文エラー:~~~~~ {$sql} ~~~~~は使用できません";
     throw $th;
   }
 }
@@ -83,7 +83,7 @@ function SQLfetchAll($sql)
     $stmt = $pdo->query($sql);
     return $stmt->fetchAll();
   } catch (\Throwable $th) {
-    echo $sql;
+    echo "SQL構文エラー:~~~~~ {$sql} ~~~~~は使用できません";
     throw $th;
   }
 }
