@@ -23,7 +23,7 @@ $res = SQL("
 select * from follow_list where
 fromUserId = '{$secretId}'
 or
-toUserId = '{$toUserId}'
+toUserId = '{$secretId}'
 ;
 ");
 

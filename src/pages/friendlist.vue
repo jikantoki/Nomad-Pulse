@@ -66,8 +66,11 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { PushNotifications, type PushNotificationSchema } from '@capacitor/push-notifications'
+  // @ts-ignore
+  import mixins from '@/mixins/mixins'
+
   export default {
+    mixins: [mixins],
     data () {
       return {
         /**
@@ -78,28 +81,20 @@ v-dialog(
          * ダイアログのターゲット（userInfoObject）
          */
         deleteTarget: null as null | any,
+        myProfile: null as null | any,
       }
     },
     async mounted () {
-      // Push Notification APIサンプル
-      PushNotifications.addListener('registration', token => {
-        console.log('通知のトークン:', token.value)
-      })
-      let permStatus = await PushNotifications.checkPermissions()
-      if (permStatus.receive === 'prompt') {
-        permStatus = await PushNotifications.requestPermissions()
+      const myProfile = localStorage.getItem('profile')
+      if (myProfile) {
+        this.myProfile = JSON.parse(myProfile)
       }
-      if (permStatus.receive !== 'granted') {
-        console.log('通知取得できなかったぽ')
-      }
-      await PushNotifications.register()
 
-      await PushNotifications.addListener('pushNotificationReceived', (Notification: PushNotificationSchema) => {
-        console.log('プッシュ通知を受信しました', Notification)
-        console.log('通知タイトル', Notification.title)
-        console.log('通知の本文', Notification.body)
+      const friendList = await this.sendAjaxWithAuth('/getMyFriendList.php', {
+        id: this.myProfile.userId,
+        token: this.myProfile.userToken,
       })
-      alert('finish')
+      console.log(friendList)
     },
   }
 </script>

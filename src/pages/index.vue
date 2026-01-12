@@ -580,7 +580,7 @@ div(style="height: 100%; width: 100%")
             /** 取得した情報をサーバーに送信 */
             try {
               const response = await CapacitorHttp.post({
-                url: 'api.nomadpulse.enoki.xyz/updateGeoLocation.php',
+                url: 'https://api.nomadpulse.enoki.xyz/updateGeoLocation.php',
                 headers: {
                   'Content-Type': 'application/json',
                   'id': this.myProfile.userId,
