@@ -51,7 +51,7 @@ if ($res) {
   echo json_encode([
     'status' => 'ng',
     'reason' => 'Unknown user',
-    'id' => $tagetId,
+    'id' => $targetId,
     'errCode' => 20
   ]);
 }

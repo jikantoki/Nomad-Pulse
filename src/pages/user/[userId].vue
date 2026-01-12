@@ -260,8 +260,8 @@ v-dialog(v-model="followDialogMessage")
       this.param = this.$route.params
       this.userData = await this.getProfile(
         this.param.userId,
-        this.myProfile ?? this.myProfile.userId,
-        this.myProfile ?? this.myProfile.userToken,
+        this.myProfile ? this.myProfile.userId : undefined,
+        this.myProfile ? this.myProfile.userToken : undefined,
       )
       if (!this.userData) {
         this.loading = false

@@ -785,8 +785,8 @@ div(style="height: 100%; width: 100%")
         }
         const userData = await this.getProfile(
           searchId,
-          this.myProfile ?? this.myProfile.userId,
-          this.myProfile ?? this.myProfile.userToken,
+          this.myProfile ? this.myProfile.userId : undefined,
+          this.myProfile ? this.myProfile.userToken : undefined,
         )
         if (userData) {
           this.$router.push(`/user/${userData.userId}`)
