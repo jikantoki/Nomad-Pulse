@@ -31,16 +31,16 @@
           v-else-if="myProfile && myProfile.userId && !myProfile.guest"
           )
           v-btn.follow-button(
-            v-if="!userData.friendStatus"
+            v-if="userData && !userData.friendStatus"
             @click="friendRequest(param.userId)"
             :loading="followLoadingNow"
             ) 友達申請
           v-btn.follow-button(
-            v-if="userData.friendStatus === 'friend'"
+            v-if="userData && userData.friendStatus === 'friend'"
             disabled
             ) 既に友達です！
           v-btn.follow-button(
-            v-else
+            v-else-if="userData"
             disabled
             ) 友達申請中
         v-btn.follow-button(
@@ -57,18 +57,16 @@
       .id.text-h7(v-else-if="userData && userData.status != 'ng'") @{{ userData.userId }}
       .id.text-h7(v-else) @unknown
     .message
-      .message-content(v-if="!userData") データ取得中…
+      .message-content(v-if="loading") データ取得中…
       .message-content(v-else-if="userData && userData.status != 'ng'" v-html="userData.message ? userData.message : 'ステータスメッセージが設定されていません'")
       .message-content(v-else) ユーザーが存在しません
       //div(v-if="userData")
         p {{ userData }}
-    .createdat.my-2
-      p(v-if="!userData")
+    .createdat.my-2(v-show="!loading")
       p(
-        v-else-if="userData && userData.status != 'ng'"
+        v-if="userData && userData.status != 'ng'"
         ) {{ new Date(userData.createdAt * 1000) }}からNomad Pulseを利用しています
-      p(v-else) ユーザーが存在しません
-    .share-and-sns-links.px-2
+    .share-and-sns-links.px-2(v-show="userData")
       .share-buttons
         v-btn.mx-2(
           small
@@ -123,13 +121,26 @@
     )
       p.ma-2(
         style="font-size: 1.5em;"
+        v-show="!noAccountExist"
       ) プロフィールを共有
+      p.ma-2(
+        style="font-size: 1.5em;"
+        v-show="noAccountExist"
+      ) ユーザーが存在しません
       v-btn.ma-2(
         @click="shareMyLinkDialog = true"
         append-icon="mdi-share-variant"
         style="background-color: rgb(var(--v-theme-primary)); color: white; border-radius: 8px;"
         size="large"
+        v-show="!noAccountExist"
       ) シェア
+      v-btn.ma-2(
+        @click="$router.push('/')"
+        append-icon="mdi-home-outline"
+        style="background-color: rgb(var(--v-theme-primary)); color: white; border-radius: 8px;"
+        size="large"
+        v-show="noAccountExist"
+      ) トップへ戻る
       canvas#qr-canvas.ma-2(
         v-show="!qrLoading"
         style="border-radius: 10%; max-width: 20em; max-height: 20em;"
@@ -146,7 +157,11 @@
         p.my-4(
           style="color: black;"
         ) QRコード読み込み中…
-v-dialog(v-model="isInvalid" style="max-width: 500px;" persistent)
+v-dialog(
+  v-model="isInvalid"
+  style="max-width: 500px;"
+  persistent
+  )
   v-card
     v-card-title 閲覧不可
     v-card-text このユーザーのプロフィールは、ログインしたユーザーのみ閲覧可能です。
@@ -220,6 +235,8 @@ v-dialog(v-model="followDialogMessage")
         friendStatus: null,
         /** QRコード生成中フラグ */
         qrLoading: false,
+        /** 存在しないアカウント */
+        noAccountExist: false,
       }
     },
     async mounted () {
@@ -245,6 +262,12 @@ v-dialog(v-model="followDialogMessage")
         this.myProfile ?? this.myProfile.userId,
         this.myProfile ?? this.myProfile.userToken,
       )
+      if (!this.userData) {
+        this.loading = false
+        this.qrLoading = false
+        this.noAccountExist = true
+        return
+      }
       if (this.userData && this.userData.status == 'invalid') {
         // ログインしていないので閲覧不可
         this.isInvalid = true

@@ -72,12 +72,20 @@ div(style="height: 100%; width: 100%")
       .button(
         v-ripple
         @click="optionsDialog = true"
-        style="cursor: pointer; border-radius: 9999px; height: 3em; width: 3em;"
+        style="cursor: pointer; border-radius: 9999px; height: 4em; width: 4em;"
         )
         img(
           :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
-          style="height: 3em; width: 3em; border-radius: 9999px;"
+          style="height: 4em; width: 4em; border-radius: 9999px;"
           )
+    .account-button.my-2
+      v-btn(
+        v-ripple
+        @click="searchFriendDialog = true"
+        icon="mdi-magnify"
+        color="rgb(var(--v-theme-primary)"
+        size="x-large"
+      )
   //- 地図で押したアカウントの詳細カード
   .detail-card-target
     v-card(
@@ -125,6 +133,37 @@ div(style="height: 100%; width: 100%")
           prepend-icon="mdi-map-marker"
           style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
         ) Google Mapsで開く
+  //-- 友達検索ダイアログ --
+  v-dialog(
+    v-model="searchFriendDialog"
+  )
+    v-card
+      v-card-actions
+        p.ml-2 友達を探す
+        v-spacer
+        v-btn(
+          text
+          @click="searchFriendDialog = false"
+          icon="mdi-close"
+          )
+      v-card-text
+        v-text-field(
+          label="友達のID"
+          prepend-icon="mdi-account"
+          v-model="searchFriendId"
+          @keydown="searchFriendErrorMessage = ''"
+          @keydown.enter="searchFriend(searchFriendId)"
+        )
+        p(
+          style="height: 1em;"
+        ) {{ searchFriendErrorMessage }}
+      v-card-actions
+        v-btn(
+          @click="searchFriend(searchFriendId)"
+          prepend-icon="mdi-magnify"
+          style="background-color: rgb(var(--v-theme-primary));"
+          :loading="searchFriendLoading"
+        ) 検索
   //-- オプションダイアログ --
   v-dialog(
     v-model="optionsDialog"
@@ -182,6 +221,10 @@ div(style="height: 100%; width: 100%")
             .icon-and-text
               v-icon mdi-chart-timeline-variant
               v-list-item-title タイムライン
+          v-list-item.item( @click="searchFriendDialog = true" )
+            .icon-and-text
+              v-icon mdi-magnify
+              v-list-item-title 友達を探す
           v-list-item.item(
             style="background-color: var(--color-error); color: white;"
             @click="$router.push('/friendlist')"
@@ -355,6 +398,14 @@ div(style="height: 100%; width: 100%")
         lastGetMyLocationTime: null as Date | null,
         /** バックグラウンド許可が欲しいダイアログフラグ */
         requestBackgroundDialog: false,
+        /** 友達検索ダイアログ */
+        searchFriendDialog: false,
+        /** 検索する友達のID */
+        searchFriendId: '',
+        /** 友達検索中のローディング画面 */
+        searchFriendLoading: false,
+        /** 友達検索画面のエラー表示 */
+        searchFriendErrorMessage: '',
       }
     },
     watch: {
@@ -473,6 +524,9 @@ div(style="height: 100%; width: 100%")
         if (this.timelineMode) {
           /** タイムラインモードを閉じる */
           this.timelineMode = false
+        } else if (this.searchFriendDialog) {
+          // 友達検索ダイアログを閉じる
+          this.searchFriendDialog = false
         } else if (this.optionsDialog) {
           /** オプションダイアログを閉じる */
           this.optionsDialog = false
@@ -482,6 +536,10 @@ div(style="height: 100%; width: 100%")
         } else if (this.detailCardTarget) {
           /** 詳細カードを閉じる */
           this.detailCardTarget = null
+        } else if (this.requestBackgroundDialog) {
+          // ここはあえて何もしない
+        } else if (this.requestGeoPermissionDialog) {
+          // ここはあえて何もしない
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを最小化 */
           App.minimizeApp()
@@ -710,6 +768,29 @@ div(style="height: 100%; width: 100%")
       async requestBackground () {
         await BackgroundGeolocation.openSettings()
         this.requestBackgroundDialog = false
+      },
+      /** 友達を検索 */
+      async searchFriend (searchId: string) {
+        searchId = searchId.replace('@', '')
+        this.searchFriendLoading = true
+        if (!searchId) {
+          this.searchFriendErrorMessage = '検索するIDを入力してください'
+          this.searchFriendLoading = false
+          return
+        }
+        const userData = await this.getProfile(
+          searchId,
+          this.myProfile ?? this.myProfile.userId,
+          this.myProfile ?? this.myProfile.userToken,
+        )
+        if (userData) {
+          this.$router.push(`/user/${userData.userId}`)
+        } else {
+          this.searchFriendErrorMessage = '友達が見つかりませんでした'
+          this.searchFriendLoading = false
+          return
+        }
+        this.searchFriendLoading = false
       },
     },
   }
