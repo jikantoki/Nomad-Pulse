@@ -579,7 +579,7 @@ div(style="height: 100%; width: 100%")
           if (this.myProfile && !this.myProfile.guest) {
             /** 取得した情報をサーバーに送信 */
             try {
-              const response = await CapacitorHttp.post({
+              await CapacitorHttp.post({
                 url: 'https://api.nomadpulse.enoki.xyz/updateGeoLocation.php',
                 headers: {
                   'Content-Type': 'application/json',

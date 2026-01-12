@@ -96,7 +96,12 @@ v-dialog(
         token: this.myProfile.userToken,
       })
       console.log(friendList)
-      if (friendList && friendList.body) {}
+      if (friendList && friendList.body) {
+        const allFriendList = friendList.body.friendList
+        for (const friend of allFriendList) {
+          if (friend.status == 'request') {}
+        }
+      }
     },
   }
 </script>

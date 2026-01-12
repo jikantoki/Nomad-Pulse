@@ -44,5 +44,6 @@ foreach ($res as $friend) {
 echo json_encode([
   'status' => 'ok',
   'id' => $id,
-  'friendList' => $res
+  'friendList' => $res,
+  'mySecretId' => $secretId
 ]);
