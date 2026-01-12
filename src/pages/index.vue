@@ -26,7 +26,7 @@ div(style="height: 100%; width: 100%")
         div(style="display: flex; align-items: center; width: auto;")
           img(
             :src="myProfile.icon ?? '/account_default.jpg'"
-            style="height: 32px; width: 32px; border-radius: 9999px;"
+            style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
             )
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
             span {{ myProfile.name ?? myProfile.userId }}
@@ -76,7 +76,7 @@ div(style="height: 100%; width: 100%")
         )
         img(
           :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
-          style="height: 4em; width: 4em; border-radius: 9999px;"
+          style="height: 4em; width: 4em; border-radius: 9999px; border: solid 2px #000;"
           )
     .account-button.my-2
       v-btn(
@@ -226,14 +226,12 @@ div(style="height: 100%; width: 100%")
               v-icon mdi-magnify
               v-list-item-title 友達を探す
           v-list-item.item(
-            style="background-color: var(--color-error); color: white;"
             @click="$router.push('/friendlist')"
+            v-show="myProfile && myProfile.userId"
           )
             .icon-and-text
               v-icon mdi-account-multiple
-              v-list-item-title 友達リスト(0人)
-              v-spacer
-              v-icon mdi-alert-circle-outline
+              v-list-item-title 友達リスト
           v-list-item.item( @click="$router.push('/settings')" )
             .icon-and-text
               v-icon mdi-cog
@@ -464,6 +462,13 @@ div(style="height: 100%; width: 100%")
         if (this.myProfile?.userId) {
           this.myUserId = this.myProfile.userId
         }
+
+        setTimeout(async () => {
+          const token = this.myProfile.userToken
+          const profile = await this.getProfile(this.myUserId)
+          profile.userToken = token
+          localStorage.setItem('profile', JSON.stringify(profile))
+        }, 100)
       } else {
         this.myProfile = {
           coverImg: null,

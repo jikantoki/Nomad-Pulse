@@ -16,7 +16,8 @@
       img.cover-img(v-else src="/img/default_cover.jpg")
     .icon-and-follow.px-2
       .icon
-        img.icon-img(src="/account_default.jpg")
+        img.icon-img(v-if="userData && userData.icon" :src="userData.icon")
+        img.icon-img(v-else src="/account_default.jpg")
       .button(v-if="loading")
         v-btn.follow-button(
             disabled
