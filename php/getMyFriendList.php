@@ -30,6 +30,7 @@ toUserId = '{$secretId}'
 $cnt = 0;
 foreach ($res as $friend) {
   $friendRealId = null;
+  echo $friend;
   if ($friend['fromUserId'] == $secretId) {
     $friendRealId = secretIdToId($friend['toUserId']);
   } else {
