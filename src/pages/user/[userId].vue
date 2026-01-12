@@ -276,15 +276,40 @@ v-dialog(v-model="followDialogMessage")
       this.myLink = `https://nomadpulse.enoki.xyz/user/${this.param.userId}`
 
       setTimeout(() => {
+        const canvas = document.querySelector('#qr-canvas')
+        const ctx = canvas.getContext('2d')
         QRCode.toCanvas(
-          document.querySelector('#qr-canvas'),
+          canvas,
           this.myLink,
           {
             scale: 10,
           },
         )
-        document.querySelector('#qr-canvas').style.height = '70vw'
-        document.querySelector('#qr-canvas').style.width = '70vw'
+        canvas.style.height = '70vw'
+        canvas.style.width = '70vw'
+
+        const logo = new Image()
+        logo.src = '/icon.png'
+        logo.addEventListener('load', () => {
+          const actualCanvasWidth = canvas.width
+          const actualCanvasHeight = canvas.height
+          const logoDiameter = actualCanvasWidth * (15 / 70)
+
+          const logoWidth = logoDiameter
+          const logoHeight = logoDiameter
+
+          const startX = (actualCanvasWidth / 2) - (logoWidth / 2)
+          const startY = (actualCanvasHeight / 2) - (logoHeight / 2)
+
+          ctx.beginPath()
+          const rad = logoDiameter / 2
+          ctx.arc(actualCanvasWidth / 2, actualCanvasHeight / 2, rad, 0, Math.PI * 2, false)
+          ctx.fillStyle = '#FFFFFF'
+          ctx.fill()
+
+          ctx.drawImage(logo, startX, startY, logoWidth, logoHeight)
+        })
+
         this.qrLoading = false
       }, 500)
 
