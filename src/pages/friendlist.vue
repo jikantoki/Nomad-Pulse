@@ -90,11 +90,13 @@ v-dialog(
         this.myProfile = JSON.parse(myProfile)
       }
 
+      // 友達リストの取得（申請・承認リストも同時に取得）
       const friendList = await this.sendAjaxWithAuth('/getMyFriendList.php', {
         id: this.myProfile.userId,
         token: this.myProfile.userToken,
       })
       console.log(friendList)
+      if (friendList && friendList.body) {}
     },
   }
 </script>

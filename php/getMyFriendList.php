@@ -27,6 +27,19 @@ toUserId = '{$secretId}'
 ;
 ");
 
+$cnt = 0;
+foreach ($res as $friend) {
+  $friendRealId = null;
+  if ($friend['fromUserId'] == $secretId) {
+    $friendRealId = secretIdToId($friend['toUserId']);
+  } else {
+    $friendRealId = secretIdToId($friend['fromUserId']);
+  }
+  $res[$cnt]['friendRealId'] = $friendRealId;
+  $res[$cnt]['friendProfile'] = SQLfind('USER_PROFILE_VIEW', 'userId', $friendRealId);
+  $cnt++;
+}
+
 echo json_encode([
   'status' => 'ok',
   'id' => $id,
