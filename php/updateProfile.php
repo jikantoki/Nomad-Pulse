@@ -117,4 +117,6 @@ where secretId = '{$secretId}';
 echo json_encode([
   'status' => 'ok',
   'id' => $id,
+  'iconUrl' => $icon,
+  'coverImgUrl' => $coverImg,
 ]);

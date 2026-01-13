@@ -120,7 +120,6 @@ v-dialog(
   import { App } from '@capacitor/app'
   import { Camera, CameraResultType } from '@capacitor/camera'
   import { Device } from '@capacitor/device'
-  import { Toast } from '@capacitor/toast'
 
   // @ts-ignore
   import mixins from '@/mixins/mixins'
@@ -182,22 +181,37 @@ v-dialog(
       async save () {
         this.saveDialog = true
 
-        const textProfile = JSON.stringify(this.myProfile)
-        localStorage.setItem('profile', textProfile)
+        try {
+          const res = await this.sendAjaxWithAuth('/updateProfile.php', {
+            id: this.myProfile.userId,
+            token: this.myProfile.userToken,
+          }, {
+            icon: this.myProfile.icon,
+            coverImg: this.myProfile.coverImg,
+            name: this.myProfile.name,
+            message: this.myProfile.message,
+          })
+          alert(res)
+          let iconUrl = null
+          let coverImgUrl = null
+          if (res && res.body) {
+            iconUrl = res.body.iconUrl
+            coverImgUrl = res.body.coverImgUrl
+          }
 
-        const res = await this.sendAjaxWithAuth('/updateProfile.php', {
-          id: this.myProfile.userId,
-          token: this.myProfile.userToken,
-        }, {
-          icon: this.myProfile.icon,
-          coverImg: this.myProfile.coverImg,
-          name: this.myProfile.name,
-          message: this.myProfile.message,
-        })
-        if (this.developerOptionEnabled) {
-          alert(JSON.stringify(res))
+          /** iconとcoverImgはURLを格納する */
+          this.myProfile = {
+            ...this.myProfile,
+            icon: iconUrl,
+            coverImg: coverImgUrl,
+          }
+          const textProfile = JSON.stringify(this.myProfile)
+          localStorage.setItem('profile', textProfile)
+        } catch (error) {
+          if (this.developerOptionEnabled) {
+            alert(error)
+          }
         }
-        console.log(res)
         this.saveDialog = false
         this.$router.back()
       },
