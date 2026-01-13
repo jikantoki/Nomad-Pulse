@@ -270,7 +270,7 @@ v-dialog(v-model="followDialogMessage")
         // ログインしていないので閲覧不可
         this.isInvalid = true
       }
-      this.myLink = `https://nomadpulse.enoki.xyz/user/${this.param.userId}`
+      this.myLink = `https://nomadpulse.enoki.xyz/user/${this.param.userId}?openExternalBrowser=1`
 
       setTimeout(() => {
         const canvas = document.querySelector('#qr-canvas')
