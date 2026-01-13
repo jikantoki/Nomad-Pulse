@@ -171,8 +171,8 @@ v-dialog(
         prepend-icon="mdi-login"
         style="background-color: var(--accent-color); color: white;"
         ) ログイン
-v-dialog(v-model="shareMyLinkDialog" max-width="500px")
-  v-card
+v-dialog(v-model="shareMyLinkDialog")
+  v-card(width="85vw")
     v-card-title このプロフィールを共有
     v-card-text
       p.mb-4 以下のURLをコピーして、共有してください
