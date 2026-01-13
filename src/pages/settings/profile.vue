@@ -156,7 +156,7 @@ v-dialog(
         this.saveDialog = true
 
         const textProfile = JSON.stringify(this.myProfile)
-        localStorage.setItem('myProfile', textProfile)
+        localStorage.setItem('profile', textProfile)
 
         const res = await this.sendAjaxWithAuth('/updateProfile.php', {
           id: this.myProfile.userId,
@@ -164,8 +164,8 @@ v-dialog(
         }, {
           icon: this.myProfile.icon,
           coverImg: this.myProfile.coverImg,
-          name: encodeURI(this.myProfile.name),
-          message: encodeURI(this.myProfile.message),
+          name: this.myProfile.name,
+          message: this.myProfile.message,
         })
         console.log(res)
         this.saveDialog = false

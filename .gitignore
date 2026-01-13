@@ -31,3 +31,4 @@ env.php
 google-services.json
 
 /uploads/*
+/php/uploads/*
