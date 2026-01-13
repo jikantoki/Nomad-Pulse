@@ -120,6 +120,7 @@ v-dialog(
   import { App } from '@capacitor/app'
   import { Camera, CameraResultType } from '@capacitor/camera'
   import { Device } from '@capacitor/device'
+  import { Toast } from '@capacitor/toast'
 
   // @ts-ignore
   import mixins from '@/mixins/mixins'
@@ -193,6 +194,9 @@ v-dialog(
           name: this.myProfile.name,
           message: this.myProfile.message,
         })
+        if (this.developerOptionEnabled) {
+          Toast.show({ text: res.body })
+        }
         console.log(res)
         this.saveDialog = false
         this.$router.back()
@@ -205,7 +209,7 @@ v-dialog(
         }
         const image = await Camera.getPhoto({
           quality: 100,
-          resultType: CameraResultType.Base64,
+          resultType: CameraResultType.DataUrl,
           allowEditing: true,
           saveToGallery: true,
           width: 1600,
@@ -215,7 +219,7 @@ v-dialog(
           promptLabelPhoto: 'アルバムから選択',
           promptLabelPicture: '撮影',
         })
-        const base64 = image.base64String
+        const base64 = image.dataUrl
         if (this.myProfile) {
           this.myProfile.coverImg = base64
         }
@@ -228,7 +232,7 @@ v-dialog(
         }
         const image = await Camera.getPhoto({
           quality: 100,
-          resultType: CameraResultType.Base64,
+          resultType: CameraResultType.DataUrl,
           allowEditing: true,
           saveToGallery: true,
           width: 1600,
@@ -238,7 +242,7 @@ v-dialog(
           promptLabelPhoto: 'アルバムから選択',
           promptLabelPicture: '撮影',
         })
-        const base64 = image.base64String
+        const base64 = image.dataUrl
         if (this.myProfile) {
           this.myProfile.icon = base64
         }
