@@ -20,7 +20,10 @@ v-card(
   v-card-text(style="height: inherit; overflow-y: auto;")
     .imgs
       .cover
-        img.cover-img(v-if="myProfile && myProfile.coverImg" :src="myProfile.coverImg")
+        img.cover-img(
+          v-if="myProfile && myProfile.coverImg"
+          :src="myProfile.coverImg"
+          )
         img.cover-img(v-else src="/img/default_cover.jpg")
         .change-cover-button(
           style="font-size: 2em;"
@@ -32,8 +35,14 @@ v-card(
           ) mdi-camera-flip
       .icon-cover.mb-6.ml-2
         .icon.cover
-          img.icon-img.cover-img(v-if="myProfile && myProfile.icon" :src="myProfile.icon")
-          img.icon-img.cover-img(v-else src="/account_default.jpg")
+          img.icon-img.cover-img(
+            v-if="myProfile && myProfile.icon"
+            :src="myProfile.icon"
+            )
+          img.icon-img.cover-img(
+            v-else
+            src="/account_default.jpg"
+            )
           .change-icon-button.change-cover-button(
             style="font-size: 2em;"
             v-ripple

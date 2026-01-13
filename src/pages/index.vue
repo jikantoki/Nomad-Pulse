@@ -25,6 +25,7 @@ div(style="height: 100%; width: 100%")
         )
         div(style="display: flex; align-items: center; width: auto;")
           img(
+            loading="lazy"
             :src="myProfile.icon ?? '/account_default.jpg'"
             style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
             )
@@ -75,6 +76,7 @@ div(style="height: 100%; width: 100%")
         style="cursor: pointer; border-radius: 9999px; height: 4em; width: 4em;"
         )
         img(
+          loading="lazy"
           :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
           style="height: 4em; width: 4em; border-radius: 9999px; border: solid 2px #000;"
           )
