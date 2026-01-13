@@ -195,7 +195,7 @@ v-dialog(
           message: this.myProfile.message,
         })
         if (this.developerOptionEnabled) {
-          Toast.show({ text: res.body })
+          alert(JSON.stringify(res))
         }
         console.log(res)
         this.saveDialog = false

@@ -16,7 +16,7 @@ function save_base64_image_to_server($base64_data)
 {
   // 1. 設定項目
   $upload_dir = 'uploads/';
-  $base_url = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/' . $upload_dir;
+  $base_url = 'https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/' . $upload_dir;
 
   if (!is_dir($upload_dir)) {
     if (!mkdir($upload_dir, 0755, true)) {
