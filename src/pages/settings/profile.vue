@@ -62,6 +62,23 @@ v-card(
         auto-grow
         v-model="myProfile.message"
       )
+      p(
+        v-show="developerOptionEnabled"
+      ) 開発者オプション
+      v-text-field(
+        name="icon"
+        label="アイコンのURL"
+        placeholder="https://icon.com/icon.png"
+        v-model="myProfile.icon"
+        v-show="developerOptionEnabled"
+      )
+      v-text-field(
+        name="coverImg"
+        label="カバー画像のURL"
+        placeholder="https://cover.com/cover.png"
+        v-model="myProfile.coverImg"
+        v-show="developerOptionEnabled"
+      )
 v-dialog(
   v-model="cancelDialog"
   persistent
