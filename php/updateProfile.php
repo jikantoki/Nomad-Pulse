@@ -20,29 +20,29 @@ $id = $_SERVER['HTTP_ID'];
 $secretId = idToSecretId($id);
 
 $icon = "";
-if (isset($_SERVER['HTTP_ICON'])) {
-  $icon = str_replace("'", "\\'", $_SERVER['HTTP_ICON']);
+if (isset($_POST['icon'])) {
+  $icon = str_replace("'", "\\'", $_POST['icon']);
 }
 
 $coverImg = "";
-if (isset($_SERVER['HTTP_COVERIMG'])) {
-  $coverImg = str_replace("'", "\\'", $_SERVER['HTTP_COVERIMG']);
+if (isset($_POST['coverImg'])) {
+  $coverImg = str_replace("'", "\\'", $_POST['coverImg']);
 }
 
 $name = "";
-if (isset($_SERVER['HTTP_NAME'])) {
-  $name = str_replace("'", "\\'", $_SERVER['HTTP_NAME']);
+if (isset($_POST['name'])) {
+  $name = str_replace("'", "\\'", $_POST['name']);
 }
 
 $message = "";
-if (isset($_SERVER['HTTP_MESSAGE'])) {
-  $message = str_replace("'", "\\'", $_SERVER['HTTP_MESSAGE']);
+if (isset($_POST['message'])) {
+  $message = str_replace("'", "\\'", $_POST['message']);
 }
 
 // 将来的な拡張用
 $links = "";
-if (isset($_SERVER['HTTP_LINKS'])) {
-  $links = str_replace("'", "\\'", $_SERVER['HTTP_LINKS']);
+if (isset($_POST['links'])) {
+  $links = str_replace("'", "\\'", $_POST['links']);
 }
 
 SQL("

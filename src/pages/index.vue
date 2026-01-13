@@ -466,8 +466,10 @@ div(style="height: 100%; width: 100%")
         setTimeout(async () => {
           const token = this.myProfile.userToken
           const profile = await this.getProfile(this.myUserId)
+          console.log(profile)
           profile.userToken = token
           localStorage.setItem('profile', JSON.stringify(profile))
+          this.myProfile = profile
         }, 100)
       } else {
         this.myProfile = {

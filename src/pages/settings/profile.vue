@@ -74,7 +74,7 @@ v-dialog(
         @click="cancelDialog = false"
       ) いいえ
       v-btn(
-        @click="$router.back()"
+        @click="cancel()"
       ) はい（キャンセル）
 v-dialog(
   v-model="saveDialog"
@@ -161,15 +161,17 @@ v-dialog(
         const res = await this.sendAjaxWithAuth('/updateProfile.php', {
           id: this.myProfile.userId,
           token: this.myProfile.userToken,
+        }, {
           icon: this.myProfile.icon,
           coverImg: this.myProfile.coverImg,
-          name: this.myProfile.name,
-          message: this.myProfile.message,
+          name: encodeURI(this.myProfile.name),
+          message: encodeURI(this.myProfile.message),
         })
         console.log(res)
         this.saveDialog = false
         this.$router.back()
       },
+      /** カバー画像の変更 */
       async changeCover () {
         const permission = await Camera.checkPermissions()
         if (permission.camera !== 'granted' || permission.photos !== 'granted') {
@@ -192,6 +194,7 @@ v-dialog(
           this.myProfile.coverImg = base64
         }
       },
+      /** アイコンの変更 */
       async changeIcon () {
         const permission = await Camera.checkPermissions()
         if (permission.camera !== 'granted' || permission.photos !== 'granted') {
@@ -213,6 +216,12 @@ v-dialog(
         if (this.myProfile) {
           this.myProfile.icon = base64
         }
+      },
+      /** プロフィール編集をキャンセル */
+      cancel () {
+        // これないとバグる
+        this.cancelDialog = false
+        this.$router.back()
       },
     },
   }

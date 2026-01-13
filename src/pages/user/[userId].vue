@@ -47,7 +47,7 @@
           v-else
           @click="$router.push('/login')"
           ) ログインして友達申請
-    .name-and-id.pl-2
+    .name-and-id.mx-2.mt-2
       .name.text-h5(v-if="!userData")
         ContentLoader.text-h5.loading-text(width="3em")
       .name.text-h5(v-else-if="userData && userData.status != 'ng'") {{ userData.name ? userData.name : userData.userId }}
@@ -56,13 +56,11 @@
         ContentLoader.text-h7.loading-text(width="6em")
       .id.text-h7(v-else-if="userData && userData.status != 'ng'") @{{ userData.userId }}
       .id.text-h7(v-else) @unknown
-    .message
+    .message.mx-2.mb-4
       .message-content(v-if="loading") データ取得中…
       .message-content(v-else-if="userData && userData.status != 'ng'" v-html="userData.message ? userData.message : 'ステータスメッセージが設定されていません'")
       .message-content(v-else) ユーザーが存在しません
-      //div(v-if="userData")
-        p {{ userData }}
-    .createdat.my-2(v-show="!loading")
+    //-.createdat.mx-2(v-show="!loading")
       p(
         v-if="userData && userData.status != 'ng'"
         ) {{ new Date(userData.createdAt * 1000) }}からNomad Pulseを利用しています
@@ -322,36 +320,6 @@ v-dialog(v-model="followDialogMessage")
       App.removeAllListeners()
     },
     methods: {
-      sendPushForAccount (userId) {
-        if (!this.userStore.userId) {
-          this.errorMessage = true
-          return false
-        }
-        if (!this.pushMessage && this.pushMessage === '') {
-          return false
-        }
-        this.sendAjaxWithAuth(
-          '/sendPushForAccount.php',
-          {
-            id: this.userStore.userId,
-            token: this.userStore.userToken,
-            for: userId,
-          },
-          {
-            title: `${this.userStore.userId}からのメッセージ`,
-            message: this.pushMessage,
-          },
-        )
-          .then(e => {
-            this.successMessage = true
-            console.log(e)
-            return true
-          })
-          .catch(error => {
-            console.log(error)
-            return false
-          })
-      },
       /** URLをコピー */
       copyMyLink () {
         navigator.clipboard.writeText(this.myLink)
