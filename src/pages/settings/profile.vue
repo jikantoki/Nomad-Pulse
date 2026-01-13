@@ -191,7 +191,6 @@ v-dialog(
             name: this.myProfile.name,
             message: this.myProfile.message,
           })
-          alert(res)
           let iconUrl = null
           let coverImgUrl = null
           if (res && res.body) {

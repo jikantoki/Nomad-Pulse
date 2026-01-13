@@ -14,6 +14,10 @@ require_once DIR_ROOT . '/php/functions/authAccountforUse.php'; //ログイン�
  */
 function save_base64_image_to_server($base64_data)
 {
+  /** そもそもURLのやつはそのままでいい */
+  if (substr($base64_data, 0, 8) == 'https://') {
+    return $base64_data;
+  }
   // 1. 設定項目
   $upload_dir = 'uploads/';
   $base_url = 'https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/' . $upload_dir;
