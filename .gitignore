@@ -29,3 +29,5 @@ env.php
 /vendor
 .htaccess
 google-services.json
+
+/uploads/*
