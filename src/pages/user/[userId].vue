@@ -23,11 +23,10 @@
             disabled
           ) 友達申請
       .button(v-if="!loading")
-        a(
+        v-btn.follow-button(
           v-if="myProfile && myProfile.userId == param.userId && !myProfile.guest"
-          href="/settings/profile"
-          )
-          v-btn.follow-button プロフィールを編集
+          @click="$router.push('/settings/profile')"
+        ) プロフィールを編集
         .follow-button-cover(
           v-else-if="myProfile && myProfile.userId && !myProfile.guest"
           )
