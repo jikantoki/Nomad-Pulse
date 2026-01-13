@@ -140,7 +140,9 @@ div(style="height: 100%; width: 100%")
     v-model="searchFriendDialog"
   )
     v-card
-      v-card-actions
+      v-card-actions(
+        style="width: 90vw;"
+      )
         p.ml-2 友達を探す
         v-spacer
         v-btn(
