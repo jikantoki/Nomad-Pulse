@@ -179,7 +179,7 @@ v-dialog(
         }
         const image = await Camera.getPhoto({
           quality: 100,
-          resultType: CameraResultType.DataUrl,
+          resultType: CameraResultType.Base64,
           allowEditing: true,
           saveToGallery: true,
           width: 1600,
@@ -189,7 +189,7 @@ v-dialog(
           promptLabelPhoto: 'アルバムから選択',
           promptLabelPicture: '撮影',
         })
-        const base64 = image.dataUrl
+        const base64 = image.base64String
         if (this.myProfile) {
           this.myProfile.coverImg = base64
         }
@@ -202,7 +202,7 @@ v-dialog(
         }
         const image = await Camera.getPhoto({
           quality: 100,
-          resultType: CameraResultType.DataUrl,
+          resultType: CameraResultType.Base64,
           allowEditing: true,
           saveToGallery: true,
           width: 1600,
@@ -212,7 +212,7 @@ v-dialog(
           promptLabelPhoto: 'アルバムから選択',
           promptLabelPicture: '撮影',
         })
-        const base64 = image.dataUrl
+        const base64 = image.base64String
         if (this.myProfile) {
           this.myProfile.icon = base64
         }
