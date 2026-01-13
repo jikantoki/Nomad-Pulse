@@ -8,6 +8,7 @@ v-app
 </template>
 
 <script lang="ts">
+  import { Capacitor } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { StatusBar, Style } from '@capacitor/status-bar'
   import commonSplashVue from './components/common/commonSplash.vue'
@@ -24,9 +25,11 @@ v-app
       }
     },
     async mounted () {
-      StatusBar.setOverlaysWebView({
-        overlay: false,
-      })
+      if (Capacitor.getPlatform() !== 'web') {
+        StatusBar.setOverlaysWebView({
+          overlay: false,
+        })
+      }
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
@@ -41,7 +44,7 @@ v-app
 
       // テーマに関する設定
       const themeOptions = localStorage.getItem('themeOptions')
-      if (themeOptions) {
+      if (themeOptions && Capacitor.getPlatform() !== 'web') {
         const options = JSON.parse(themeOptions)
         switch (options.theme) {
           case true: {
@@ -140,5 +143,15 @@ pre {
   color: #000000;
   user-select: all;
   overflow-x: auto;
+}
+
+img {
+  object-fit: cover;
+  object-position: center;
+}
+
+// 表示バグ対策
+.v-dialog > .v-overlay__content, .v-dialog > .v-overlay__content > form{
+  align-items: center;
 }
 </style>

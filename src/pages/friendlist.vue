@@ -122,7 +122,6 @@ v-dialog(
         id: this.myProfile.userId,
         token: this.myProfile.userToken,
       })
-      console.log(res)
       if (res && res.body) {
         const allFriendList = res.body.friendList
         for (const friend of allFriendList) {

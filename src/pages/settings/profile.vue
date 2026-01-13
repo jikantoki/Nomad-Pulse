@@ -1,3 +1,270 @@
 <template lang="pug">
-h1 準備中
+v-card(
+  style="width: 100%; height: 100%;"
+  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  )
+  v-card-actions
+    p.ml-2(style="font-size: 1.3em") プロフィール編集
+    v-spacer
+    v-btn(
+      text
+      @click="cancelDialog = true"
+      append-icon="mdi-close"
+    ) キャンセル
+    v-btn(
+      text
+      @click="save()"
+      append-icon="mdi-content-save"
+      style="background-color: rgb(var(--v-theme-primary)); color: white;"
+      ) 保存
+  v-card-text(style="height: inherit; overflow-y: auto;")
+    .imgs
+      .cover
+        img.cover-img(v-if="myProfile && myProfile.coverImg" :src="myProfile.coverImg")
+        img.cover-img(v-else src="/img/default_cover.jpg")
+        .change-cover-button(
+          style="font-size: 2em;"
+          v-ripple
+          @click="changeCover()"
+          )
+          v-icon(
+            style="opacity: 0.7;"
+          ) mdi-camera-flip
+      .icon-cover.mb-6.ml-2
+        .icon.cover
+          img.icon-img.cover-img(v-if="myProfile && myProfile.icon" :src="myProfile.icon")
+          img.icon-img.cover-img(v-else src="/account_default.jpg")
+          .change-icon-button.change-cover-button(
+            style="font-size: 2em;"
+            v-ripple
+            @click="changeIcon()"
+            )
+            v-icon(
+              style="opacity: 0.7;"
+            ) mdi-camera-flip
+    .text-form
+      v-text-field(
+        name="id"
+        label="ID"
+        disabled
+        v-model="myProfile.userId"
+      )
+      v-text-field(
+        name="name"
+        label="ニックネーム"
+        placeholder="名前を入力してください"
+        v-model="myProfile.name"
+      )
+      v-textarea(
+        label="自己紹介"
+        placeholder="趣味は色々です"
+        clearable
+        auto-grow
+        v-model="myProfile.message"
+      )
+v-dialog(
+  v-model="cancelDialog"
+  persistent
+)
+  v-card
+    v-card-title キャンセル
+    v-card-text 変更は保存されません。キャンセルしますか？
+    v-card-actions
+      v-btn(
+        @click="cancelDialog = false"
+      ) いいえ
+      v-btn(
+        @click="$router.back()"
+      ) はい（キャンセル）
+v-dialog(
+  v-model="saveDialog"
+  persistent
+)
+  v-card(
+    width="400"
+  )
+    v-card-text
+      v-card-title 保存中
+      v-progress-linear(
+        indeterminate
+      )
 </template>
+
+<script lang="ts">
+  import { App } from '@capacitor/app'
+  import { Camera, CameraResultType } from '@capacitor/camera'
+  import { Device } from '@capacitor/device'
+
+  // @ts-ignore
+  import mixins from '@/mixins/mixins'
+
+  export default {
+    mixins: [mixins],
+    data () {
+      return {
+        developerOptionEnabled: false,
+        isAndroid15OrHigher: false,
+        myUserId: null as string | null,
+        myProfile: {} as {
+          [key: string]: any
+        } | null,
+        cancelDialog: false,
+        saveDialog: false,
+      }
+    },
+    async mounted () {
+      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
+      if (developerOptionEnabled === 'true') {
+        this.developerOptionEnabled = true
+      }
+
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
+      const info = await Device.getInfo()
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
+      }
+
+      /** ログイン情報 */
+      const myProfile = localStorage.getItem('profile')
+      if (myProfile) {
+        this.myProfile = JSON.parse(myProfile)
+        if (this.myProfile?.lastGetLocationTime) {
+          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
+        }
+        if (this.myProfile?.userId) {
+          this.myUserId = this.myProfile.userId
+        }
+      }
+
+      App.addListener('backButton', () => {
+        this.cancelDialog = this.cancelDialog ? false : true
+      })
+    },
+    unmounted () {
+      App.removeAllListeners()
+    },
+    methods: {
+      /** 変更したプロフィールの保存 */
+      async save () {
+        this.saveDialog = true
+
+        const textProfile = JSON.stringify(this.myProfile)
+        localStorage.setItem('myProfile', textProfile)
+
+        const res = await this.sendAjaxWithAuth('/updateProfile.php', {
+          id: this.myProfile.userId,
+          token: this.myProfile.userToken,
+          icon: this.myProfile.icon,
+          coverImg: this.myProfile.coverImg,
+          name: this.myProfile.name,
+          message: this.myProfile.message,
+        })
+        console.log(res)
+        this.saveDialog = false
+        this.$router.back()
+      },
+      async changeCover () {
+        const permission = await Camera.checkPermissions()
+        if (permission.camera !== 'granted' || permission.photos !== 'granted') {
+          await Camera.requestPermissions()
+        }
+        const image = await Camera.getPhoto({
+          quality: 100,
+          resultType: CameraResultType.DataUrl,
+          allowEditing: true,
+          saveToGallery: true,
+          width: 1600,
+          height: 1600,
+          promptLabelHeader: '写真を使う',
+          promptLabelCancel: 'キャンセル',
+          promptLabelPhoto: 'アルバムから選択',
+          promptLabelPicture: '撮影',
+        })
+        const base64 = image.dataUrl
+        if (this.myProfile) {
+          this.myProfile.coverImg = base64
+        }
+      },
+      async changeIcon () {
+        const permission = await Camera.checkPermissions()
+        if (permission.camera !== 'granted' || permission.photos !== 'granted') {
+          await Camera.requestPermissions()
+        }
+        const image = await Camera.getPhoto({
+          quality: 100,
+          resultType: CameraResultType.DataUrl,
+          allowEditing: true,
+          saveToGallery: true,
+          width: 1600,
+          height: 1600,
+          promptLabelHeader: '写真を使う',
+          promptLabelCancel: 'キャンセル',
+          promptLabelPhoto: 'アルバムから選択',
+          promptLabelPicture: '撮影',
+        })
+        const base64 = image.dataUrl
+        if (this.myProfile) {
+          this.myProfile.icon = base64
+        }
+      },
+    },
+  }
+</script>
+
+<style lang="scss" scoped>
+.top-android-15-or-higher {
+  height: calc(100vh - 40px - 16px)!important;
+}
+.cover {
+  width: 100%;
+  height: 12em;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  .cover-img {
+    width: 100%;
+    height: 12em;
+  }
+  .change-cover-button {
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    padding: 0;
+    margin: 0;
+    background: rgba(0,0,0,0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #FFFFFF;
+  }
+}
+.icon-cover{
+  margin-top: -36px;
+  z-index: 5;
+  position: sticky;
+  .icon {
+    border-radius: 9999px;
+    height: 72px;
+    width: 72px;
+    .icon-img {
+      border-radius: 9999px;
+      width: 72px;
+      height: 72px;
+    }
+    .change-icon-button {
+      border-radius: 9999px;
+    }
+  }
+}
+</style>
