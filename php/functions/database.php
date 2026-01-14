@@ -717,11 +717,11 @@ function secretIdToId($secretId)
   if (!$secretId) {
     return false;
   }
-  $sqlRes = SQLfind('user_list', 'userId', $secretId);
+  $sqlRes = SQLfind('user_list', 'secretId', $secretId);
   if (!$sqlRes) {
     return false;
   }
-  return $sqlRes['secretId'];
+  return $sqlRes['userId'];
 }
 
 /**

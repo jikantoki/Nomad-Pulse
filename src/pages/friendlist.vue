@@ -15,6 +15,7 @@ v-card(
     //-- 承認待ちリスト
     .friend-accept-list
       p 承認待ち
+      p {{ acceptList }}
       .friend-cover
         .friend(
           v-ripple
@@ -41,6 +42,7 @@ v-card(
     //-- 申請中リスト
     .friend-accept-list
       p 申請中（友達の承認待ち）
+      p {{ requestList }}
       .friend-cover
         .friend(
           v-ripple
@@ -53,9 +55,29 @@ v-card(
               span.name 名前
               span.id @id-hogehoge
             .description いい感じのアカウントです
+        .friend(
+          v-ripple
+          v-for="(friend, cnt) of requestList"
+          @click=""
+          )
+          .icon
+            img(
+              v-if="friend.icon"
+              :src="friend.icon"
+            )
+            img(
+              v-else
+              src="/account_default.jpg"
+              )
+          .name-and-id-and-description
+            .name-and-id
+              span.name {{ friend.name ?? friend.userId }}
+              span.id @{{ friend.userId }}
+            .description {{ friend.message }}
     //-- フレンドリスト
     .friend-list
       p {{ friendList.length }}人の友達
+      p {{ friendList }}
       .friend-cover
         .friend(
           v-ripple
@@ -123,6 +145,7 @@ v-dialog(
         token: this.myProfile.userToken,
       })
       if (res && res.body) {
+        console.log(res.body)
         const allFriendList = res.body.friendList
         for (const friend of allFriendList) {
           if (friend.status == 'request') {
