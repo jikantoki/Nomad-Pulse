@@ -109,7 +109,7 @@ div(style="height: 100%; width: 100%")
         .info
           v-icon(
             v-if="detailCardTarget && detailCardTarget.battery"
-            ) {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
+            ) {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargingNow) }}
           v-icon(
             v-else
           ) mdi-battery
@@ -487,10 +487,11 @@ div(style="height: 100%; width: 100%")
         setTimeout(async () => {
           const token = this.myProfile.userToken
           const profile = await this.getProfile(this.myUserId)
-          console.log(profile)
           profile.userToken = token
+          profile.battery = this.myProfile?.battery
           localStorage.setItem('profile', JSON.stringify(profile))
           this.myProfile = profile
+          console.log(profile)
         }, 100)
       } else {
         this.myProfile = {

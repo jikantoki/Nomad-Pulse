@@ -328,7 +328,7 @@ v-dialog(v-model="followDialogMessage")
         if (this.shareMyLinkDialog) {
           this.shareMyLinkDialog = false
         } else {
-          this.$router.push('/')
+          this.$router.back()
         }
       })
 

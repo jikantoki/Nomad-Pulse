@@ -94,6 +94,7 @@ v-card(
               icon="mdi-trash-can-outline"
               @click.stop="deleteDialog = true; deleteTarget = {userId: 'jikantoki', name: 'えのき'}"
             )
+    .my-16.pa-2
 v-dialog(
   v-model="deleteDialog"
 )
