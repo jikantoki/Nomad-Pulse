@@ -34,8 +34,30 @@ $toRandId = idToSecretId($toId);
 $unixtime = time();
 
 //既に同じリクエストが来ていないか？逆リクエストも含めて探す
-$alreadyRequest1 = SQLfind('follow_list', 'fromUserId', $toRandId);
-$alreadyRequest2 = SQLfind('follow_list', 'toUserId', $toRandId);
+$alreadyRequest1 = SQLfindSome('follow_list', [
+  [
+    'key' => 'fromUserId',
+    'value' => $toRandId,
+    'func' => '='
+  ],
+  [
+    'key' => 'toUserId',
+    'value' => $fromRandId,
+    'func' => '='
+  ]
+]);
+$alreadyRequest2 = SQLfindSome('follow_list', [
+  [
+    'key' => 'toUserId',
+    'value' => $fromRandId,
+    'func' => '='
+  ],
+  [
+    'key' => 'fromUserId',
+    'value' => $toRandId,
+    'func' => '='
+  ]
+]);
 if ($alreadyRequest1 || $alreadyRequest2) {
   echo json_encode([
     'status' => 'cannot',

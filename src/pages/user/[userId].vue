@@ -37,7 +37,7 @@
           v-btn.follow-button(
             v-else-if="userData && userData.friendStatus"
             disabled
-            ) 友達申請中{{ userData.friendStatus }}
+            ) 友達申請中
           v-btn.follow-button(
             v-else
             @click="friendRequest(param.userId)"
