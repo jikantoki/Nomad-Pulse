@@ -17,19 +17,26 @@ v-card(
       v-if="acceptList.length"
     )
       p {{ acceptList.length }}人の承認待ち
-      p {{ acceptList }}
       .friend-cover
         .friend(
           v-ripple
-          @click=""
+          v-for="(friend, cnt) of acceptList"
+          @click="$router.push(`/user/${friend.userId}`)"
           )
           .icon
-            img(src="/account_default.jpg")
+            img(
+              v-if="friend.icon"
+              :src="friend.icon"
+            )
+            img(
+              v-else
+              src="/account_default.jpg"
+              )
           .name-and-id-and-description
             .name-and-id
-              span.name 名前
-              span.id @id-hogehoge
-            .description いい感じのアカウントです～～～～～～～～～～～～～～～～～～～ふえええええ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
+              span.name {{ (friend.name && friend.name.length) ? friend.name : friend.userId }}
+              span.id @{{ friend.userId }}
+            .description {{ friend.message }}
           .action-buttons
             v-btn(
               color="var(--color-error)"
@@ -101,6 +108,7 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { Device } from '@capacitor/device'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
 
@@ -126,6 +134,24 @@ v-dialog(
       }
     },
     async mounted () {
+      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
+      if (developerOptionEnabled === 'true') {
+        this.developerOptionEnabled = true
+      }
+
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
+      const info = await Device.getInfo()
+      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+
+      // 開発者オプション
+      const developerOptions = localStorage.getItem('developerOptions')
+      if (developerOptions) {
+        const options = JSON.parse(developerOptions)
+        if (options.statusBarNotch !== undefined) {
+          this.isAndroid15OrHigher = options.statusBarNotch
+        }
+      }
+      // ここからページ固有のmounted処理
       const myProfile = localStorage.getItem('profile')
       if (myProfile) {
         this.myProfile = JSON.parse(myProfile)
@@ -218,5 +244,9 @@ v-dialog(
         }
       }
   }
+}
+
+.top-android-15-or-higher {
+  height: calc(100vh - 40px - 16px)!important;
 }
 </style>
