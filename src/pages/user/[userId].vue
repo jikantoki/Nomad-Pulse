@@ -20,7 +20,7 @@
         img.icon-img(v-else src="/account_default.jpg")
       .button(v-if="loading")
         v-btn.follow-button(
-            disabled
+            loading
           ) 友達申請
       .button(v-if="!loading")
         v-btn.follow-button(
@@ -64,7 +64,7 @@
       p(
         v-if="userData && userData.status != 'ng'"
         ) {{ new Date(userData.createdAt * 1000) }}からNomad Pulseを利用しています
-    .share-and-sns-links.px-2(v-show="userData")
+    //.share-and-sns-links.px-2(v-show="userData")
       .share-buttons
         v-btn.mx-2(
           small
@@ -257,22 +257,16 @@ v-dialog(v-model="followDialogMessage")
 
       // ユーザー情報の取得
       this.param = this.$route.params
-      this.userData = await this.getProfile(
-        this.param.userId,
-        this.myProfile ? this.myProfile.userId : undefined,
-        this.myProfile ? this.myProfile.userToken : undefined,
-      )
-      if (!this.userData) {
-        this.loading = false
-        this.qrLoading = false
-        this.noAccountExist = true
-        return
+
+      const userId = this.param.userId
+
+      // Ajaxでユーザー情報取得前に、localStorageに情報があれば表示
+      const localUserData = localStorage.getItem(`userdata-${userId}`)
+      if (localUserData) {
+        this.userData = JSON.parse(localUserData)
       }
-      if (this.userData && this.userData.status == 'invalid') {
-        // ログインしていないので閲覧不可
-        this.isInvalid = true
-      }
-      this.myLink = `https://nomadpulse.enoki.xyz/user/${this.param.userId}?openExternalBrowser=1`
+
+      this.myLink = `https://nomadpulse.enoki.xyz/user/${userId}?openExternalBrowser=1`
 
       setTimeout(() => {
         const canvas = document.querySelector('#qr-canvas')
@@ -310,7 +304,25 @@ v-dialog(v-model="followDialogMessage")
         })
 
         this.qrLoading = false
-      }, 500)
+      }, 100)
+
+      this.userData = await this.getProfile(
+        userId,
+        this.myProfile ? this.myProfile.userId : undefined,
+        this.myProfile ? this.myProfile.userToken : undefined,
+      )
+      if (!this.userData) {
+        this.loading = false
+        this.qrLoading = false
+        this.noAccountExist = true
+        return
+      }
+      // 次回はすぐ開けるように、ローカルストレージに保存
+      localStorage.setItem(`userdata-${userId}`, JSON.stringify(this.userData))
+      if (this.userData.status == 'invalid') {
+        // ログインしていないので閲覧不可
+        this.isInvalid = true
+      }
 
       App.addListener('backButton', () => {
         if (this.shareMyLinkDialog) {

@@ -13,7 +13,8 @@ const config: CapacitorConfig = {
       src: 'runners/background-runner.js',
       event: 'NomadPulseBackgroundRunner',
       repeat: true,
-      interval: 1,
+      /** OSの制約で15分間隔 */
+      interval: 15,
       autoStart: true,
     },
     PushNotifications: {
@@ -24,7 +25,7 @@ const config: CapacitorConfig = {
     },
   },
   server: {
-    hostname: 'nomadpulse.enoki.xyz'
+    hostname: 'nomadpulse.enoki.xyz',
     androidScheme: 'https',
   },
   deepLinks: {

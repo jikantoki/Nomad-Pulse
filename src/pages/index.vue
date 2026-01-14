@@ -447,8 +447,20 @@ div(style="height: 100%; width: 100%")
         deep: true,
         immediate: true,
       },
+      /** ようこそ画面の表示状態を保存 */
+      optionsDialog: {
+        handler: async function (dialog) {
+          localStorage.setItem('welcomeDialog', String(dialog))
+        },
+      },
     },
     async mounted () {
+      /** ようこその復活 */
+      const welcomeDialog = localStorage.getItem('welcomeDialog')
+      if (welcomeDialog && welcomeDialog.toLowerCase() == 'true') {
+        this.optionsDialog = true
+      }
+
       /** ローカルストレージから最後に取得した位置情報を読み込み */
       const localStorageLatlng = localStorage.getItem('latlng')
       if (localStorageLatlng) {

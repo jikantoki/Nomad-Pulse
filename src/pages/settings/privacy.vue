@@ -4,7 +4,7 @@ v-card(
   :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
-    p.ml-2(style="font-size: 1.3em") 設定
+    p.ml-2(style="font-size: 1.3em") 位置情報とプライバシー
     v-spacer
     v-btn(
       text
@@ -15,89 +15,28 @@ v-card(
     .settings-list
       .setting-item(
         v-ripple
-        @click="$router.push('/settings/display')"
         )
         .icon
-          v-icon mdi-palette-outline
+          v-icon mdi-map-marker-off
         .text
-          p.title 外観
-          p.description テーマ、色
-      .setting-item(v-ripple)
-        .icon
-          v-icon mdi-bell-outline
-        .text
-          p.title 通知
-          p.description メール、プッシュ通知
+          p.title 位置情報の一時停止
+          p.description 特定の時間になるまで、位置情報を共有しません
       .setting-item(
         v-ripple
-        @click="$router.push('/settings/privacy')"
         )
         .icon
-          v-icon mdi-file-document-outline
+          v-icon mdi-timer-marker-outline
         .text
-          p.title 位置情報とプライバシー
-          p.description タイムラン、マップ履歴
+          p.title 位置情報の共有時間
+          p.description 何時から何時まで位置情報を共有するかを選べます
       .setting-item(
         v-ripple
-        @click="$router.push('/terms')"
         )
         .icon
-          v-icon mdi-file-document-outline
+          v-icon mdi-map-marker-radius
         .text
-          p.title 利用規約
-      .setting-item(
-        v-ripple
-        @click="$router.push('/about')"
-        )
-        .icon
-          v-icon mdi-information-outline
-        .text
-          p.title このアプリについて
-          p.description バージョン情報
-      .setting-item(
-        v-if="developerOptionEnabled"
-        v-ripple
-        @click="$router.push('/settings/developer-options')"
-        )
-        .icon(
-          style="background-color: rgba(var(--v-theme-primary), 1); color: white;"
-        )
-          v-icon mdi-bug-outline
-        .text
-          p.title 開発者オプション
-          p.description 特定のモバイル向けの機能を強制有効
-      .setting-item(
-        v-ripple
-        @click="logoutRequest()"
-        v-if="myUserId"
-        )
-        .icon(style="background: rgba(var(--v-theme-error), 1);")
-          v-icon mdi-logout
-        .text
-          p.title ログアウト
-          p.description またお会いしましょう！
-      .my-16
-v-dialog(
-  v-model="logoutDialog"
-  max-width="400"
-  )
-  v-card
-    v-card-title(class="headline") ログアウトしますか？
-    v-card-text
-      | ログアウトすると、再度ログインするまでデータの同期が行われません。
-    v-card-actions
-      v-spacer
-      v-btn(
-        text
-        @click="logoutDialog = false"
-        append-icon="mdi-close"
-        ) キャンセル
-      v-btn(
-        text
-        style="background: rgba(var(--v-theme-error), 1); color: white;"
-        append-icon="mdi-logout"
-        @click="logout"
-        ) ログアウト
+          p.title 位置情報の共有場所
+          p.description どの地点を基準に、何km離れたところまで位置情報を共有するかを選べます
 </template>
 
 <script lang="ts">
@@ -147,17 +86,7 @@ v-dialog(
         }
       }
     },
-    methods: {
-      logoutRequest () {
-        this.logoutDialog = true
-      },
-      logout () {
-        this.logoutDialog = false
-        localStorage.removeItem('userId')
-        localStorage.removeItem('profile')
-        this.$router.push('/login')
-      },
-    },
+    methods: {},
   }
 </script>
 

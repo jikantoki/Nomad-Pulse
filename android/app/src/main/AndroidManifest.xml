@@ -26,8 +26,22 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="nomadpulse.enoki.xyz" />
-                <data android:scheme="https" android:host="np.enoki.xyz" />
+                <data
+                    android:scheme="https"
+                    android:host="nomadpulse.enoki.xyz" />
+                <data
+                    android:scheme="https"
+                    android:host="np.enoki.xyz"
+                    android:pathPrefix="/user/" />
+            </intent-filter>
+
+            <!-- ここからカスタムプロトコル enoki:// の設定 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="nomadpulse" />
+                <!-- nomadpulse://enoki.xyz/user/hoge でアプリを起動させる -->
             </intent-filter>
         </activity>
 

@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     '/settings/': RouteRecordInfo<'/settings/', '/settings', Record<never, never>, Record<never, never>>,
     '/settings/developer-options': RouteRecordInfo<'/settings/developer-options', '/settings/developer-options', Record<never, never>, Record<never, never>>,
     '/settings/display': RouteRecordInfo<'/settings/display', '/settings/display', Record<never, never>, Record<never, never>>,
+    '/settings/privacy': RouteRecordInfo<'/settings/privacy', '/settings/privacy', Record<never, never>, Record<never, never>>,
     '/settings/profile': RouteRecordInfo<'/settings/profile', '/settings/profile', Record<never, never>, Record<never, never>>,
     '/terms': RouteRecordInfo<'/terms', '/terms', Record<never, never>, Record<never, never>>,
     '/tutorial': RouteRecordInfo<'/tutorial', '/tutorial', Record<never, never>, Record<never, never>>,
@@ -83,6 +84,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/settings/display.vue': {
       routes: '/settings/display'
+      views: never
+    }
+    'src/pages/settings/privacy.vue': {
+      routes: '/settings/privacy'
       views: never
     }
     'src/pages/settings/profile.vue': {
