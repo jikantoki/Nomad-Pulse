@@ -118,7 +118,7 @@ v-dialog(
 
 <script lang="ts">
   import { App } from '@capacitor/app'
-  import { Camera, CameraResultType } from '@capacitor/camera'
+  import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
   import { Device } from '@capacitor/device'
 
   // @ts-ignore
@@ -223,10 +223,11 @@ v-dialog(
         const image = await Camera.getPhoto({
           quality: 100,
           resultType: CameraResultType.DataUrl,
-          allowEditing: true,
-          saveToGallery: true,
+          allowEditing: false,
+          saveToGallery: false,
           width: 1600,
           height: 1600,
+          source: CameraSource.Photos,
           promptLabelHeader: '写真を使う',
           promptLabelCancel: 'キャンセル',
           promptLabelPhoto: 'アルバムから選択',
@@ -246,10 +247,11 @@ v-dialog(
         const image = await Camera.getPhoto({
           quality: 100,
           resultType: CameraResultType.DataUrl,
-          allowEditing: true,
-          saveToGallery: true,
+          allowEditing: false,
+          saveToGallery: false,
           width: 1600,
           height: 1600,
+          source: CameraSource.Photos,
           promptLabelHeader: '写真を使う',
           promptLabelCancel: 'キャンセル',
           promptLabelPhoto: 'アルバムから選択',
