@@ -15,13 +15,14 @@ if (
   exit;
 }
 
+$mySecretId = null;
 $getFriendStatus = false;
 if (isset($_SERVER['HTTP_ID']) && isset($_SERVER['HTTP_TOKEN'])) {
   $id = $_SERVER['HTTP_ID'];
   $token = $_SERVER['HTTP_TOKEN'];
-  $secretId = idToSecretId($id);
-  if ($secretId) {
-    $isAuthed = authAccount($secretId, $token);
+  $mySecretId = idToSecretId($id);
+  if ($mySecretId) {
+    $isAuthed = authAccount($mySecretId, $token);
     if ($isAuthed) {
       $getFriendStatus = true;
     }
@@ -30,15 +31,39 @@ if (isset($_SERVER['HTTP_ID']) && isset($_SERVER['HTTP_TOKEN'])) {
 
 $targetId = $_SERVER['HTTP_TARGETID'];
 $res = getProfile($targetId);
+$myProfile = null;
 if ($res) {
-  $friendStatus1 = SQLfind('follow_list', 'fromUserId', $res['secretId']);
-  $friendStatus2 = SQLfind('follow_list', 'toUserId', $res['secretId']);
-  if ($friendStatus1) {
-    $friendStatus = $friendStatus1['status'];
-  } else if ($friendStatus2) {
-    $friendStatus = $friendStatus2['status'];
-  } else {
-    $friendStatus = null;
+  $friendStatus = null;
+  if ($mySecretId) {
+    $friendStatus1 = SQLfindSome('follow_list', [
+      [
+        'key' => 'fromUserId',
+        'value' => $res['secretId'],
+        'func' => '='
+      ],
+      [
+        'key' => 'toUserId',
+        'value' => $mySecretId,
+        'func' => '='
+      ]
+    ]);
+    $friendStatus2 = SQLfindSome('follow_list', [
+      [
+        'key' => 'toUserId',
+        'value' => $res['secretId'],
+        'func' => '='
+      ],
+      [
+        'key' => 'fromUserId',
+        'value' => $mySecretId,
+        'func' => '='
+      ]
+    ]);
+    if ($friendStatus1) {
+      $friendStatus = $friendStatus1['status'];
+    } else if ($friendStatus2) {
+      $friendStatus = $friendStatus2['status'];
+    }
   }
   echo json_encode([
     'status' => 'ok',

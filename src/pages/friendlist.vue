@@ -13,8 +13,10 @@ v-card(
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
     //-- 承認待ちリスト
-    .friend-accept-list
-      p 承認待ち
+    .friend-accept-list(
+      v-if="acceptList.length"
+    )
+      p {{ acceptList.length }}人の承認待ち
       p {{ acceptList }}
       .friend-cover
         .friend(
@@ -40,25 +42,15 @@ v-card(
               @click.stop=""
             )
     //-- 申請中リスト
-    .friend-accept-list
-      p 申請中（友達の承認待ち）
-      p {{ requestList }}
+    .friend-accept-list(
+      v-if="requestList.length"
+    )
+      p {{ requestList.length }}人の申請中（友達の承認待ち）
       .friend-cover
         .friend(
           v-ripple
-          @click=""
-          )
-          .icon
-            img(src="/account_default.jpg")
-          .name-and-id-and-description
-            .name-and-id
-              span.name 名前
-              span.id @id-hogehoge
-            .description いい感じのアカウントです
-        .friend(
-          v-ripple
           v-for="(friend, cnt) of requestList"
-          @click=""
+          @click="$router.push(`/user/${friend.userId}`)"
           )
           .icon
             img(
@@ -71,7 +63,7 @@ v-card(
               )
           .name-and-id-and-description
             .name-and-id
-              span.name {{ friend.name ?? friend.userId }}
+              span.name {{ (friend.name && friend.name.length) ? friend.name : friend.userId }}
               span.id @{{ friend.userId }}
             .description {{ friend.message }}
     //-- フレンドリスト
@@ -139,15 +131,31 @@ v-dialog(
         this.myProfile = JSON.parse(myProfile)
       }
 
+      const friendList = localStorage.getItem('friendList')
+      const acceptList = localStorage.getItem('acceptList')
+      const requestList = localStorage.getItem('requestList')
+      if (friendList) {
+        this.friendList = JSON.parse(friendList)
+      }
+      if (acceptList) {
+        this.acceptList = JSON.parse(acceptList)
+      }
+      if (requestList) {
+        this.requestList = JSON.parse(requestList)
+      }
+
       // 友達リストの取得（申請・承認リストも同時に取得）
       const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
         id: this.myProfile.userId,
         token: this.myProfile.userToken,
       })
       if (res && res.body) {
-        console.log(res.body)
         const allFriendList = res.body.friendList
+        this.friendList = []
+        this.acceptList = []
+        this.requestList = []
         for (const friend of allFriendList) {
+          friend.friendProfile.userId = friend.friendRealId
           if (friend.status == 'request') {
             if (friend.fromUserId == res.body.mySecretId) {
               this.requestList.push(friend.friendProfile)
@@ -158,6 +166,9 @@ v-dialog(
             this.friendList.push(friend.friendProfile)
           }
         }
+        localStorage.setItem('friendList', JSON.stringify(this.friendList))
+        localStorage.setItem('acceptList', JSON.stringify(this.acceptList))
+        localStorage.setItem('requestList', JSON.stringify(this.requestList))
       }
     },
   }

@@ -31,18 +31,18 @@
           v-else-if="myProfile && myProfile.userId && !myProfile.guest"
           )
           v-btn.follow-button(
-            v-if="userData && !userData.friendStatus"
-            @click="friendRequest(param.userId)"
-            :loading="followLoadingNow"
-            ) 友達申請
-          v-btn.follow-button(
-            v-else-if="userData && userData.friendStatus === 'friend'"
+            v-if="userData && userData.friendStatus === 'friend'"
             disabled
             ) 既に友達です！
           v-btn.follow-button(
             v-else-if="userData && userData.friendStatus"
             disabled
-            ) 友達申請中
+            ) 友達申請中{{ userData.friendStatus }}
+          v-btn.follow-button(
+            v-else
+            @click="friendRequest(param.userId)"
+            :loading="followLoadingNow"
+            ) 友達申請
         v-btn.follow-button(
           v-else
           @click="$router.push('/login')"
