@@ -33,6 +33,7 @@
         :rules="[rules.required]"
         hint="3～32文字、半角英数字アンダーバーのみ"
         ref="formId"
+        autocomplete="username"
         @keydown.enter="$refs.formMail.focus()"
         clearable
         )
@@ -45,6 +46,7 @@
         type="email"
         :rules="[rules.required]"
         ref="formMail"
+        autocomplete="email"
         @keydown.enter="$refs.formPass.focus()"
         clearable
         )
@@ -58,6 +60,7 @@
         :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append-inner="showPassword = !showPassword"
         ref="formPass"
+        autocomplete="new-password"
         @keydown.enter="$refs.formRePass.focus()"
         :rules="[rules.required]"
         )
@@ -71,6 +74,7 @@
         :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append-inner="showConfirmPassword = !showConfirmPassword"
         ref="formRePass"
+        autocomplete="new-password"
         @keydown.enter="agreement = true;$refs.formRegistar.$el.focus();"
         :rules="[rules.required]"
         )

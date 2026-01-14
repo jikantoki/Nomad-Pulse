@@ -24,6 +24,7 @@ const config: CapacitorConfig = {
     },
   },
   server: {
+    hostname: 'nomadpulse.enoki.xyz'
     androidScheme: 'https',
   },
   deepLinks: {

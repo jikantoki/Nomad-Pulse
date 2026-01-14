@@ -27,6 +27,7 @@
         required
         clearable
         ref="userName"
+        autocomplete="username"
         @keydown.enter="$refs.password.focus()"
         )
       v-text-field(
@@ -39,6 +40,7 @@
         @click:append-inner="showPassword = !showPassword"
         required
         ref="password"
+        autocomplete="current-password"
         @keydown.enter="requestToken()"
         )
       a.forgot-password(v-if="page === 0" href="/password_reset") パスワードを忘れました
@@ -76,7 +78,6 @@
 </template>
 
 <script>
-  import webpush from '~/js/webpush'
   import mixins from '~/mixins/mixins'
   export default {
     mixins: [mixins],
@@ -149,18 +150,6 @@
               const profile = await this.getProfile(e.body.id)
               profile.userToken = e.body.token
               localStorage.setItem('profile', JSON.stringify(profile))
-              // ログイン中のユーザーの情報で、プッシュ通知に関する情報をDB登録
-              /* const push = await webpush.get()
-              if (push) {
-                await this.sendAjaxWithAuth('/insertPushToken.php', {
-                  id: localStorage.getItem('userId'),
-                  token: localStorage.getItem('userToken'),
-                  endPoint: push.endpoint,
-                  publicKey: push.publicKey,
-                  pushToken: push.authToken,
-                })
-              }
-                */
               const redirect = now.searchParams.get('redirect')
               if (redirect && redirect !== '') {
                 this.a(redirect)

@@ -36,11 +36,11 @@
             :loading="followLoadingNow"
             ) 友達申請
           v-btn.follow-button(
-            v-if="userData && userData.friendStatus === 'friend'"
+            v-else-if="userData && userData.friendStatus === 'friend'"
             disabled
             ) 既に友達です！
           v-btn.follow-button(
-            v-else-if="userData"
+            v-else-if="userData && userData.friendStatus"
             disabled
             ) 友達申請中
         v-btn.follow-button(
@@ -311,7 +311,11 @@ v-dialog(v-model="followDialogMessage")
       }, 500)
 
       App.addListener('backButton', () => {
-        $router.push('/')
+        if (this.shareMyLinkDialog) {
+          this.shareMyLinkDialog = false
+        } else {
+          this.$router.push('/')
+        }
       })
 
       this.loading = false

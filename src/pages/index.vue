@@ -107,7 +107,12 @@ div(style="height: 100%; width: 100%")
           v-icon mdi-card-account-details-outline
           p @{{ detailCardTarget.userId }}
         .info
-          v-icon {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
+          v-icon(
+            v-if="detailCardTarget && detailCardTarget.battery"
+            ) {{ chooseBatteryIcon(detailCardTarget.battery.parsent, detailCardTarget.battery.chargeingNow) }}
+          v-icon(
+            v-else
+          ) mdi-battery
           p {{ detailCardTarget.battery && detailCardTarget.battery.parsent ? detailCardTarget.battery.parsent.toFixed(0) + '%' : '取得できませんでした' }}
         .info
           v-icon mdi-map-marker-account

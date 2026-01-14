@@ -27,6 +27,7 @@
         required
         clearable
         ref="userName"
+        autocomplete="username"
         @keydown.enter="$refs.mailAddress.focus()"
         )
       v-text-field(
@@ -40,6 +41,7 @@
         clearable
         required
         ref="maillAddress"
+        autocomplete="email"
         @keydown.enter="requestToken()"
         )
       a.forgot-password(v-if="page === 0" href="/login") パスワードを思い出した
@@ -64,6 +66,7 @@
         :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append-inner="showPassword = !showPassword"
         @keydown.enter="$refs.newRePassword.focus()"
+        autocomplete="new-password"
         )
       v-text-field(
         v-if="page === 1"
@@ -77,6 +80,7 @@
         :append-inner-icon="showRePassword ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append-inner="showRePassword = !showRePassword"
         @keydown.enter="login()"
+        autocomplete="new-password"
         )
       .btns
         v-btn.round.submit(
