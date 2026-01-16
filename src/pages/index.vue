@@ -325,6 +325,22 @@ div(style="height: 100%; width: 100%")
           )
       v-card-text
         p ここにタイムラインコンテンツを表示します。
+  v-dialog(
+    v-model="acceptDialog"
+    persistent
+  )
+    v-card
+      v-card-title 友達リクエストが来ています！
+      v-card-text
+        p {{ acceptList.length }}人の友達があなたを待っています。承認してつながろう！
+      v-card-actions
+        v-btn(
+          @click="acceptDialog = false"
+        ) やめとく
+        v-btn(
+          @click="$router.push('/friendlist')"
+          style="background-color: rgb(var(--v-theme-primary)); color: white"
+        ) リクエストを見る
 </template>
 
 <script lang="ts">
@@ -415,6 +431,10 @@ div(style="height: 100%; width: 100%")
         searchFriendErrorMessage: '',
         /** 環境変数 */
         env: null as any,
+        /** 承認待ち友達リスト */
+        acceptList: [] as any,
+        /** 承認してほしい友達がいるダイアログ */
+        acceptDialog: false,
       }
     },
     watch: {
@@ -561,6 +581,9 @@ div(style="height: 100%; width: 100%")
         } else if (this.searchFriendDialog) {
           // 友達検索ダイアログを閉じる
           this.searchFriendDialog = false
+        } else if (this.acceptDialog) {
+          // 友達承認しろダイアログを閉じる
+          this.acceptDialog = false
         } else if (this.optionsDialog) {
           /** オプションダイアログを閉じる */
           this.optionsDialog = false
@@ -631,6 +654,25 @@ div(style="height: 100%; width: 100%")
       setTimeout(() => {
         this.setCurrentPosition()
       }, 500)
+
+      // 承認していない友達リクエストがあったらポップアップを表示
+      const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
+        id: this.myProfile.userId,
+        token: this.myProfile.userToken,
+      })
+      if (res && res.body) {
+        const allFriendList = res.body.friendList
+        this.acceptList = []
+        for (const friend of allFriendList) {
+          friend.friendProfile.userId = friend.friendRealId
+          if (friend.status == 'request' && friend.fromUserId != res.body.mySecretId) {
+            this.acceptList.push(friend.friendProfile)
+          }
+        }
+      }
+      if (this.acceptList.length > 0 && history.length <= 2) {
+        this.acceptDialog = true
+      }
     },
     unmounted () {
       App.removeAllListeners()

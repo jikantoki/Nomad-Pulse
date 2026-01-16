@@ -41,12 +41,12 @@ v-card(
             v-btn(
               color="var(--color-error)"
               icon="mdi-close"
-              @click.stop=""
+              @click.stop="accept(friend.userId, false)"
             )
             v-btn(
               color="var(--color-success)"
               icon="mdi-check"
-              @click.stop=""
+              @click.stop="accept(friend.userId, true)"
             )
     //-- 申請中リスト
     .friend-accept-list(
@@ -197,6 +197,22 @@ v-dialog(
         localStorage.setItem('acceptList', JSON.stringify(this.acceptList))
         localStorage.setItem('requestList', JSON.stringify(this.requestList))
       }
+    },
+    methods: {
+      /**
+       * 友達として承認、もしくはキャンセルする
+       * @param userId ターゲットのユーザーID
+       * @param accept True→承認、False→キャンセル
+       */
+      async accept (userId: string, accept: boolean) {
+        const res = await this.sendAjaxWithAuth('/acceptFriend.php', {
+          id: this.myProfile.userId,
+          token: this.myProfile.userToken,
+          targetId: userId,
+          friendAccept: accept,
+        })
+        console.log(res.body)
+      },
     },
   }
 </script>

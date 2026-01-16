@@ -78,7 +78,7 @@ v-app
        */
       window.setTimeout(() => {
         this.splashScreen = false
-      }, 2000)
+      }, 500)
     },
   }
 </script>
