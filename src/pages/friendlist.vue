@@ -99,7 +99,7 @@ v-card(
           .action-buttons
             v-btn.trash(
               icon="mdi-trash-can-outline"
-              @click.stop="deleteDialog = true; deleteTarget = {userId: 'jikantoki', name: 'えのき'}"
+              @click.stop="deleteDialog = true; deleteTarget = friend"
             )
     .no-friend(v-if="!friendList.length")
       .my-16
@@ -115,13 +115,13 @@ v-dialog(
 )
   v-card
     v-card-title 友達の削除
-    v-card-text {{ deleteTarget.name }}@{{ deleteTarget.userId }}を友達から削除しますか？
+    v-card-text {{ deleteTarget.name?.length ? deleteTarget.name : deleteTarget.userId }}@{{ deleteTarget.userId }}を友達から削除しますか？
     v-card-actions
       v-btn(
         @click="deleteDialog = false"
       ) キャンセル
       v-btn(
-        @click="accept(friend.userId, false)"
+        @click="accept(deleteTarget.userId, false)"
       ) 削除
 v-dialog(
   v-model="loadingStatusDialog"
@@ -250,12 +250,27 @@ v-dialog(
           }
           cnt++
         }
+        cnt = 0
         if (accept) {
           this.friendList.push(friendProfile)
+        } else {
+          for (const friend of this.friendList) {
+            console.log(friend.userId, userId)
+            if (friend.userId == userId) {
+              this.friendList.splice(cnt, 1)
+              console.log(friend)
+              break
+            }
+            cnt++
+          }
         }
         // これないとバグる
         this.deleteDialog = false
         this.loadingStatusDialog = false
+
+        localStorage.setItem('friendList', JSON.stringify(this.friendList))
+        localStorage.setItem('acceptList', JSON.stringify(this.acceptList))
+        localStorage.setItem('requestList', JSON.stringify(this.requestList))
         return
       },
     },
