@@ -33,17 +33,17 @@ if($friendStatus){
     status = 'friend',
     unixtime = {$unixtime}
     where
-    fromUserId = '{$mySecretId}'
+    fromUserId = '{$targetSecretId}'
     and
-    toUserId = '{$targetSecretId}';
+    toUserId = '{$mySecretId}';
   ");
 } else {
   SQL("
     delete from follow_list
     where
-    fromUserId = '{$mySecretId}'
+    fromUserId = '{$targetSecretId}'
     and
-    toUserId = '{$targetSecretId}';
+    toUserId = '{$mySecretId}';
   ");
 }
 

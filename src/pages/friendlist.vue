@@ -74,26 +74,41 @@ v-card(
               span.id @{{ friend.userId }}
             .description {{ friend.message }}
     //-- フレンドリスト
-    .friend-list
+    .friend-list(v-if="friendList.length")
       p {{ friendList.length }}人の友達
-      p {{ friendList }}
       .friend-cover
         .friend(
           v-ripple
-          @click=""
+          v-for="(friend, cnt) of friendList"
+          @click="$router.push(`/user/${friend.userId}`)"
           )
           .icon
-            img(src="/account_default.jpg")
+            img(
+              v-if="friend.icon"
+              :src="friend.icon"
+            )
+            img(
+              v-else
+              src="/account_default.jpg"
+              )
           .name-and-id-and-description
             .name-and-id
-              span.name 名前
-              span.id @id-hogehoge
-            .description いい感じのアカウントです
+              span.name {{ (friend.name && friend.name.length) ? friend.name : friend.userId }}
+              span.id @{{ friend.userId }}
+            .description {{ friend.message }}
           .action-buttons
             v-btn.trash(
               icon="mdi-trash-can-outline"
               @click.stop="deleteDialog = true; deleteTarget = {userId: 'jikantoki', name: 'えのき'}"
             )
+    .no-friend(v-if="!friendList.length")
+      .my-16
+      p.text-h5(
+        style="text-align: center;"
+      )
+        span 友達がいません。
+        br
+        span トップページの検索ボタンから探してみよう！
     .my-16.pa-2
 v-dialog(
   v-model="deleteDialog"
@@ -105,7 +120,17 @@ v-dialog(
       v-btn(
         @click="deleteDialog = false"
       ) キャンセル
-      v-btn 削除
+      v-btn(
+        @click="accept(friend.userId, false)"
+      ) 削除
+v-dialog(
+  v-model="loadingStatusDialog"
+  persistent
+)
+  v-card(width="400")
+    v-card-title 処理中…
+    v-card-text
+      v-progress-linear.my-4(indeterminate)
 </template>
 
 <script lang="ts">
@@ -132,6 +157,8 @@ v-dialog(
         acceptList: [] as any[],
         /** 友達リスト */
         friendList: [] as any[],
+        /** ステータス変更処理中ダイアログ */
+        loadingStatusDialog: false,
       }
     },
     async mounted () {
@@ -205,6 +232,7 @@ v-dialog(
        * @param accept True→承認、False→キャンセル
        */
       async accept (userId: string, accept: boolean) {
+        this.loadingStatusDialog = true
         const res = await this.sendAjaxWithAuth('/acceptFriend.php', {
           id: this.myProfile.userId,
           token: this.myProfile.userToken,
@@ -212,6 +240,23 @@ v-dialog(
           friendAccept: accept,
         })
         console.log(res.body)
+        let cnt = 0
+        let friendProfile = {}
+        for (const friend of this.acceptList) {
+          if (friend.userId == userId) {
+            friendProfile = this.acceptList[cnt]
+            this.acceptList.splice(cnt, 1)
+            break
+          }
+          cnt++
+        }
+        if (accept) {
+          this.friendList.push(friendProfile)
+        }
+        // これないとバグる
+        this.deleteDialog = false
+        this.loadingStatusDialog = false
+        return
       },
     },
   }
