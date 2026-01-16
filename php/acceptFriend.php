@@ -19,6 +19,7 @@ if (
 $myId = $_SERVER['HTTP_ID'];
 $targetId = $_SERVER['HTTP_TARGETID'];
 $accept = $_SERVER['HTTP_FRIENDACCEPT'];
+print_r($accept);
 
 $mySecretId = idToSecretId($myId);
 $targetSecretId = idToSecretId($targetId);
