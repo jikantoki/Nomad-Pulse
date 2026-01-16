@@ -413,6 +413,8 @@ div(style="height: 100%; width: 100%")
         searchFriendLoading: false,
         /** 友達検索画面のエラー表示 */
         searchFriendErrorMessage: '',
+        /** 環境変数 */
+        env: null as any,
       }
     },
     watch: {
@@ -455,6 +457,9 @@ div(style="height: 100%; width: 100%")
       },
     },
     async mounted () {
+      // @ts-ignore
+      this.env = import.meta.env as any
+
       /** ようこその復活 */
       const welcomeDialog = localStorage.getItem('welcomeDialog')
       if (welcomeDialog && welcomeDialog.toLowerCase() == 'true') {
@@ -676,6 +681,9 @@ div(style="height: 100%; width: 100%")
                   'lng': String(lng),
                   'batteryLevel': String(batteryLevel),
                   'batteryCharging': String(batteryCharging),
+                  'apiid': this.env.VUE_APP_API_ID,
+                  'apitoken': this.env.VUE_APP_API_TOKEN,
+                  'apipassword': this.env.VUE_APP_API_ACCESSKEY,
                 },
               })
             } catch (error) {
