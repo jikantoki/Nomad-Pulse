@@ -19,7 +19,6 @@ if (
 $myId = $_SERVER['HTTP_ID'];
 $targetId = $_SERVER['HTTP_TARGETID'];
 $accept = $_SERVER['HTTP_FRIENDACCEPT'] == 'true';
-print_r($accept);
 
 $mySecretId = idToSecretId($myId);
 $targetSecretId = idToSecretId($targetId);
@@ -28,7 +27,6 @@ $friendStatus = $accept ? true : false;
 
 $unixtime = time();
 
-print_r($friendStatus);
 if($friendStatus){
   SQL("
     update follow_list set
@@ -40,22 +38,20 @@ if($friendStatus){
     toUserId = '{$mySecretId}';
   ");
 } else {
-  $s = SQL("
+  SQL("
     delete from follow_list
     where
     fromUserId = '{$targetSecretId}'
     and
     toUserId = '{$mySecretId}';
   ");
-  print_r($s);
-  $s = SQL("
+  SQL("
     delete from follow_list
     where
     fromUserId = '{$mySecretId}'
     and
     toUserId = '{$targetSecretId}';
   ");
-  print_r($s);
 }
 
 echo json_encode([
