@@ -27,6 +27,7 @@ $friendStatus = $accept ? true : false;
 
 $unixtime = time();
 
+print_r($friendStatus);
 if($friendStatus){
   SQL("
     update follow_list set
