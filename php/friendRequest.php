@@ -49,12 +49,12 @@ $alreadyRequest1 = SQLfindSome('follow_list', [
 $alreadyRequest2 = SQLfindSome('follow_list', [
   [
     'key' => 'toUserId',
-    'value' => $fromRandId,
+    'value' => $toRandId,
     'func' => '='
   ],
   [
     'key' => 'fromUserId',
-    'value' => $toRandId,
+    'value' => $fromRandId,
     'func' => '='
   ]
 ]);
