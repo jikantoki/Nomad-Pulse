@@ -255,10 +255,8 @@ v-dialog(
           this.friendList.push(friendProfile)
         } else {
           for (const friend of this.friendList) {
-            console.log(friend.userId, userId)
             if (friend.userId == userId) {
               this.friendList.splice(cnt, 1)
-              console.log(friend)
               break
             }
             cnt++

@@ -38,20 +38,22 @@ if($friendStatus){
     toUserId = '{$mySecretId}';
   ");
 } else {
-  SQL("
+  $s = SQL("
     delete from follow_list
     where
     fromUserId = '{$targetSecretId}'
     and
     toUserId = '{$mySecretId}';
   ");
-  SQL("
+  print_r($s);
+  $s = SQL("
     delete from follow_list
     where
     fromUserId = '{$mySecretId}'
     and
     toUserId = '{$targetSecretId}';
   ");
+  print_r($s);
 }
 
 echo json_encode([
