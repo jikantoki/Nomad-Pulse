@@ -261,6 +261,10 @@ div(style="height: 100%; width: 100%")
             .icon-and-text
               v-icon mdi-magnify
               v-list-item-title 友達を探す
+          v-list-item.item( @click="$router.push('qrcode')" )
+            .icon-and-text
+              v-icon mdi-qrcode-scan
+              v-list-item-title QRコードで友達を探す
           v-list-item.item(
             @click="$router.push('/friendlist')"
             v-show="myProfile && myProfile.userId"

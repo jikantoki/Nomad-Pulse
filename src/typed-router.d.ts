@@ -24,6 +24,7 @@ declare module 'vue-router/auto-routes' {
     '/friendlist': RouteRecordInfo<'/friendlist', '/friendlist', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/password_reset': RouteRecordInfo<'/password_reset', '/password_reset', Record<never, never>, Record<never, never>>,
+    '/qrcode': RouteRecordInfo<'/qrcode', '/qrcode', Record<never, never>, Record<never, never>>,
     '/registar': RouteRecordInfo<'/registar', '/registar', Record<never, never>, Record<never, never>>,
     '/settings/': RouteRecordInfo<'/settings/', '/settings', Record<never, never>, Record<never, never>>,
     '/settings/developer-options': RouteRecordInfo<'/settings/developer-options', '/settings/developer-options', Record<never, never>, Record<never, never>>,
@@ -68,6 +69,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/password_reset.vue': {
       routes: '/password_reset'
+      views: never
+    }
+    'src/pages/qrcode.vue': {
+      routes: '/qrcode'
       views: never
     }
     'src/pages/registar.vue': {
