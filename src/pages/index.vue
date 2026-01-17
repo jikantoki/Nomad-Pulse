@@ -113,7 +113,14 @@ div(style="height: 100%; width: 100%")
       style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 24em; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
-        p.ml-2 {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
+        p.ml-2(
+          style="display: flex; align-items: center;"
+        )
+          img.mr-2(
+            :src="detailCardTarget.icon && detailCardTarget.icon.length ? detailCardTarget.icon : '/account_default.jpg'"
+            style="height: 1.5em; width: 1.5em; border-radius: 9999px;"
+            )
+          span {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
         v-spacer
         v-btn(
           text
