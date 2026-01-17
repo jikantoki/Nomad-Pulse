@@ -177,7 +177,7 @@ v-dialog(v-model="shareMyLinkDialog")
     v-card-text
       p.mb-4 以下のURLをコピーして、共有してください
       v-btn.mb-4(
-        @click="copyMyLink()"
+        @click="copy(this.myLink)"
         append-icon="mdi-content-copy"
         style="color: white;"
         color="var(--accent-color)"
@@ -208,8 +208,10 @@ v-dialog(v-model="followDialogMessage")
 
 <script>
   import { App } from '@capacitor/app'
+  import { Clipboard } from '@capacitor/clipboard'
   import QRCode from 'qrcode'
   import mixins from '~/mixins/mixins'
+
   export default {
     mixins: [mixins],
     data () {
@@ -338,10 +340,6 @@ v-dialog(v-model="followDialogMessage")
       App.removeAllListeners()
     },
     methods: {
-      /** URLをコピー */
-      copyMyLink () {
-        navigator.clipboard.writeText(this.myLink)
-      },
       /** 友達申請 */
       async friendRequest (userId) {
         this.followLoadingNow = true
@@ -371,6 +369,12 @@ v-dialog(v-model="followDialogMessage")
         } catch {}
         await setTimeout(() => {}, 500)
         this.followLoadingNow = false
+      },
+      /** クリップボードにコピー */
+      async copy (content) {
+        await Clipboard.write({
+          string: content,
+        })
       },
     },
   }

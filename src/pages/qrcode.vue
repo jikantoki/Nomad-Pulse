@@ -12,9 +12,27 @@ v-card(
       icon="mdi-close"
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
-    .qrcode-stream
-      QrcodeStream(@detect="readQrcode")
-    .my-16
+    p.text-h6.my-4(style="text-align: center;")
+      span QRコードスキャン中…
+      br
+      span カメラにQRコードを映してください
+    .qrcode-stream(style="background-color: white;position: relative;")
+      QrcodeStream(
+        @detect="readQrcode"
+        style="position: absolute;"
+        )
+      .scan-wrap(
+        style="width: 100%; height: 100%;z-index: 999;position: absolute;"
+      )
+    .btns.my-8(
+      style="display: flex; justify-content: center;"
+    )
+      v-btn(
+        @click="myQrDialog = true"
+        prepend-icon="mdi-qrcode"
+        style="color: white; background-color: rgb(var(--v-theme-primary));"
+      ) 自分のQRコードを表示
+      .my-16
 v-dialog(
   v-model="searchFriendLoading"
   persistent
@@ -52,12 +70,53 @@ v-dialog(
         @click="otherResultDialog = false"
         prepend-icon="mdi-close"
       ) 閉じる
+v-dialog(
+  v-model="myQrDialog"
+)
+  v-card(width="80vw")
+    v-card-title 私のQRコード
+    v-card-text
+      p.mb-4 以下のURLをコピーして、共有してください
+      v-btn.mb-4(
+        @click="copy(myLink)"
+        append-icon="mdi-content-copy"
+        style="color: white;"
+        color="var(--accent-color)"
+      ) コピー
+      pre.pa-4(
+        style="border-radius: var(--border-radius);"
+      ) {{ myLink }}
+      .canvas-area.my-4(
+        style="display: flex; justify-content: center;"
+      )
+        canvas#qr-canvas.ma-2(
+          v-show="!qrLoading"
+          style="border-radius: 10%; max-width: 20em; max-height: 20em;"
+        )
+        .qr-loading.ma-2(
+          v-show="qrLoading"
+          style="width: 70vw; height: 70vw; max-width: 20em; max-height: 20em; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+        )
+          v-progress-circular.my-4(
+            indeterminate
+            :size="64"
+            color="black"
+            )
+          p.my-4(
+            style="color: black;"
+          ) QRコード読み込み中…
+    v-card-actions
+      v-btn(
+        @click="myQrDialog = false"
+        prepend-icon="mdi-close"
+      ) 閉じる
 </template>
 
 <script lang="ts">
   import { Browser } from '@capacitor/browser'
   import { Clipboard } from '@capacitor/clipboard'
   import { Device } from '@capacitor/device'
+  import QRCode from 'qrcode'
   import { QrcodeStream } from 'vue-qrcode-reader'
 
   // @ts-ignore
@@ -75,9 +134,75 @@ v-dialog(
         searchResultDialog: false,
         otherResultDialog: false,
         resultValue: '',
+        myQrDialog: false,
+        qrLoading: false,
+        myProfile: null as any,
+        myUserId: null as null | string,
+        myLink: null as null | string,
       }
     },
+    watch: {
+      myQrDialog: {
+        handler: async function () {
+          await setTimeout(() => {}, 50)
+          this.qrLoading = true
+          this.myLink = `https://nomadpulse.enoki.xyz/user/${this.myUserId}?openExternalBrowser=1`
+
+          const canvas = document.querySelector('#qr-canvas') as any
+          if (!canvas) {
+            console.log('not defined canvas')
+            return false
+          }
+          const ctx = canvas.getContext('2d')
+          QRCode.toCanvas(
+            canvas,
+            this.myLink,
+            {
+              scale: 10,
+            },
+          )
+          canvas.style.height = '70vw'
+          canvas.style.width = '70vw'
+
+          const logo = new Image()
+          logo.src = '/icon.png'
+          logo.addEventListener('load', () => {
+            const actualCanvasWidth = canvas.width
+            const actualCanvasHeight = canvas.height
+            const logoDiameter = actualCanvasWidth * (15 / 70)
+
+            const logoWidth = logoDiameter
+            const logoHeight = logoDiameter
+
+            const startX = (actualCanvasWidth / 2) - (logoWidth / 2)
+            const startY = (actualCanvasHeight / 2) - (logoHeight / 2)
+
+            ctx.beginPath()
+            const rad = logoDiameter / 2
+            ctx.arc(actualCanvasWidth / 2, actualCanvasHeight / 2, rad, 0, Math.PI * 2, false)
+            ctx.fillStyle = '#FFFFFF'
+            ctx.fill()
+
+            ctx.drawImage(logo, startX, startY, logoWidth, logoHeight)
+          })
+
+          this.qrLoading = false
+        },
+      },
+    },
     async mounted () {
+      /** ログイン情報 */
+      const myProfile = localStorage.getItem('profile')
+      if (myProfile) {
+        this.myProfile = JSON.parse(myProfile)
+        if (this.myProfile?.lastGetLocationTime) {
+          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
+        }
+        if (this.myProfile?.userId) {
+          this.myUserId = this.myProfile.userId
+        }
+      }
+
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
       this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
@@ -149,7 +274,10 @@ v-dialog(
   height: calc(100vh - 40px - 16px)!important;
 }
 .qrcode-stream {
-  width: 100%;
-  height: calc(80vh - 40px - 16px);
+  width: 95%;
+  height: calc(60vh - 40px - 16px);
+  border-radius: 32px;
+  overflow: hidden;
+  justify-self: center;
 }
 </style>

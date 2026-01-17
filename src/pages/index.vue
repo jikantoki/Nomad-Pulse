@@ -103,8 +103,8 @@ div(style="height: 100%; width: 100%")
     .account-button.my-2
       v-btn(
         v-ripple
-        @click="searchFriendDialog = true"
-        icon="mdi-magnify"
+        @click="$router.push('/qrcode')"
+        icon="mdi-qrcode-scan"
         color="rgb(var(--v-theme-primary)"
         size="x-large"
       )

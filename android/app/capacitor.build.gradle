@@ -15,6 +15,7 @@ dependencies {
     implementation project(':capacitor-background-runner')
     implementation project(':capacitor-browser')
     implementation project(':capacitor-camera')
+    implementation project(':capacitor-clipboard')
     implementation project(':capacitor-device')
     implementation project(':capacitor-geolocation')
     implementation project(':capacitor-push-notifications')
