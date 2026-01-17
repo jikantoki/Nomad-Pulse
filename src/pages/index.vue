@@ -666,7 +666,7 @@ div(style="height: 100%; width: 100%")
         BackgroundGeolocation.addWatcher({
           backgroundMessage: 'バックグラウンドで位置情報を取得しています。タスクキルしないでください。',
           backgroundTitle: '位置情報取得中',
-          distanceFilter: 10,
+          distanceFilter: 5,
         }, (location, error) => {
           if (error) {
             if (error.code === 'NOT_AUTHORIZED') {
