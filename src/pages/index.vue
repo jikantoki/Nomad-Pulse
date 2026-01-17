@@ -8,47 +8,49 @@ div(style="height: 100%; width: 100%")
     @update:zoom="leaflet.zoom = $event"
     @update:center="leaflet.center = $event"
     :options="{ zoomControl: false }"
+    ref="map"
     )
     LTileLayer(
       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
     )
     //- 自分の現在地マーカー
-    LMarker(
-      :lat-lng="myLocation"
-      @click="detailCardTarget = myProfile"
-      )
-      LIcon(
-        :icon-size="[0,0]"
-        style="border: none;"
-        :icon-anchor="[16, 16]"
+    MarkerCluster
+      LMarker(
+        :lat-lng="myLocation"
+        @click="detailCardTarget = myProfile"
         )
-        div(style="display: flex; align-items: center; width: auto;")
-          img(
-            loading="lazy"
-            :src="myProfile.icon ?? '/account_default.jpg'"
-            style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
-            )
-          p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-            span {{ myProfile.name ?? myProfile.userId }}
-    LMarker(
-      v-for="(friend, cnt) of friendList"
-      :lat-lng="[friend.location.lat, friend.location.lng]"
-      @click="detailCardTarget = friend.friendProfile"
-      )
-      LIcon(
-        :icon-size="[0,0]"
-        style="border: none;"
-        :icon-anchor="[16, 16]"
+        LIcon(
+          :icon-size="[0,0]"
+          style="border: none;"
+          :icon-anchor="[16, 16]"
+          )
+          div(style="display: flex; align-items: center; width: auto;")
+            img(
+              loading="lazy"
+              :src="myProfile.icon ?? '/account_default.jpg'"
+              style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
+              )
+            p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
+              span {{ myProfile.name ?? myProfile.userId }}
+      LMarker(
+        v-for="(friend, cnt) of friendList"
+        :lat-lng="[friend.location.lat, friend.location.lng]"
+        @click="detailCardTarget = friend.friendProfile"
         )
-        div(style="display: flex; align-items: center; width: auto;")
-          img(
-            loading="lazy"
-            :src="friend.friendProfile.icon && friend.friendProfile.icon.length ? friend.friendProfile.icon : '/account_default.jpg'"
-            style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
-            )
-          p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-            span {{ friend.friendProfile.name ?? friend.friendProfile.userId }}
+        LIcon(
+          :icon-size="[0,0]"
+          style="border: none;"
+          :icon-anchor="[16, 16]"
+          )
+          div(style="display: flex; align-items: center; width: auto;")
+            img(
+              loading="lazy"
+              :src="friend.friendProfile.icon && friend.friendProfile.icon.length ? friend.friendProfile.icon : '/account_default.jpg'"
+              style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
+              )
+            p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
+              span {{ friend.friendProfile.name ?? friend.friendProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -378,6 +380,7 @@ div(style="height: 100%; width: 100%")
   import { Geolocation } from '@capacitor/geolocation'
   import { Toast } from '@capacitor/toast'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
+  import MarkerCluster from '@/components/MarkerCluster.vue'
   import muniArray from '@/js/muni'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
@@ -390,6 +393,7 @@ div(style="height: 100%; width: 100%")
       LMarker,
       LTileLayer,
       LIcon,
+      MarkerCluster,
     },
     mixins: [mixins],
     data () {
@@ -664,10 +668,8 @@ div(style="height: 100%; width: 100%")
           backgroundTitle: '位置情報取得中',
         }, (location, error) => {
           if (error) {
-            if (error.code === 'NOT_AUTHORIZED' && window.confirm(
-              'バックグラウンドでの位置情報権限が必要なので、許可してください！',
-            )) {
-              BackgroundGeolocation.openSettings()
+            if (error.code === 'NOT_AUTHORIZED') {
+              this.requestBackgroundDialog = true
             }
             return console.log(error)
           }
