@@ -41,14 +41,14 @@ foreach ($res as $friend) {
     $friendRealId = secretIdToId($friend['toUserId']);
     $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['toUserId']);
 
-    if($withLocation) {
+    if($withLocation && $friend['status'] == 'friend') {
       $res[$cnt]['location'] = SQLfind('location_list','secretId',$friend['toUserId']);
     }
   } else {
     $friendRealId = secretIdToId($friend['fromUserId']);
     $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['fromUserId']);
 
-    if($withLocation) {
+    if($withLocation && $friend['status'] == 'friend') {
       $res[$cnt]['location'] = SQLfind('location_list','secretId',$friend['fromUserId']);
     }
   }
