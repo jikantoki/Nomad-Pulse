@@ -31,6 +31,24 @@ div(style="height: 100%; width: 100%")
             )
           p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
             span {{ myProfile.name ?? myProfile.userId }}
+    LMarker(
+      v-for="(friend, cnt) of friendList"
+      :lat-lng="[friend.location.lat, friend.location.lng]"
+      @click="detailCardTarget = friend.friendProfile"
+      )
+      LIcon(
+        :icon-size="[0,0]"
+        style="border: none;"
+        :icon-anchor="[16, 16]"
+        )
+        div(style="display: flex; align-items: center; width: auto;")
+          img(
+            loading="lazy"
+            :src="friend.friendProfile.icon && friend.friendProfile.icon.length ? friend.friendProfile.icon : '/account_default.jpg'"
+            style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
+            )
+          p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
+            span {{ friend.friendProfile.name ?? friend.friendProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -437,6 +455,8 @@ div(style="height: 100%; width: 100%")
         acceptDialog: false,
         /** setIntervalしたものをクリアする用 */
         updateLocationInterval: null,
+        /** 友達リスト */
+        friendList: [] as any[],
       }
     },
     watch: {
@@ -532,6 +552,16 @@ div(style="height: 100%; width: 100%")
           location: null,
           battery: null,
           guest: true,
+        }
+      }
+
+      const locationList = localStorage.getItem('locationList')
+      if (locationList) {
+        this.friendList = JSON.parse(locationList)
+        let cnt = 0
+        for (const friend of this.friendList) {
+          this.friendList[cnt].friendProfile.lastGetLocationTime = new Date(friend.location.unixtime * 1000)
+          cnt++
         }
       }
 
@@ -676,21 +706,16 @@ div(style="height: 100%; width: 100%")
         this.acceptDialog = true
       }
 
-      console.log('setInterval')
-      /** 5秒に1回、サーバーと通信して位置情報を更新 */
-      this.updateLocationInterval = setInterval(async () => {
-        const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
-          id: this.myProfile.userId,
-          token: this.myProfile.userToken,
-          withLocation: true,
-        })
-        console.log(res.body)
-      }, 5000)
+      /** 友達の現在地を更新 */
+      this.updateLocation()
+      /** 10秒に1回、サーバーと通信して位置情報を更新 */
+      this.updateLocationInterval = setInterval(
+        async () => this.updateLocation(),
+        10_000)
     },
     unmounted () {
       App.removeAllListeners()
       clearInterval(this.updateLocationInterval)
-      console.log('clearInterval')
     },
     methods: {
       /** 位置情報監視のコールバック */
@@ -885,6 +910,34 @@ div(style="height: 100%; width: 100%")
           return
         }
         this.searchFriendLoading = false
+      },
+      async updateLocation () {
+        const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
+          id: this.myProfile.userId,
+          token: this.myProfile.userToken,
+          withLocation: true,
+        })
+        if (res && res.body && res.body.friendList) {
+          const friendList = []
+          // friend.friendProfileがdetailCardTargetに反映される
+          for (const friend of res.body.friendList) {
+            if (friend.status == 'friend' && friend.location) {
+              friend.friendProfile.userId = friend.friendRealId
+              friend.friendProfile.battery = {
+                parsent: friend.location.batteryLevel,
+                chargingNow: friend.location.batteryCharging ? true : false,
+              }
+              friend.friendProfile.location = [
+                friend.location.lat,
+                friend.location.lng,
+              ]
+              friend.friendProfile.lastGetLocationTime = new Date(friend.location.unixtime * 1000)
+              friendList.push(friend)
+            }
+          }
+          this.friendList = friendList
+          localStorage.setItem('locationList', JSON.stringify(friendList))
+        }
       },
     },
   }
