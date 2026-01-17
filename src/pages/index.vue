@@ -50,7 +50,7 @@ div(style="height: 100%; width: 100%")
               style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
               )
             p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-              span {{ friend.friendProfile.name ?? friend.friendProfile.userId }}
+              span {{ friend.friendProfile.name && friend.friendProfile.name.length ? friend.friendProfile.nae : friend.friendProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
