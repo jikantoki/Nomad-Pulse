@@ -666,6 +666,7 @@ div(style="height: 100%; width: 100%")
         BackgroundGeolocation.addWatcher({
           backgroundMessage: 'バックグラウンドで位置情報を取得しています。タスクキルしないでください。',
           backgroundTitle: '位置情報取得中',
+          distanceFilter: 10,
         }, (location, error) => {
           if (error) {
             if (error.code === 'NOT_AUTHORIZED') {
@@ -740,6 +741,11 @@ div(style="height: 100%; width: 100%")
             this.myProfile.lastGetLocationTime = lastGetMyLocationTime
             this.myProfile.location = [lat, lng]
             localStorage.setItem('profile', JSON.stringify(this.myProfile))
+          }
+          const now = new Date()
+          if (this.isWithin10Seconds(lastGetMyLocationTime, now)) {
+            console.log('10秒以内の位置情報更新はサーバーに送信しません')
+            return
           }
 
           /** バッテリー情報を取得 */
@@ -920,6 +926,7 @@ div(style="height: 100%; width: 100%")
         }
         this.searchFriendLoading = false
       },
+      /** 友達の位置情報を取得して更新 */
       async updateLocation () {
         const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
           id: this.myProfile.userId,
@@ -947,6 +954,17 @@ div(style="height: 100%; width: 100%")
           this.friendList = friendList
           localStorage.setItem('locationList', JSON.stringify(friendList))
         }
+      },
+      /**
+       * 2つのDateオブジェクトの差が10秒以内か判定する
+       * @param {Date} date1 - 比較する1つ目の日付
+       * @param {Date} date2 - 比較する2つ目の日付
+       * @returns {boolean} 10秒以内ならtrue
+       */
+      isWithin10Seconds (date1: Date, date2: Date) {
+        // 10秒 = 10000ミリ秒
+        const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime())
+        return diffInMilliseconds <= 10_000
       },
     },
   }
