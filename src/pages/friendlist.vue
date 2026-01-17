@@ -233,13 +233,12 @@ v-dialog(
        */
       async accept (userId: string, accept: boolean) {
         this.loadingStatusDialog = true
-        const res = await this.sendAjaxWithAuth('/acceptFriend.php', {
+        await this.sendAjaxWithAuth('/acceptFriend.php', {
           id: this.myProfile.userId,
           token: this.myProfile.userToken,
           targetId: userId,
           friendAccept: accept,
         })
-        console.log(res.body)
         let cnt = 0
         let friendProfile = {}
         for (const friend of this.acceptList) {

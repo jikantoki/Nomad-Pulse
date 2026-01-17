@@ -19,6 +19,13 @@ if (
 $id = $_SERVER['HTTP_ID'];
 $secretId = idToSecretId($id);
 
+/** 友達に関しては位置情報も送信する */
+$withLocation = false;
+if(isset($_SERVER['HTTP_WITHLOCATION']) &&
+  $_SERVER['HTTP_WITHLOCATION'] == 'true'){
+  $withLocation = true;
+}
+
 $res = SQLfetchAll("
 select * from follow_list where
 fromUserId = '{$secretId}'
@@ -33,13 +40,22 @@ foreach ($res as $friend) {
   if ($friend['fromUserId'] == $secretId) {
     $friendRealId = secretIdToId($friend['toUserId']);
     $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['toUserId']);
+
+    if($withLocation) {
+      $res[$cnt]['location'] = SQLfind('location_list','secretId',$friend['toUserId']);
+    }
   } else {
     $friendRealId = secretIdToId($friend['fromUserId']);
     $res[$cnt]['friendProfile'] = SQLfind('user_profile_list', 'secretId', $friend['fromUserId']);
+
+    if($withLocation) {
+      $res[$cnt]['location'] = SQLfind('location_list','secretId',$friend['fromUserId']);
+    }
   }
   $res[$cnt]['friendRealId'] = $friendRealId;
   $cnt++;
 }
+
 
 echo json_encode([
   'status' => 'ok',

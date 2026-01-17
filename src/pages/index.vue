@@ -435,6 +435,8 @@ div(style="height: 100%; width: 100%")
         acceptList: [] as any,
         /** 承認してほしい友達がいるダイアログ */
         acceptDialog: false,
+        /** setIntervalしたものをクリアする用 */
+        updateLocationInterval: null,
       }
     },
     watch: {
@@ -516,7 +518,6 @@ div(style="height: 100%; width: 100%")
           profile.battery = this.myProfile?.battery
           localStorage.setItem('profile', JSON.stringify(profile))
           this.myProfile = profile
-          console.log(profile)
         }, 100)
       } else {
         this.myProfile = {
@@ -659,6 +660,7 @@ div(style="height: 100%; width: 100%")
       const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
         id: this.myProfile.userId,
         token: this.myProfile.userToken,
+        withLocation: true,
       })
       if (res && res.body) {
         const allFriendList = res.body.friendList
@@ -673,9 +675,22 @@ div(style="height: 100%; width: 100%")
       if (this.acceptList.length > 0 && history.length <= 2) {
         this.acceptDialog = true
       }
+
+      console.log('setInterval')
+      /** 5秒に1回、サーバーと通信して位置情報を更新 */
+      this.updateLocationInterval = setInterval(async () => {
+        const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
+          id: this.myProfile.userId,
+          token: this.myProfile.userToken,
+          withLocation: true,
+        })
+        console.log(res.body)
+      }, 5000)
     },
     unmounted () {
       App.removeAllListeners()
+      clearInterval(this.updateLocationInterval)
+      console.log('clearInterval')
     },
     methods: {
       /** 位置情報監視のコールバック */
