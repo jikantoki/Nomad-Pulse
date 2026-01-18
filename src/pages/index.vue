@@ -452,6 +452,8 @@ div(style="height: 100%; width: 100%")
         } | null | undefined,
         /** 自分の位置情報を最後にいつ取得したか？ */
         lastGetMyLocationTime: null as Date | null,
+        /** 最後にサーバーに位置情報を送信した時間 */
+        lastUpdateMyLocationTime: new Date(0),
         /** バックグラウンド許可が欲しいダイアログフラグ */
         requestBackgroundDialog: false,
         /** 友達検索ダイアログ */
@@ -747,10 +749,12 @@ div(style="height: 100%; width: 100%")
             localStorage.setItem('profile', JSON.stringify(this.myProfile))
           }
           const now = new Date()
-          if (this.isWithin10Seconds(lastGetMyLocationTime, now)) {
+          if (this.isWithin10Seconds(this.lastUpdateMyLocationTime, now)) {
             console.log('10秒以内の位置情報更新はサーバーに送信しません')
             return
           }
+          this.lastUpdateMyLocationTime = now
+          console.log('サーバーアップロード中…')
 
           /** バッテリー情報を取得 */
           const info = await Device.getBatteryInfo()
