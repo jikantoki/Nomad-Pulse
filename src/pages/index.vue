@@ -615,9 +615,12 @@ div(style="height: 100%; width: 100%")
         })
       } else {
         /** スマホの場合、この方法で位置情報と通知を許可してもらう */
-        const permission = await BackgroundRunner.checkPermissions()
-        if (permission.geolocation !== 'granted') {
-          this.requestGeoPermissionDialog = true
+        const perm = await Geolocation.checkPermissions()
+        if (perm.coarseLocation != 'granted' && perm.location != 'granted') {
+          const permission = await BackgroundRunner.checkPermissions()
+          if (permission.geolocation !== 'granted') {
+            this.requestGeoPermissionDialog = true
+          }
         }
       }
 
@@ -672,14 +675,16 @@ div(style="height: 100%; width: 100%")
         BackgroundGeolocation.addWatcher({
           backgroundMessage: 'バックグラウンドで位置情報を取得しています。タスクキルしないでください。',
           backgroundTitle: '位置情報取得中',
-          distanceFilter: 5,
+          distanceFilter: 0,
+          requestPermissions: false,
         }, (location, error) => {
-          if (error) {
-            if (error.code === 'NOT_AUTHORIZED') {
-              this.requestBackgroundDialog = true
-            }
-            return console.log(error)
-          }
+          // あいまいな位置情報でも誤検知するので一旦消している
+          // if (error) {
+          //   if (error.code === 'NOT_AUTHORIZED') {
+          //     this.requestBackgroundDialog = true
+          //   }
+          //   return console.log(error)
+          // }
 
           const position = {
             coords: {
