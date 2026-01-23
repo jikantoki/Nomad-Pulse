@@ -1,4 +1,6 @@
 <?php
+require_once DIR_ROOT . '/env.php';
+
 //メール関係
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -23,7 +25,7 @@ function sendMail($to, $title, $message)
     //メールによる設定
     $mail->addAddress($to);
     $mail->Subject = $title;
-    $mail->Body = $message;
+    $mail->Body = "{$mailHeader}<br>{$message}<br>{$mailFooter}";
 
     //送信
     $mail->send();
