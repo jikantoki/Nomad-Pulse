@@ -474,8 +474,6 @@ div(style="height: 100%; width: 100%")
         updateLocationInterval: null,
         /** 友達リスト */
         friendList: [] as any[],
-        /** 一時的な位置情報格納場所 */
-        lastGetPosition: {} as any,
       }
     },
     watch: {
@@ -677,7 +675,7 @@ div(style="height: 100%; width: 100%")
         BackgroundGeolocation.addWatcher({
           backgroundMessage: 'バックグラウンドで位置情報を取得しています。タスクキルしないでください。',
           backgroundTitle: '位置情報取得中',
-          distanceFilter: 0,
+          distanceFilter: 5,
           requestPermissions: false,
         }, (location, error) => {
           // あいまいな位置情報でも誤検知するので一旦消している
@@ -694,7 +692,10 @@ div(style="height: 100%; width: 100%")
               longitude: location?.longitude,
             },
           }
-          this.lastGetPosition = position
+          this.lastGetLocation = [
+            position.coords.latitude,
+            position.coords.longitude,
+          ]
           // this.watchPosition(position)
           return location
         }).then(watcherId => {
@@ -702,20 +703,15 @@ div(style="height: 100%; width: 100%")
         })
       }
 
-      /** あとから追加したのでコードが汚い */
-      if (this.lastGetLocation[0]) {
-        this.lastGetPosition = {
-          coords: {
-            latitude: this.lastGetLocation[0],
-            longitude: this.lastGetLocation[1],
-          },
-        }
-      }
-
       // 5秒に一回、位置情報に関わらずサーバーにリクエストを送る
       setInterval(() => {
-        if (this.lastGetPosition && this.lastGetPosition.coords) {
-          this.watchPosition(this.lastGetPosition)
+        if (this.lastGetLocation[0]) {
+          this.watchPosition({
+            coords: {
+              latitude: this.lastGetLocation[0],
+              longitude: this.lastGetLocation[1],
+            },
+          })
         }
       }, 1000 * 5)
 
