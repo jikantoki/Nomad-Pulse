@@ -1,5 +1,5 @@
 <?php
-require_once '../../env.php'; //環境変数読み込み
+require_once DIR_ROOT . '/env.php';
 
 //メール関係
 
@@ -8,6 +8,10 @@ use PHPMailer\PHPMailer\Exception;
 
 function sendMail($to, $title, $message)
 {
+  $_ = function ($s) {
+    return $s;
+  };
+
   try {
     //全メール共通設定
     $mail = new PHPMailer(true);
@@ -25,7 +29,7 @@ function sendMail($to, $title, $message)
     //メールによる設定
     $mail->addAddress($to);
     $mail->Subject = $title;
-    $mail->Body = "{$mailHeader}<br>{$message}<br>{$mailFooter}";
+    $mail->Body = "{$_(MailHeader)}<br>{$message}<br>{$_(MailFooter)}";
 
     //送信
     $mail->send();

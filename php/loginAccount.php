@@ -31,7 +31,11 @@ if ($token) {
   ]);
   $secretId = idToSecretId($id);
   $mailAddress = secretIdToMailAddress($secretId);
-  sendMail($mailAddress, 'ログインがあったよ！', '<h1>ハッハッハあああ</h1><p>本文</p>');
+  sendMail($mailAddress, 'ログインがあったよ！', "
+  <p>ご利用のアカウントで新規のログインを検知しました。</p>
+  <br>
+  <p>もし身に覚えがない場合は、今すぐパスワードを変更してください。</p>
+  ");
   SQLupdate('user_secret_list', 'otp', null, 'secretId', $secretId);
 } else {
   echo json_encode([
