@@ -8,10 +8,6 @@ use PHPMailer\PHPMailer\Exception;
 
 function sendMail($to, $title, $message)
 {
-  $_ = function ($s) {
-    return $s;
-  };
-
   try {
     //全メール共通設定
     $mail = new PHPMailer(true);
@@ -29,7 +25,7 @@ function sendMail($to, $title, $message)
     //メールによる設定
     $mail->addAddress($to);
     $mail->Subject = $title;
-    $mail->Body = "{$_(MailHeader)}<br>{$message}<br>{$_(MailFooter)}";
+    $mail->Body = MailHeader . "<br>{$message}<br>" . MailFooter;
 
     //送信
     $mail->send();
