@@ -702,6 +702,17 @@ div(style="height: 100%; width: 100%")
         })
       }
 
+      /** あとから追加したのでコードが汚い */
+      if (this.lastGetLocation[0]) {
+        this.lastGetPosition = {
+          coords: {
+            latitude: this.lastGetLocation[0],
+            longitude: this.lastGetLocation[1],
+          },
+        }
+      }
+
+      // 5秒に一回、位置情報に関わらずサーバーにリクエストを送る
       setInterval(() => {
         if (this.lastGetPosition && this.lastGetPosition.coords) {
           this.watchPosition(this.lastGetPosition)
