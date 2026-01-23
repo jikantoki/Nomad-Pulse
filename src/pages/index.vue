@@ -50,7 +50,7 @@ div(style="height: 100%; width: 100%")
               style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
               )
             p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-              span {{ friend.friendProfile.name && friend.friendProfile.name.length ? friend.friendProfile.nae : friend.friendProfile.userId }}
+              span {{ friend.friendProfile.name && friend.friendProfile.name.length ? friend.friendProfile.name : friend.friendProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -474,6 +474,8 @@ div(style="height: 100%; width: 100%")
         updateLocationInterval: null,
         /** 友達リスト */
         friendList: [] as any[],
+        /** 一時的な位置情報格納場所 */
+        lastGetPosition: {} as any,
       }
     },
     watch: {
@@ -687,12 +689,19 @@ div(style="height: 100%; width: 100%")
               longitude: location?.longitude,
             },
           }
-          this.watchPosition(position)
+          this.lastGetPosition = position
+          // this.watchPosition(position)
           return location
         }).then(watcherId => {
           localStorage.setItem('watcherId', watcherId)
         })
       }
+
+      setInterval(() => {
+        if (this.lastGetPosition && this.lastGetPosition.coords) {
+          this.watchPosition(this.lastGetPosition)
+        }
+      }, 1000 * 5)
 
       /** 現在地を取得し、地図の中心も移動 */
       await this.setCurrentPosition()
@@ -749,10 +758,10 @@ div(style="height: 100%; width: 100%")
             localStorage.setItem('profile', JSON.stringify(this.myProfile))
           }
           const now = new Date()
-          if (this.isWithin10Seconds(this.lastUpdateMyLocationTime, now)) {
-            console.log('10秒以内の位置情報更新はサーバーに送信しません')
-            return
-          }
+          // if (this.isWithin10Seconds(this.lastUpdateMyLocationTime, now)) {
+          //   console.log('10秒以内の位置情報更新はサーバーに送信しません')
+          //   return
+          // }
           this.lastUpdateMyLocationTime = now
           console.log('サーバーアップロード中…')
 
