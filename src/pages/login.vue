@@ -126,6 +126,7 @@
               this.errorMessage = null
               this.pageTitle = 'メールに送信したトークンを入力'
             } else {
+              console.log(e)
               this.errorMessage = 'ユーザー名またはパスワードが間違っています'
             }
             this.loading = false

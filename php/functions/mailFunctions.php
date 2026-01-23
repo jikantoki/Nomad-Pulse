@@ -1,5 +1,5 @@
 <?php
-require_once DIR_ROOT . '/env.php';
+require_once '../../env.php'; //環境変数読み込み
 
 //メール関係
 
