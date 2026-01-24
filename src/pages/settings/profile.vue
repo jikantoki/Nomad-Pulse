@@ -37,6 +37,7 @@ v-card(
           img.icon-img.cover-img(
             v-if="myProfile.icon"
             :src="myProfile.icon"
+            onerror="this.src='/account_default.jpg'"
             )
           img.icon-img.cover-img(
             v-else

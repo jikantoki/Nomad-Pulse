@@ -16,7 +16,10 @@ v-card(
       style="display: flex; flex-direction: column; align-items: center; gap: 1em; margin-bottom: 1em;"
     )
       .account-img
-        img(src="/icon.png" style="height: 8em; width: 8em;")
+        img(
+          src="/icon.png"
+          style="height: 8em; width: 8em;"
+          )
       .account-info(
         style="text-align: center;"
       )

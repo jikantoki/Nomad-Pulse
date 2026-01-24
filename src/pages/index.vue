@@ -104,6 +104,7 @@ div(style="height: 100%; width: 100%")
           loading="lazy"
           :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
           style="height: 4em; width: 4em; border-radius: 9999px; border: solid 2px #000;"
+          onerror="this.src='/account_default.jpg'"
           )
     .account-button.my-2
       v-btn(
@@ -126,6 +127,7 @@ div(style="height: 100%; width: 100%")
           img.mr-2(
             :src="detailCardTarget.icon && detailCardTarget.icon.length ? detailCardTarget.icon : '/account_default.jpg'"
             style="height: 1.5em; width: 1.5em; border-radius: 9999px;"
+            onerror="this.src='/account_default.jpg'"
             )
           span {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
         v-spacer
@@ -229,6 +231,7 @@ div(style="height: 100%; width: 100%")
             img(
               :src="myProfile && myProfile.icon ? myProfile.icon : '/account_default.jpg'"
               style="height: 8em; width: 8em; border-radius: 9999px;"
+              onerror="this.src='/account_default.jpg'"
               )
           .account-info(
             style="text-align: center;"

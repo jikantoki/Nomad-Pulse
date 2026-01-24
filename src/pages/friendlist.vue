@@ -35,6 +35,7 @@ v-card(
             img(
               v-if="friend.icon"
               :src="friend.icon"
+              onerror="this.src='/account_default.jpg'"
             )
             img(
               v-else
@@ -71,6 +72,7 @@ v-card(
             img(
               v-if="friend.icon"
               :src="friend.icon"
+              onerror="this.src='/account_default.jpg'"
             )
             img(
               v-else
