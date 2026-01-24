@@ -7,7 +7,7 @@ export default {
    * @param {string} metaKey メタタグのキー（og:titleとかdescriptionとか）
    * @param {string} property セットしたい値
    */
-  updateMeta: (metaKey, property) => {
+  updateMeta: (metaKey: string, property: string) => {
     let returnCode
     const metaName = document.querySelector('meta[name="' + metaKey + '"]')
     if (metaName) {
@@ -32,7 +32,7 @@ export default {
    * @param {string} color カラーコードまたは色名
    * @returns 更新できたら0、無理だったら1
    */
-  setStatusColor: color => {
+  setStatusColor: (color: string) => {
     const theme = document.querySelector('meta[name="theme-color"]')
     if (theme) {
       theme.setAttribute('content', color)

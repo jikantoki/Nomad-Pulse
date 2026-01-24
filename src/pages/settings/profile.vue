@@ -121,7 +121,6 @@ v-dialog(
   import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
   import { Device } from '@capacitor/device'
 
-  // @ts-ignore
   import mixins from '@/mixins/mixins'
 
   export default {
@@ -183,13 +182,13 @@ v-dialog(
 
         try {
           const res = await this.sendAjaxWithAuth('/updateProfile.php', {
-            id: this.myProfile.userId,
-            token: this.myProfile.userToken,
+            id: this.myProfile?.userId,
+            token: this.myProfile?.userToken,
           }, {
-            icon: this.myProfile.icon,
-            coverImg: this.myProfile.coverImg,
-            name: this.myProfile.name,
-            message: this.myProfile.message,
+            icon: this.myProfile?.icon,
+            coverImg: this.myProfile?.coverImg,
+            name: this.myProfile?.name,
+            message: this.myProfile?.message,
           })
           let iconUrl = null
           let coverImgUrl = null

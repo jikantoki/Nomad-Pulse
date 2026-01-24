@@ -135,7 +135,6 @@ v-dialog(
 
 <script lang="ts">
   import { Device } from '@capacitor/device'
-  // @ts-ignore
   import mixins from '@/mixins/mixins'
 
   export default {
@@ -159,6 +158,8 @@ v-dialog(
         friendList: [] as any[],
         /** ステータス変更処理中ダイアログ */
         loadingStatusDialog: false,
+        developerOptionEnabled: false,
+        isAndroid15OrHigher: false,
       }
     },
     async mounted () {

@@ -2,35 +2,34 @@
  * ここに記述したものはVueの機能として使える
  * しかもどのファイルでも読み込める
  */
-import ajaxFunctions from '~/js/ajaxFunctions'
+import { defineComponent } from 'vue'
+import ajaxFunctions from '@/js/ajaxFunctions'
 // import Functions from '~/js/Functions'
 import PackageJson from '../../package.json'
 
-export default {
+export default defineComponent({
   components: {},
   data () {
     return {
       cookieAllowed: false,
       PackageJson,
-      env: null,
+      env: null as any,
     }
   },
   computed: {
-    availableLocales () {
-      return this.$i18n.availableLocales.filter(
-        i => i.code !== this.$i18n.locale,
-      )
-    },
+    // availableLocales () {
+    //   return this.$i18n.availableLocales.filter(
+    //     i => i.code !== this.$i18n.locale,
+    //   )
+    // },
   },
   mounted () {
     const isAllow = localStorage.cookieAllowed === 'true'
     this.cookieAllowed = isAllow
-    // eslint-disable-next-line unicorn/no-this-assignment
-    const vues = this
     const aTags = document.querySelectorAll('a')
     for (const aTag of aTags) {
       if (aTag.href !== '') {
-        aTag.addEventListener('click', function () {
+        aTag.addEventListener('click', () => {
           const now = new URL(window.location.href).host
           const next = new URL(aTag.href).host
           let to = aTag.href
@@ -38,8 +37,8 @@ export default {
             const next = new URL(aTag.href)
             to = next.pathname + next.hash + next.search
           }
-          vues.a(to)
-          event.preventDefault()
+          this.a(to)
+          event?.preventDefault()
           return false
         })
       }
@@ -63,7 +62,7 @@ export default {
      * @param {object} sendObject 送りたいオブジェクト
      * @param {bool} isPost true（デフォ）ならPOST、falseでGET
      */
-    sendAjaxWithAuth (url, header = null, sendObject, isPost = true) {
+    sendAjaxWithAuth (url: string, header = null as any, sendObject = null as any, isPost = true) {
       const authHeader = {
         apiid: this.env.VUE_APP_API_ID,
         apitoken: this.env.VUE_APP_API_TOKEN,
@@ -71,12 +70,17 @@ export default {
       }
       let hd = []
       hd = this.isObject(header) ? Object.assign(header, authHeader) : authHeader
-      return this.sendAjax(
+      // @ts-ignore
+      const res: {
+        body: any
+        isJSON: boolean
+      } = this.sendAjax(
         this.env.VUE_APP_API_HOST + url,
         sendObject,
         hd,
         isPost,
       )
+      return res
     },
     /**
      * <p>aタグと同じ動きをするし、pjaxになる</p>
@@ -84,15 +88,15 @@ export default {
      * @param {string} url 転送したいURL（ルートからのパス）
      * @returns {int} 内部リンクなら0、外部ドメインなら1
      */
-    a (url) {
+    a (url: string) {
       if (url.slice(0, 4) === 'http') {
         window.open(url, '_blank')
         return 1
       } else {
         this.$router.push(url)
-        if (this.drawer) {
-          this.drawer = false
-        }
+        // if (this.drawer) {
+        //   this.drawer = false
+        // }
         return 0
       }
     },
@@ -101,7 +105,7 @@ export default {
      * @param {string} filePath ファイルのパス
      * @returns 0
      */
-    download (filePath, name) {
+    download (filePath: string, name: string) {
       if (!name) {
         name = filePath
       }
@@ -117,7 +121,7 @@ export default {
      * @param {int, float} number 変換したい数値
      * @returns 正の値
      */
-    unsigned (number) {
+    unsigned (number: number) {
       return number < 0 ? number * -1 : number
     },
     /**
@@ -125,7 +129,7 @@ export default {
      * @param {string} name 取得したいCookieのキー
      * @returns キーがあればvalue、無ければnull
      */
-    getCookie (name) {
+    getCookie (name: string) {
       const c = new RegExp(name + '=[^;]+').exec(document.cookie)
       return c ? c[0].replace(name + '=', '') : null
     },
@@ -152,7 +156,7 @@ export default {
      * @param {*} value 設定したい値
      * @returns OKだったらTrue、許可がなかったらFalse
      */
-    setCookie (key, value) {
+    setCookie (key: string, value: any) {
       if (this.cookieAllowed) {
         // eslint-disable-next-line unicorn/no-document-cookie
         document.cookie = `${key}=${value};`
@@ -187,12 +191,14 @@ export default {
      * @param {string} myUserId 自分のユーザーのID
      * @returns アカウントの公開情報
      */
-    async getProfile (targetUserId, myUserId = null, myUserToken = null) {
+    async getProfile (targetUserId: string,
+      myUserId = null as string | null,
+      myUserToken = null as string | null) {
       const profile = await this.sendAjaxWithAuth('/getProfile.php', {
         id: myUserId,
         token: myUserToken,
         targetId: targetUserId,
-      })
+      }) as any
       const res = profile.body.res
       // eslint-disable-next-line unicorn/prefer-ternary
       if (res) {
@@ -205,6 +211,11 @@ export default {
           name: res.name === '' ? null : res.name,
           message: res.message === '' ? null : res.message,
           friendStatus: profile.body.friendStatus,
+          userToken: null as any,
+          lastGetLocationTime: null as any,
+          location: null as any,
+          battery: null as any,
+          guest: null as any,
         }
       } else {
         // 存在しない
@@ -216,7 +227,7 @@ export default {
      * @param {string} locale 言語名
      * @returns string
      */
-    arrangeLocale (locale) {
+    arrangeLocale (locale: string) {
       if (!locale) {
         return null
       }
@@ -236,7 +247,7 @@ export default {
       }
     },
     /** 連想配列かどうか？（T/F） */
-    isObject (obj) {
+    isObject (obj: any) {
       return obj instanceof Object && !(Array.isArray(obj)) ? true : false
     },
 
@@ -247,7 +258,7 @@ export default {
      * @param {*} obj エラーを無効化したい変数
      * @returns objがtrueなら1
      */
-    nulling (obj) {
+    nulling (obj: any) {
       if (obj) {
         return 1
       }
@@ -257,4 +268,4 @@ export default {
       return 7_095_110
     },
   },
-}
+})

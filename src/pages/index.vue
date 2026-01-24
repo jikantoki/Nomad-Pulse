@@ -28,11 +28,11 @@ div(style="height: 100%; width: 100%")
           div(style="display: flex; align-items: center; width: auto;")
             img(
               loading="lazy"
-              :src="myProfile.icon ?? '/account_default.jpg'"
+              :src="myProfile?.icon ?? '/account_default.jpg'"
               style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
               )
             p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-              span {{ myProfile.name ?? myProfile.userId }}
+              span(v-if="myProfile") {{ myProfile.name ?? myProfile.userId }}
       LMarker(
         v-for="(friend, cnt) of friendList"
         :lat-lng="[friend.location.lat, friend.location.lng]"
@@ -43,7 +43,10 @@ div(style="height: 100%; width: 100%")
           style="border: none;"
           :icon-anchor="[16, 16]"
           )
-          div(style="display: flex; align-items: center; width: auto;")
+          div(
+            style="display: flex; align-items: center; width: auto;"
+            :class="(diffSeconds(friend.friendProfile.lastGetLocationTime)) > 60 * 60 ? 'opacity05' : ''"
+            )
             img(
               loading="lazy"
               :src="friend.friendProfile.icon && friend.friendProfile.icon.length ? friend.friendProfile.icon : '/account_default.jpg'"
@@ -391,6 +394,27 @@ div(style="height: 100%; width: 100%")
   import 'leaflet/dist/leaflet.css'
   const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>('BackgroundGeolocation')
 
+  interface profile {
+    [key: string]: any
+    coverImg: string | null
+    createdAt: number | null
+    icon: string | null
+    message: string | null
+    name: string | null
+    status: string | null
+    userId: string
+    userToken: string | null | undefined
+    lastGetLocationTime: Date | null
+    location: [
+      lat: number,
+      lng: number,
+    ] | null
+    battery: {
+      parsent: number
+      chargingNow: boolean | undefined
+    } | null | undefined
+    guest: boolean | undefined
+  }
   export default {
     components: {
       LMap,
@@ -430,26 +454,7 @@ div(style="height: 100%; width: 100%")
         /** 自分のユーザーID */
         myUserId: null as string | null,
         /** 自分のプロフィール */
-        myProfile: null as {
-          coverImg: string | null
-          createdAt: number | null
-          icon: string | null
-          message: string | null
-          name: string | null
-          status: string | null
-          userId: string
-          userToken: string | null | undefined
-          lastGetLocationTime: Date | null
-          location: [
-            lat: number,
-            lng: number,
-          ] | null
-          battery: {
-            parsent: number
-            chargingNow: boolean | undefined
-          } | null
-          guest: boolean | undefined
-        } | null | undefined,
+        myProfile: null as profile | null | undefined,
         /** 自分の位置情報を最後にいつ取得したか？ */
         lastGetMyLocationTime: null as Date | null,
         /** 最後にサーバーに位置情報を送信した時間 */
@@ -471,7 +476,7 @@ div(style="height: 100%; width: 100%")
         /** 承認してほしい友達がいるダイアログ */
         acceptDialog: false,
         /** setIntervalしたものをクリアする用 */
-        updateLocationInterval: null,
+        updateLocationInterval: null as any,
         /** 友達リスト */
         friendList: [] as any[],
       }
@@ -538,8 +543,8 @@ div(style="height: 100%; width: 100%")
       }
 
       /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
+      const myProfile: any = localStorage.getItem('profile')
+      if (myProfile && myProfile != 'null' && myProfile.guest) {
         this.myProfile = JSON.parse(myProfile)
         if (this.myProfile?.lastGetLocationTime) {
           this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
@@ -549,10 +554,12 @@ div(style="height: 100%; width: 100%")
         }
 
         setTimeout(async () => {
-          const token = this.myProfile.userToken
-          const profile = await this.getProfile(this.myUserId)
-          profile.userToken = token
-          profile.battery = this.myProfile?.battery
+          const token = this.myProfile?.userToken
+          const profile: profile | null = await this.getProfile(this.myUserId ?? '')
+          if (profile) {
+            profile.userToken = token
+            profile.battery = this.myProfile?.battery
+          }
           localStorage.setItem('profile', JSON.stringify(profile))
           this.myProfile = profile
         }, 100)
@@ -569,6 +576,7 @@ div(style="height: 100%; width: 100%")
           location: null,
           battery: null,
           guest: true,
+          userToken: null,
         }
       }
 
@@ -692,10 +700,13 @@ div(style="height: 100%; width: 100%")
               longitude: location?.longitude,
             },
           }
-          this.lastGetLocation = [
-            position.coords.latitude,
-            position.coords.longitude,
-          ]
+          if (position.coords.latitude
+            && position.coords.longitude) {
+            this.lastGetLocation = [
+              position.coords.latitude,
+              position.coords.longitude,
+            ]
+          }
           // this.watchPosition(position)
           return location
         }).then(watcherId => {
@@ -724,18 +735,20 @@ div(style="height: 100%; width: 100%")
       }, 500)
 
       // 承認していない友達リクエストがあったらポップアップを表示
-      const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
-        id: this.myProfile.userId,
-        token: this.myProfile.userToken,
+      const res: any = await this.sendAjaxWithAuth('/getMyFriendList.php', {
+        id: this.myProfile?.userId,
+        token: this.myProfile?.userToken,
         withLocation: true,
       })
       if (res && res.body) {
-        const allFriendList = res.body.friendList
+        const allFriendList: any[] = res.body.friendList
         this.acceptList = []
-        for (const friend of allFriendList) {
-          friend.friendProfile.userId = friend.friendRealId
-          if (friend.status == 'request' && friend.fromUserId != res.body.mySecretId) {
-            this.acceptList.push(friend.friendProfile)
+        if (allFriendList && allFriendList[0]) {
+          for (const friend of allFriendList) {
+            friend.friendProfile.userId = friend.friendRealId
+            if (friend.status == 'request' && friend.fromUserId != res.body.mySecretId) {
+              this.acceptList.push(friend.friendProfile)
+            }
           }
         }
       }
@@ -802,7 +815,7 @@ div(style="height: 100%; width: 100%")
                 headers: {
                   'Content-Type': 'application/json',
                   'id': this.myProfile.userId,
-                  'token': this.myProfile.userToken,
+                  'token': this.myProfile.userToken ?? '',
                   'lat': String(lat),
                   'lng': String(lng),
                   'batteryLevel': String(batteryLevel),
@@ -896,14 +909,24 @@ div(style="height: 100%; width: 100%")
           return returnText + '10'
         }
       },
+      /** 秒比較 */
+      diffSeconds (date: Date | null | undefined) {
+        if (!date) {
+          return 999_999
+        }
+
+        const now = new Date()
+        /** 差分秒 */
+        const diff = (now.getTime() - date.getTime()) / 1000
+        return diff
+      },
       /** 現在時刻と位置情報を最後に取得した時間を比較 */
       diffLastGetTime (date: Date | null | undefined) {
         if (!date) {
           return ''
         }
-        const now = new Date()
         /** 差分秒 */
-        const diff = (now.getTime() - date.getTime()) / 1000
+        const diff = this.diffSeconds(date)
         if (diff < 30) {
           return 'たった今'
         } else if (diff < 60) {
@@ -958,8 +981,8 @@ div(style="height: 100%; width: 100%")
       /** 友達の位置情報を取得して更新 */
       async updateLocation () {
         const res = await this.sendAjaxWithAuth('/getMyFriendList.php', {
-          id: this.myProfile.userId,
-          token: this.myProfile.userToken,
+          id: this.myProfile?.userId,
+          token: this.myProfile?.userToken,
           withLocation: true,
         })
         if (res && res.body && res.body.friendList) {
@@ -1119,5 +1142,9 @@ div(style="height: 100%; width: 100%")
     gap: 1em;
     margin: 1em 0;
   }
+}
+
+.opacity05 {
+  opacity: 0.7;
 }
 </style>

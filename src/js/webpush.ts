@@ -11,11 +11,13 @@ export default {
    * @returns promise
    */
   set: async () => {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       /**
        * サービスワーカーの登録
        */
       if ('serviceWorker' in navigator) {
+        // @ts-ignore
         window.sw = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
         })
@@ -61,7 +63,7 @@ export default {
    * @param {bool} listenFlag Trueの場合はリクエストを出す、Falseなら現在の権限に委ねる
    * @returns object
    */
-  get: async listenFlag => {
+  get: async (listenFlag: boolean) => {
     return await getRequest(listenFlag)
   },
 }
@@ -69,15 +71,15 @@ export default {
  * トークンを変換するときに使うロジック
  * @param {*} base64String
  */
-function urlB64ToUint8Array (base64String) {
+function urlB64ToUint8Array (base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/')
+  const base64 = (base64String + padding).replace(/\\-/g, '+').replace(/_/g, '/')
 
   const rawData = window.atob(base64)
   const outputArray = new Uint8Array(rawData.length)
 
   for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i)
+    outputArray[i] = rawData.codePointAt(i) ?? 0
   }
   return outputArray
 }
@@ -112,6 +114,7 @@ async function getRequest (listenFlag = false) {
         }
         Notification.requestPermission()
       }
+      // @ts-ignore
       subscription = await window.sw.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey,
@@ -132,8 +135,10 @@ async function getRequest (listenFlag = false) {
   const token = subscription.getKey('auth')
   const request = {
     endpoint: subscription.endpoint,
-    publicKey: btoa(String.fromCharCode.apply(null, new Uint8Array(key))),
-    authToken: btoa(String.fromCharCode.apply(null, new Uint8Array(token))),
+    // @ts-ignore
+    publicKey: btoa(String.fromCodePoint.apply(null, new Uint8Array(key))),
+    // @ts-ignore
+    authToken: btoa(String.fromCodePoint.apply(null, new Uint8Array(token))),
   }
   return request
 }

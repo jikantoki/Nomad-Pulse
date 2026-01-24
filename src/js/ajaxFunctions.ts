@@ -43,7 +43,7 @@ export default {
    * @param isPost {bool} trueならPOST、false（default）ならGET
    * @returns object Webサイトから貰ったデータはobject.bodyに格納
    */
-  send: (url, obj = null, header = null, isPost = false) => {
+  send: (url: string, obj = null as any, header = null as null | any[], isPost = false) => {
     const methods = isPost ? 'POST' : 'GET'
     /**
      * resolve(hogehoge)で実行環境のthenが発火する
@@ -66,13 +66,17 @@ export default {
                 isJSON: false,
               }
             }
+            // @ts-ignore
             response.ajaxInfo = {
               status: request.status,
               statusText: request.statusText,
               url: request.responseURL,
               timeout: request.timeout,
             }
-            resolve(response)
+            resolve(response as {
+              body: any
+              isJSON: boolean
+            })
           } else {
             reject({
               ajaxInfo: {
@@ -106,9 +110,10 @@ export default {
         'application/x-www-form-urlencoded;charset=UTF-8',
       )
       // ヘッダ情報の追加
-      if (isObject(header)) {
+      if (header && header[0]) {
         const keys = Object.keys(header)
         for (const key of keys) {
+          // @ts-ignore
           const value = header[key]
           request.setRequestHeader(key, value)
         }
@@ -117,7 +122,8 @@ export default {
     })
   },
 }
+
 // is this object? t/f
-function isObject (obj) {
-  return obj instanceof Object && !(Array.isArray(obj)) ? true : false
-}
+// function isObject (obj: any) {
+//   return obj instanceof Object && !(Array.isArray(obj)) ? true : false
+// }

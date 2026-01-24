@@ -119,7 +119,6 @@ v-dialog(
   import QRCode from 'qrcode'
   import { QrcodeStream } from 'vue-qrcode-reader'
 
-  // @ts-ignore
   import mixins from '@/mixins/mixins'
 
   export default {
@@ -224,7 +223,7 @@ v-dialog(
           const pathname = url.pathname
           const userId = pathname.match(/\/user\/([^\/]+)\/?$/)
           if (userId) {
-            this.searchFriend(userId[1])
+            this.searchFriend(userId[1] ?? '')
             console.log(userId[1])
           } else {
             throw new Error('謎のURL')
