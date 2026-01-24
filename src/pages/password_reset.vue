@@ -145,7 +145,6 @@
           mailAddress: this.mailAddress,
         })
           .then(e => {
-            console.log(e)
             if (e.body.status === 'ok') {
               this.page = 1
               this.errorMessage = null
@@ -156,7 +155,7 @@
             this.loading = false
           })
           .catch(error => {
-            console.log(error)
+            console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loading = false
           })
@@ -184,7 +183,7 @@
             this.loadingToken = false
           })
           .catch(error => {
-            console.log(error)
+            console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loadingToken = false
           })

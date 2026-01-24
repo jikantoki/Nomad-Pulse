@@ -149,7 +149,7 @@ v-dialog(
 
           const canvas = document.querySelector('#qr-canvas') as any
           if (!canvas) {
-            console.log('not defined canvas')
+            console.error('not defined canvas')
             return false
           }
           const ctx = canvas.getContext('2d')
@@ -224,7 +224,6 @@ v-dialog(
           const userId = pathname.match(/\/user\/([^\/]+)\/?$/)
           if (userId) {
             this.searchFriend(userId[1] ?? '')
-            console.log(userId[1])
           } else {
             throw new Error('謎のURL')
           }

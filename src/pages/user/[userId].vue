@@ -254,8 +254,6 @@ v-dialog(v-model="followDialogMessage")
           this.myUserId = this.myProfile.userId
         }
       }
-      // 何故かここで監視してやるとバグらない？
-      console.log(this.myProfile)
 
       // ユーザー情報の取得
       this.param = this.$route.params

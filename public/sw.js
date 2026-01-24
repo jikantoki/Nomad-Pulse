@@ -96,7 +96,7 @@ self.addEventListener('fetch', function (event) {
               })
               .catch(function (error) {
               // デバッグ用
-                return console.log(error)
+                return console.error(error)
               })
           }),
     )
@@ -213,7 +213,7 @@ self.addEventListener('push', function (event) {
    */
 })
 self.addEventListener('pushsubscriptionchange', e => {
-  console.log(e)
+  console.error(e)
 })
 
 self.addEventListener('activate', event => {

@@ -126,13 +126,13 @@
               this.errorMessage = null
               this.pageTitle = 'メールに送信したトークンを入力'
             } else {
-              console.log(e)
+              console.error(e)
               this.errorMessage = 'ユーザー名またはパスワードが間違っています'
             }
             this.loading = false
           })
           .catch(error => {
-            console.log(error)
+            console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loading = false
           })
@@ -164,7 +164,7 @@
             this.loadingToken = false
           })
           .catch(error => {
-            console.log(error)
+            console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loadingToken = false
           })

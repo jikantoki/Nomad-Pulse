@@ -12,7 +12,7 @@ export default {
     ajaxFunctions.send(url,{example:'example'}).then((value) => {
       console.log(value)
     }).catch((error) => {
-      console.log(error)
+      console.error(error)
     })
    * ```
    * ___

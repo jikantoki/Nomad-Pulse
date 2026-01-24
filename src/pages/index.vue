@@ -691,7 +691,7 @@ div(style="height: 100%; width: 100%")
           //   if (error.code === 'NOT_AUTHORIZED') {
           //     this.requestBackgroundDialog = true
           //   }
-          //   return console.log(error)
+          //   return console.error(error)
           // }
 
           const position = {
@@ -826,7 +826,7 @@ div(style="height: 100%; width: 100%")
                 },
               })
             } catch (error) {
-              console.log(error)
+              console.error(error)
               const res = await this.sendAjaxWithAuth(
                 '/updateGeoLocation.php', {
                   id: this.myProfile.userId,
@@ -838,7 +838,7 @@ div(style="height: 100%; width: 100%")
                 },
               )
               if (!res || !res.body) {
-                console.log('サーバー送信エラー', res)
+                console.error('サーバー送信エラー', res)
               }
             }
           }

@@ -5,7 +5,7 @@ export default {
    * set().then((e) => {
    *   console.log(e) //requestが返り値
    * }).catch((e) => {
-   *   console.log(e) //エラー理由
+   *   console.error(e) //エラー理由
    * })
    * ```
    * @returns promise

@@ -192,7 +192,7 @@
             }
           })
           .catch(error => {
-            console.log(error)
+            console.error(error)
             this.errorMessage = 'ネットワークエラー'
           })
       },
