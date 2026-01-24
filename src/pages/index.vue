@@ -284,7 +284,7 @@ div(style="height: 100%; width: 100%")
           v-list-item.item( @click="$router.push('/terms')" )
             .icon-and-text
               v-icon mdi-file-document-outline
-              v-list-item-title 利用規約
+              v-list-item-title 利用規約・プライバシーポリシー
           v-list-item.item( @click="$router.push('/about')" )
             .icon-and-text
               v-icon mdi-information

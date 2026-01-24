@@ -12,6 +12,7 @@ v-card(
       icon="mdi-close"
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
+    p.text-h5 ここの項目は現在実装中です（動きません）
     .settings-list
       .setting-item(
         v-ripple

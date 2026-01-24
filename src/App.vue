@@ -30,13 +30,6 @@ v-app
       }
     },
     watch: {
-      myProfile: {
-        handler: function (newProfile) {
-          console.log(newProfile.userId)
-        },
-        immediate: true,
-        deep: true,
-      },
       settings: {
         handler: async function () {
           switch (this.settings.developerOptions.statusBarNotch) {

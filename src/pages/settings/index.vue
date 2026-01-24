@@ -47,7 +47,7 @@ v-card(
         .icon
           v-icon mdi-file-document-outline
         .text
-          p.title 利用規約
+          p.title 利用規約・プライバシーポリシー
       .setting-item(
         v-ripple
         @click="$router.push('/about')"

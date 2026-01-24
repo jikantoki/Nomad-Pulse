@@ -128,13 +128,13 @@
       p.ma-2(
         style="font-size: 1.5em;"
         v-show="!noAccountExist"
-      ) プロフィールを共有
+      ) このプロフィールを共有
       p.ma-2(
         style="font-size: 1.5em;"
         v-show="noAccountExist"
       ) ユーザーが存在しません
       v-btn.ma-2(
-        @click="shareMyLinkDialog = true"
+        @click="copy(this.myLink)"
         append-icon="mdi-share-variant"
         style="background-color: rgb(var(--v-theme-primary)); color: white; border-radius: 8px;"
         size="large"
@@ -148,11 +148,11 @@
         v-show="noAccountExist"
       ) トップへ戻る
       canvas#qr-canvas.ma-2(
-        v-show="!qrLoading"
+        v-show="!qrLoading && myProfile.userId == param.userId"
         style="border-radius: 10%; max-width: 20em; max-height: 20em;"
       )
       .qr-loading.ma-2(
-        v-show="qrLoading"
+        v-show="qrLoading && myProfile.userId == param.userId"
         style="width: 70vw; height: 70vw; max-width: 20em; max-height: 20em; background-color: white; border-radius: 10%; display: flex; flex-direction: column; align-items: center; justify-content: center;"
       )
         v-progress-circular.my-4(
@@ -163,6 +163,10 @@
         p.my-4(
           style="color: black;"
         ) QRコード読み込み中…
+      .my-16.text-h4(
+        v-show="myProfile.userId != param.userId"
+        style="text-align: center;"
+      ) 友達を増やして、地図を賑やかにしよう！
 v-dialog(
   v-model="isInvalid"
   style="max-width: 500px;"

@@ -114,7 +114,8 @@ v-dialog(
 
 <script lang="ts">
   import { Browser } from '@capacitor/browser'
-  import { Clipboard } from '@capacitor/clipboard'
+  // import { Clipboard } from '@capacitor/clipboard'
+  import { Share } from '@capacitor/share'
   import QRCode from 'qrcode'
   import { QrcodeStream } from 'vue-qrcode-reader'
 
@@ -227,9 +228,11 @@ v-dialog(
         }
         this.searchFriendLoading = false
       },
+      /** コンテンツの共有 */
       async copy (content: string) {
-        await Clipboard.write({
-          string: content,
+        await Share.share({
+          title: 'Nomad Pulseで位置情報を共有しよう',
+          url: content,
         })
         this.searchResultDialog = false
       },

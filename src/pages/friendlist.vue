@@ -12,6 +12,14 @@ v-card(
       icon="mdi-close"
       )
   v-card-text(style="height: inherit; overflow-y: auto;")
+    .progress.my-8(
+      style="display: flex; justify-content: center;"
+      v-show="loading"
+    )
+      v-progress-circular(
+        :size="64"
+        indeterminate
+      )
     //-- 承認待ちリスト
     .friend-accept-list(
       v-if="acceptList.length"
@@ -162,9 +170,12 @@ v-dialog(
         loadingStatusDialog: false,
         myProfile: useMyProfileStore(),
         settings: useSettingsStore(),
+        /** 最初の読み込みフラグ */
+        loading: false,
       }
     },
     async mounted () {
+      this.loading = true
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
       this.settings.hidden.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
@@ -216,6 +227,7 @@ v-dialog(
           localStorage.setItem('requestList', JSON.stringify(this.requestList))
         }
       }
+      this.loading = false
     },
     methods: {
       /**
