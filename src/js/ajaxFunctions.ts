@@ -110,13 +110,12 @@ export default {
         'application/x-www-form-urlencoded;charset=UTF-8',
       )
       // ヘッダ情報の追加
-      if (header && header[0]) {
-        const keys = Object.keys(header)
-        for (const key of keys) {
-          // @ts-ignore
-          const value = header[key]
-          request.setRequestHeader(key, value)
-        }
+      // @ts-ignore
+      const keys = Object.keys(header)
+      for (const key of keys) {
+        // @ts-ignore
+        const value = header[key]
+        request.setRequestHeader(key, value)
       }
       request.send(postMethod)
     })
