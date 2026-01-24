@@ -90,4 +90,5 @@ echo json_encode([
   'toId' => $toId,
   'followStatus' => 'request',
   'unixtime' => $unixtime,
+  'mailAddress' => $toMailaddress
 ]);

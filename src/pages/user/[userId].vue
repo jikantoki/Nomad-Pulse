@@ -360,6 +360,7 @@ v-dialog(v-model="followDialogMessage")
               requestUserId: userId,
             },
           )
+          console.log(res)
           switch (res.body.status) {
             case 'request':
             case 'ok': {
