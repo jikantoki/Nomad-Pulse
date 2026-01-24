@@ -27,7 +27,7 @@ $friendStatus = $accept ? true : false;
 
 $unixtime = time();
 
-if($friendStatus){
+if ($friendStatus) {
   SQL("
     update follow_list set
     status = 'friend',
@@ -36,6 +36,13 @@ if($friendStatus){
     fromUserId = '{$targetSecretId}'
     and
     toUserId = '{$mySecretId}';
+  ");
+
+  $toMailaddress = SQLfind('user_mail_list', 'secretId', $targetId);
+  mail($toMailaddress['mailAddress'], '友達申請リクエスト承認のお知らせ', "
+  <p>{$fromId}が友達申請を承認しました。</p>
+  <br>
+  <p>アプリを開いて、位置情報を見てみよう！</p>
   ");
 } else {
   SQL("

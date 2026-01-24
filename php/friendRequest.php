@@ -77,6 +77,13 @@ SQLinsert('follow_list', [
   'status' => 'request'
 ]);
 
+$toMailaddress = SQLfind('user_mail_list', 'secretId', $toRandId);
+mail($toMailaddress['mailAddress'], '友達申請リクエストのお知らせ', "
+<p>{$fromId}より友達申請のリクエストが来ています。</p>
+<br>
+<p>アプリを開いて、友達リクエストを承認してください。</p>
+");
+
 echo json_encode([
   'status' => 'ok',
   'fromId' => $fromId,
