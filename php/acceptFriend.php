@@ -38,7 +38,7 @@ if ($friendStatus) {
     toUserId = '{$mySecretId}';
   ");
 
-  $toMailaddress = SQLfind('user_mail_list', 'secretId', $targetId);
+  $toMailaddress = SQLfind('user_mail_list', 'secretId', $targetSecretId);
   sendMail($toMailaddress['mailAddress'], '友達申請リクエスト承認のお知らせ', "
   <p>{$fromId}が友達申請を承認しました。</p>
   <br>
