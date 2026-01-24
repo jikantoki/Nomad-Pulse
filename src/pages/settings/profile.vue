@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") プロフィール編集
@@ -21,10 +21,9 @@ v-card(
     .imgs
       .cover
         img.cover-img(
-          v-if="myProfile && myProfile.coverImg"
           :src="myProfile.coverImg"
+          onerror="this.src='/img/default_cover.jpg'"
           )
-        img.cover-img(v-else src="/img/default_cover.jpg")
         .change-cover-button(
           style="font-size: 2em;"
           v-ripple
@@ -36,7 +35,7 @@ v-card(
       .icon-cover.mb-6.ml-2
         .icon.cover
           img.icon-img.cover-img(
-            v-if="myProfile && myProfile.icon"
+            v-if="myProfile.icon"
             :src="myProfile.icon"
             )
           img.icon-img.cover-img(
@@ -72,21 +71,21 @@ v-card(
         v-model="myProfile.message"
       )
       p(
-        v-show="developerOptionEnabled"
+        v-show="settings.developerOptions.enabled"
       ) 開発者オプション
       v-text-field(
         name="icon"
         label="アイコンのURL"
         placeholder="https://icon.com/icon.png"
         v-model="myProfile.icon"
-        v-show="developerOptionEnabled"
+        v-show="settings.developerOptions.enabled"
       )
       v-text-field(
         name="coverImg"
         label="カバー画像のURL"
         placeholder="https://cover.com/cover.png"
         v-model="myProfile.coverImg"
-        v-show="developerOptionEnabled"
+        v-show="settings.developerOptions.enabled"
       )
 v-dialog(
   v-model="cancelDialog"
@@ -119,55 +118,22 @@ v-dialog(
 <script lang="ts">
   import { App } from '@capacitor/app'
   import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
-  import { Device } from '@capacitor/device'
 
   import mixins from '@/mixins/mixins'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     mixins: [mixins],
     data () {
       return {
-        developerOptionEnabled: false,
-        isAndroid15OrHigher: false,
-        myUserId: null as string | null,
-        myProfile: {} as {
-          [key: string]: any
-        } | null,
+        myProfile: useMyProfileStore(),
         cancelDialog: false,
         saveDialog: false,
+        settings: useSettingsStore(),
       }
     },
     async mounted () {
-      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
-      if (developerOptionEnabled === 'true') {
-        this.developerOptionEnabled = true
-      }
-
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-
-      /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
-          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
-        }
-      }
-
       App.addListener('backButton', () => {
         this.cancelDialog = this.cancelDialog ? false : true
       })
@@ -206,7 +172,7 @@ v-dialog(
           const textProfile = JSON.stringify(this.myProfile)
           localStorage.setItem('profile', textProfile)
         } catch (error) {
-          if (this.developerOptionEnabled) {
+          if (this.settings.developerOptions.enabled) {
             alert(error)
           }
         }
@@ -234,7 +200,7 @@ v-dialog(
         })
         const base64 = image.dataUrl
         if (this.myProfile) {
-          this.myProfile.coverImg = base64
+          this.myProfile.coverImg = base64 ?? null
         }
       },
       /** アイコンの変更 */
@@ -258,7 +224,7 @@ v-dialog(
         })
         const base64 = image.dataUrl
         if (this.myProfile) {
-          this.myProfile.icon = base64
+          this.myProfile.icon = base64 ?? null
         }
       },
       /** プロフィール編集をキャンセル */

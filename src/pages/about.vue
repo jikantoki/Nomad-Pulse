@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") このアプリについて
@@ -50,7 +50,7 @@ v-card(
           p.title バージョン情報
           p.description v{{ packageJson.version }}
       .setting-item(
-        v-if="developerOptionEnabled"
+        v-if="settings.developerOptions.enabled"
         v-ripple
         @click="$router.push('/settings/developer-options')"
         )
@@ -69,7 +69,12 @@ v-card(
         @click="openURL('https://enoki.xyz')"
         )
         .icon
-          img(src="/jikantoki.jpg" width="36" height="36" style="border-radius: 50%;")
+          img(
+            src="/jikantoki.jpg"
+            width="36"
+            height="36"
+            style="border-radius: 50%;"
+            )
         .text
           p.title ときえのき
           p.description jikantoki
@@ -78,10 +83,26 @@ v-card(
         @click="openURL('https://enoki.xyz')"
         )
         .icon
-          img(src="/jikantoki-homepage.jpg" width="36" height="36" style="border-radius: 50%;")
+          img(
+            src="/jikantoki-homepage.jpg"
+            width="36"
+            height="36"
+            style="border-radius: 50%;"
+            )
         .text
           p.title ホームページ
           p.description https://enoki.xyz
+      .setting-item(
+        v-ripple
+        @click="openURL('https://www.youtube.com/@jikantoki')"
+        )
+        .icon(
+          style="background: #FF0000; color: white;"
+        )
+          v-icon mdi-youtube
+        .text
+          p.title YouTube
+          p.description https://www.youtube.com/@jikantoki
       .setting-item(
         v-ripple
         @click="openURL('https://twitter.com/jikantoki')"
@@ -111,6 +132,7 @@ v-card(
   import { Browser } from '@capacitor/browser'
   import { Device } from '@capacitor/device'
   import { Toast } from '@capacitor/toast'
+  import { useSettingsStore } from '@/stores/settings'
   import PackageJson from '../../package.json'
 
   export default {
@@ -118,33 +140,27 @@ v-card(
       return {
         packageJson: PackageJson,
         developerOptionClickCount: 0,
-        developerOptionEnabled: false,
-        isAndroid15OrHigher: true,
+        settings: useSettingsStore(),
       }
     },
     async mounted () {
-      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
-      if (developerOptionEnabled === 'true') {
-        this.developerOptionEnabled = true
-      }
-
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+      this.settings.hidden.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
       // 開発者オプション
       const developerOptions = localStorage.getItem('developerOptions')
       if (developerOptions) {
         const options = JSON.parse(developerOptions)
         if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
+          this.settings.hidden.isAndroid15OrHigher = options.statusBarNotch
         }
       }
     },
     methods: {
       /** 開発者オプションを有効にする */
       async developerOptionToggle () {
-        if (this.developerOptionEnabled) {
+        if (this.settings.developerOptions.enabled) {
           await Toast.show({
             text: '開発者オプションは既に有効です',
             duration: 'long',
@@ -156,8 +172,7 @@ v-card(
         })
         this.developerOptionClickCount += 1
         if (this.developerOptionClickCount >= 8) {
-          this.developerOptionEnabled = true
-          localStorage.setItem('developerOptionEnabled', 'true')
+          this.settings.developerOptions.enabled = true
           await Toast.show({
             text: '開発者オプションが有効になりました',
             duration: 'long',

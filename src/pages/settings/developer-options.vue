@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 開発者オプション
@@ -23,22 +23,22 @@ v-card(
       .setting-button-item
         .li(
           v-ripple
-          :class="options.statusBarNotch === undefined ? 'selected' : null"
-          @click="options.statusBarNotch = undefined"
+          :class="settings.developerOptions.statusBarNotch === 'default' ? 'selected' : null"
+          @click="settings.developerOptions.statusBarNotch = 'default'"
         )
           v-icon(size="x-large") mdi-sync
           p デフォルト
         .li(
           v-ripple
-          :class="options.statusBarNotch === true ? 'selected' : null"
-          @click="options.statusBarNotch = true"
+          :class="settings.developerOptions.statusBarNotch === 'true' ? 'selected' : null"
+          @click="settings.developerOptions.statusBarNotch = 'true'"
         )
           v-icon(size="x-large") mdi-check
           p 有効
         .li(
           v-ripple
-          :class="options.statusBarNotch === false ? 'selected' : null"
-          @click="options.statusBarNotch = false"
+          :class="settings.developerOptions.statusBarNotch === 'false' ? 'selected' : null"
+          @click="settings.developerOptions.statusBarNotch = 'false'"
         )
           v-icon(size="x-large") mdi-close
           p 無効
@@ -87,51 +87,19 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { Device } from '@capacitor/device'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     data () {
       return {
-        options: {
-          statusBarNotch: undefined as boolean | undefined,
-        },
-        developerOptionLogoutDialog: false,
-        isAndroid15OrHigher: false,
+        settings: useSettingsStore(),
       }
     },
-    watch: {
-      options: {
-        handler (newOptions) {
-          localStorage.setItem('developerOptions', JSON.stringify(newOptions))
-        },
-        deep: true,
-      },
-    },
-    async mounted () {
-      const optionsJson = localStorage.getItem('developerOptions')
-      if (optionsJson) {
-        const options = JSON.parse(optionsJson)
-        this.options = {
-          ...options,
-        }
-      }
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-    },
+    watch: {},
+    async mounted () {},
     methods: {
       developerOptionLogout () {
-        this.developerOptionLogoutDialog = false
-        localStorage.removeItem('developerOptionEnabled')
+        this.settings.developerOptions.enabled = false
         this.$router.back()
       },
     },

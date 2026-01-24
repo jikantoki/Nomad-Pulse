@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 位置情報とプライバシー
@@ -40,52 +40,18 @@ v-card(
 </template>
 
 <script lang="ts">
-  import { Device } from '@capacitor/device'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     name: 'SettingsPage',
     data () {
       return {
-        logoutDialog: false,
-        developerOptionEnabled: false,
-        isAndroid15OrHigher: false,
-        myUserId: null as string | null,
-        myProfile: {} as {
-          [key: string]: any
-        } | null,
+        settings: useSettingsStore(),
+        myProfile: useMyProfileStore(),
       }
     },
-    async mounted () {
-      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
-      if (developerOptionEnabled === 'true') {
-        this.developerOptionEnabled = true
-      }
-
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-
-      /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
-          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
-        }
-      }
-    },
+    async mounted () {},
     methods: {},
   }
 </script>

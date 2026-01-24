@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 利用規約
@@ -35,28 +35,15 @@ v-card(
 </template>
 
 <script lang="ts">
-  import { Device } from '@capacitor/device'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     data () {
       return {
-        isAndroid15OrHigher: true,
+        settings: useSettingsStore(),
       }
     },
-    async mounted () {
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-    },
+    async mounted () {},
   }
 </script>
 

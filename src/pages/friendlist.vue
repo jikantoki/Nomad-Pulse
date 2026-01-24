@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 友達リスト
@@ -86,6 +86,7 @@ v-card(
             img(
               v-if="friend.icon"
               :src="friend.icon"
+              onerror="this.src='/account_default.jpg'"
             )
             img(
               v-else
@@ -136,6 +137,8 @@ v-dialog(
 <script lang="ts">
   import { Device } from '@capacitor/device'
   import mixins from '@/mixins/mixins'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     mixins: [mixins],
@@ -149,7 +152,6 @@ v-dialog(
          * ダイアログのターゲット（userInfoObject）
          */
         deleteTarget: null as null | any,
-        myProfile: null as null | any,
         /** 友達側の承認待ちリスト */
         requestList: [] as any[],
         /** 自分側の承認待ちリスト */
@@ -158,34 +160,21 @@ v-dialog(
         friendList: [] as any[],
         /** ステータス変更処理中ダイアログ */
         loadingStatusDialog: false,
-        developerOptionEnabled: false,
-        isAndroid15OrHigher: false,
+        myProfile: useMyProfileStore(),
+        settings: useSettingsStore(),
       }
     },
     async mounted () {
-      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
-      if (developerOptionEnabled === 'true') {
-        this.developerOptionEnabled = true
-      }
-
       /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+      this.settings.hidden.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
       // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-      // ここからページ固有のmounted処理
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
+      if (this.settings.developerOptions.statusBarNotch !== 'default') {
+        this.settings.hidden.isAndroid15OrHigher = this.settings.developerOptions.statusBarNotch == 'true'
       }
 
+      // ここからページ固有のmounted処理
       const friendList = localStorage.getItem('friendList')
       const acceptList = localStorage.getItem('acceptList')
       const requestList = localStorage.getItem('requestList')

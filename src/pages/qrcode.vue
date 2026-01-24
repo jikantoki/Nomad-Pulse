@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") QRで友達を探す
@@ -67,7 +67,7 @@ v-dialog(
         prepend-icon="mdi-content-copy"
       ) コピー
       v-btn(
-        @click="otherResultDialog = false"
+        @click="otherResultDialog = false; $router.back()"
         prepend-icon="mdi-close"
       ) 閉じる
 v-dialog(
@@ -115,11 +115,12 @@ v-dialog(
 <script lang="ts">
   import { Browser } from '@capacitor/browser'
   import { Clipboard } from '@capacitor/clipboard'
-  import { Device } from '@capacitor/device'
   import QRCode from 'qrcode'
   import { QrcodeStream } from 'vue-qrcode-reader'
 
   import mixins from '@/mixins/mixins'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     components: {
@@ -128,16 +129,15 @@ v-dialog(
     mixins: [mixins],
     data () {
       return {
-        isAndroid15OrHigher: true,
         searchFriendLoading: false,
         searchResultDialog: false,
         otherResultDialog: false,
         resultValue: '',
         myQrDialog: false,
         qrLoading: false,
-        myProfile: null as any,
-        myUserId: null as null | string,
+        myProfile: useMyProfileStore(),
         myLink: null as null | string,
+        settings: useSettingsStore(),
       }
     },
     watch: {
@@ -145,7 +145,7 @@ v-dialog(
         handler: async function () {
           await setTimeout(() => {}, 50)
           this.qrLoading = true
-          this.myLink = `https://nomadpulse.enoki.xyz/user/${this.myUserId}?openExternalBrowser=1`
+          this.myLink = `https://nomadpulse.enoki.xyz/user/${this.myProfile.userId}?openExternalBrowser=1`
 
           const canvas = document.querySelector('#qr-canvas') as any
           if (!canvas) {
@@ -189,32 +189,7 @@ v-dialog(
         },
       },
     },
-    async mounted () {
-      /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
-          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
-        }
-      }
-
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-    },
+    async mounted () {},
     methods: {
       readQrcode (content: any) {
         const val = content[0].rawValue as string

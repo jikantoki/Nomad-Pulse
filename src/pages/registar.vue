@@ -101,8 +101,8 @@
           ) ログイン
 </template>
 
-<script>
-  import mixins from '~/mixins/mixins'
+<script lang="ts">
+  import mixins from '@/mixins/mixins'
   export default {
     mixins: [mixins],
     data () {
@@ -119,25 +119,25 @@
         errorMessage: '',
         page: 0,
         rules: {
-          required: value => !!value || 'Field is required',
+          required: (value: string) => !!value || 'Field is required',
         },
       }
     },
     watch: {
       password () {
-        this.errorMessage = false
+        this.errorMessage = ''
       },
       confirmPassword () {
-        this.errorMessage = false
+        this.errorMessage = ''
       },
       userName () {
-        this.errorMessage = false
+        this.errorMessage = ''
       },
       mailAddress () {
-        this.errorMessage = false
+        this.errorMessage = ''
       },
       agreement () {
-        this.errorMessage = false
+        this.errorMessage = ''
       },
     },
     mounted () {
@@ -179,6 +179,7 @@
           this.errorMessage = '利用規約に同意してください'
           return false
         }
+        // @ts-ignore
         this.sendAjaxWithAuth('/createAccount.php', {
           username: this.userName,
           password: this.password,
@@ -191,7 +192,7 @@
               this.errorMessage = '既に存在するアカウントです'
             }
           })
-          .catch(error => {
+          .catch((error: any) => {
             console.error(error)
             this.errorMessage = 'ネットワークエラー'
           })

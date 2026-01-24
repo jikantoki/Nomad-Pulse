@@ -72,6 +72,7 @@ export default defineComponent({
       hd = this.isObject(header) ? Object.assign(header, authHeader) : authHeader
       // @ts-ignore
       const res: {
+        then: (arg0: (e: { [key: string]: any }) => void) => unknown
         body: any
         isJSON: boolean
       } = this.sendAjax(

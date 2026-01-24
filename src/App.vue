@@ -2,9 +2,9 @@
 v-app
   common-splash-vue(v-show="splashScreen")
   v-main(style="height: 100vh;")
-    .status-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
-    router-view(:style="isAndroid15OrHigher ? 'height: calc(100vh - 40px - 16px);' : ''")
-    .nav-bar-padding(:class="isAndroid15OrHigher ? 'android-15-or-higher' : ''")
+    .status-bar-padding(:class="settings.hidden.isAndroid15OrHigher ? 'android-15-or-higher' : ''")
+    router-view(:style="settings.hidden.isAndroid15OrHigher ? 'height: calc(100vh - 40px - 16px);' : ''")
+    .nav-bar-padding(:class="settings.hidden.isAndroid15OrHigher ? 'android-15-or-higher' : ''")
 </template>
 
 <script lang="ts">
@@ -12,17 +12,53 @@ v-app
   import { Device } from '@capacitor/device'
   import { StatusBar, Style } from '@capacitor/status-bar'
   import commonSplashVue from './components/common/commonSplash.vue'
+  import mixins from './mixins/mixins'
+  import { useMyProfileStore } from './stores/myProfile'
+  import { useSettingsStore } from './stores/settings'
 
   export default {
     name: 'App',
     components: {
       commonSplashVue,
     },
+    mixins: [mixins],
     data () {
       return {
-        isAndroid15OrHigher: true,
         splashScreen: true,
+        myProfile: useMyProfileStore(),
+        settings: useSettingsStore(),
       }
+    },
+    watch: {
+      myProfile: {
+        handler: function (newProfile) {
+          console.log(newProfile.userId)
+        },
+        immediate: true,
+        deep: true,
+      },
+      settings: {
+        handler: async function () {
+          switch (this.settings.developerOptions.statusBarNotch) {
+            case 'default': {
+              /** ステータスバーがWebViewをオーバーレイしないように設定 */
+              const info = await Device.getInfo()
+              this.settings.hidden.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+              break
+            }
+            case 'true': {
+              this.settings.hidden.isAndroid15OrHigher = true
+              break
+            }
+            case 'false': {
+              this.settings.hidden.isAndroid15OrHigher = false
+              break
+            }
+          }
+        },
+        deep: true,
+        immediate: true,
+      },
     },
     async mounted () {
       if (Capacitor.getPlatform() !== 'web') {
@@ -30,16 +66,36 @@ v-app
           overlay: false,
         })
       }
+      /** ステータスバーがWebViewをオーバーレイしないように設定 */
       const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
+      this.settings.hidden.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
 
       // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
+      if (this.settings.developerOptions.statusBarNotch !== 'default') {
+        this.settings.hidden.isAndroid15OrHigher = this.settings.developerOptions.statusBarNotch == 'true'
+      }
+
+      /** ログイン情報 */
+      if (this.myProfile.$state.guest == false) {
+        if (this.myProfile.lastGetLocationTime) {
+          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
         }
+
+        setTimeout(async () => {
+          const token = this.myProfile.userToken
+          const profile = await this.getProfile(this.myProfile.userId ?? '')
+          if (profile) {
+            profile.userToken = token
+            profile.battery = this.myProfile.battery
+            profile.guest = false
+            this.myProfile = {
+              ...this.myProfile,
+              ...profile,
+            }
+          }
+        }, 100)
+      } else {
+        this.myProfile.reset()
       }
 
       // テーマに関する設定

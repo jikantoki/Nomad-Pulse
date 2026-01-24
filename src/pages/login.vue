@@ -77,8 +77,10 @@
           ) ログイン
 </template>
 
-<script>
-  import mixins from '~/mixins/mixins'
+<script lang="ts">
+  import mixins from '@/mixins/mixins'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
   export default {
     mixins: [mixins],
     data () {
@@ -91,9 +93,11 @@
         showPassword: false,
         loading: false,
         loadingToken: false,
-        errorMessage: null,
+        errorMessage: '',
         page: 0,
         pageTitle: 'ログインして、世界とつながろう',
+        myProfile: useMyProfileStore(),
+        settings: useSettingsStore(),
       }
     },
     watch: {
@@ -116,14 +120,15 @@
       /** ログイン前の二段階認証をリクエスト */
       async requestToken () {
         this.loading = true
+        // @ts-ignore
         this.sendAjaxWithAuth('/requestToken.php', {
           id: this.userName,
           password: this.password,
         })
-          .then(e => {
+          .then((e: { [key: string]: any }) => {
             if (e.body.status === 'ok') {
               this.page = 1
-              this.errorMessage = null
+              this.errorMessage = ''
               this.pageTitle = 'メールに送信したトークンを入力'
             } else {
               console.error(e)
@@ -131,26 +136,33 @@
             }
             this.loading = false
           })
-          .catch(error => {
+          .catch((error: any) => {
             console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loading = false
           })
       },
       async login () {
+        console.log('login start')
         this.loadingToken = true
         this.token = this.token.replace('-', '')
+        // @ts-ignore
         this.sendAjaxWithAuth('/loginAccount.php', {
           id: this.userName,
           password: this.password,
           token: this.token,
         })
           .then(async e => {
+            console.log(e)
             if (e.body.status === 'ok') {
               const now = new URL(window.location.href)
               const profile = await this.getProfile(e.body.id)
+              if (!profile) {
+                throw new Error('プロフィールを取得できませんでした')
+              }
               profile.userToken = e.body.token
-              localStorage.setItem('profile', JSON.stringify(profile))
+              profile.guest = false
+              this.myProfile.$state = profile
               const redirect = now.searchParams.get('redirect')
               if (redirect && redirect !== '') {
                 this.a(redirect)
@@ -158,12 +170,13 @@
                 this.a('/')
               }
             } else {
+              console.error(e.body)
               this.errorMessage = 'ワンタイムトークンが違います'
               this.token = ''
             }
             this.loadingToken = false
           })
-          .catch(error => {
+          .catch((error: any) => {
             console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loadingToken = false

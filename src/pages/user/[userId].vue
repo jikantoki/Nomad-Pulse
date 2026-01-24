@@ -12,11 +12,19 @@
     style="overflow-y: auto; height: 100%;"
     )
     .cover
-      img.cover-img(v-if="userData && userData.coverImg" :src="userData.coverImg")
+      img.cover-img(
+        v-if="userData && userData.coverImg"
+        :src="userData.coverImg"
+        onerror="this.src='/img/default_cover.jpg'"
+        )
       img.cover-img(v-else src="/img/default_cover.jpg")
     .icon-and-follow.px-2
       .icon
-        img.icon-img(v-if="userData && userData.icon" :src="userData.icon")
+        img.icon-img(
+          v-if="userData && userData.icon"
+          :src="userData.icon"
+          onerror="this.src='/account_default.jpg'"
+          )
         img.icon-img(v-else src="/account_default.jpg")
       .button(v-if="loading")
         v-btn.follow-button(
@@ -24,11 +32,11 @@
           ) 友達申請
       .button(v-if="!loading")
         v-btn.follow-button(
-          v-if="myProfile && myProfile.userId == param.userId && !myProfile.guest"
+          v-if="myProfile.userId == param.userId && !myProfile.guest"
           @click="$router.push('/settings/profile')"
         ) プロフィールを編集
         .follow-button-cover(
-          v-else-if="myProfile && myProfile.userId && !myProfile.guest"
+          v-else-if="myProfile.userId && !myProfile.guest"
           )
           v-btn.follow-button(
             v-if="userData && userData.friendStatus === 'friend'"
@@ -178,16 +186,16 @@ v-dialog(v-model="shareMyLinkDialog")
       p.mb-4 以下のURLをコピーして、共有してください
       v-btn.mb-4(
         @click="copy(this.myLink)"
-        append-icon="mdi-content-copy"
+        append-icon="mdi-share-variant"
         style="color: white;"
         color="var(--accent-color)"
-      ) コピー
+      ) 共有
       pre.pa-4(
         style="border-radius: var(--border-radius);"
       ) {{ myLink }}
     v-card-actions
       v-btn(
-        @click="shareDialog = false"
+        @click="shareMyLinkDialog = false"
         variant="elevated"
         append-icon="mdi-check"
         style="color: white;"
@@ -206,33 +214,37 @@ v-dialog(v-model="followDialogMessage")
       ) 閉じる
 </template>
 
-<script>
+<script lang="ts">
   import { App } from '@capacitor/app'
   import { Clipboard } from '@capacitor/clipboard'
+  import { Share } from '@capacitor/share'
   import QRCode from 'qrcode'
-  import mixins from '~/mixins/mixins'
+  import mixins from '@/mixins/mixins'
+  import { useMyProfileStore } from '@/stores/myProfile'
 
   export default {
     mixins: [mixins],
     data () {
       return {
-        param: null,
-        userData: null,
+        param: null as any,
+        userData: null as {
+          [key: string]: any
+        } | null,
         pushMessage: '',
         errorMessage: false,
         successMessage: false,
         isInvalid: false,
         /** 自分のプロフィールリンク */
-        myLink: null,
+        myLink: '',
         shareMyLinkDialog: false,
-        myProfile: null,
+        myProfile: useMyProfileStore(),
         /** フォロー処理中のクルクル表示 */
         followLoadingNow: false,
-        followDialogMessage: null,
+        followDialogMessage: null as string | null,
         /** ユーザー情報取得中フラグ */
         loading: false,
         /** 友達申請の状態 */
-        friendStatus: null,
+        friendStatus: null as string | null,
         /** QRコード生成中フラグ */
         qrLoading: false,
         /** 存在しないアカウント */
@@ -243,21 +255,13 @@ v-dialog(v-model="followDialogMessage")
       this.loading = true
       this.qrLoading = true
 
-      /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
-          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
-        }
-      }
-
       // ユーザー情報の取得
       this.param = this.$route.params
+      if (!this.param.userId) {
+        return
+      }
 
+      /** paramから取得したユーザーID */
       const userId = this.param.userId
 
       // Ajaxでユーザー情報取得前に、localStorageに情報があれば表示
@@ -269,8 +273,10 @@ v-dialog(v-model="followDialogMessage")
       this.myLink = `https://nomadpulse.enoki.xyz/user/${userId}?openExternalBrowser=1`
 
       setTimeout(() => {
-        const canvas = document.querySelector('#qr-canvas')
+        const canvas = document.querySelector('#qr-canvas') as HTMLCanvasElement
+        if (!canvas) return false
         const ctx = canvas.getContext('2d')
+        if (!ctx) return false
         QRCode.toCanvas(
           canvas,
           this.myLink,
@@ -308,8 +314,8 @@ v-dialog(v-model="followDialogMessage")
 
       this.userData = await this.getProfile(
         userId,
-        this.myProfile ? this.myProfile.userId : undefined,
-        this.myProfile ? this.myProfile.userToken : undefined,
+        this.myProfile.userId,
+        this.myProfile.userToken,
       )
       if (!this.userData) {
         this.loading = false
@@ -339,7 +345,7 @@ v-dialog(v-model="followDialogMessage")
     },
     methods: {
       /** 友達申請 */
-      async friendRequest (userId) {
+      async friendRequest (userId: string) {
         this.followLoadingNow = true
         /** サーバーに送信 */
         try {
@@ -369,9 +375,13 @@ v-dialog(v-model="followDialogMessage")
         this.followLoadingNow = false
       },
       /** クリップボードにコピー */
-      async copy (content) {
-        await Clipboard.write({
-          string: content,
+      async copy (content: string) {
+        // await Clipboard.write({
+        //   string: content,
+        // })
+        await Share.share({
+          title: 'Nomad Pulseで位置情報を共有しよう',
+          url: content,
         })
       },
     },

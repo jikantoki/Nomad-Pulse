@@ -30,6 +30,7 @@ div(style="height: 100%; width: 100%")
               loading="lazy"
               :src="myProfile?.icon ?? '/account_default.jpg'"
               style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
+              onerror="this.src='/account_default.jpg'"
               )
             p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
               span(v-if="myProfile") {{ myProfile.name ?? myProfile.userId }}
@@ -51,9 +52,10 @@ div(style="height: 100%; width: 100%")
               loading="lazy"
               :src="friend.friendProfile.icon && friend.friendProfile.icon.length ? friend.friendProfile.icon : '/account_default.jpg'"
               style="height: 32px; width: 32px; border-radius: 9999px; border: solid 1px #000;"
+              onerror="this.src='/account_default.jpg'"
               )
             p.ml-2.name-space(:style="leaflet.zoom >= 15 ? 'opacity: 1;' : 'opacity: 0;'")
-              span {{ friend.friendProfile.name && friend.friendProfile.name.length ? friend.friendProfile.name : friend.friendProfile.userId }}
+              span {{ friend.friendProfile.name && friend.friendProfile.name.length && friend.friendProfile.name != 'null' ? friend.friendProfile.name : friend.friendProfile.userId }}
   //-- 下部のアクションバー --
   .action-bar
     .buttons
@@ -77,7 +79,7 @@ div(style="height: 100%; width: 100%")
         )
         v-icon mdi-dots-vertical
         p その他
-    .bottom-android-15-or-higher(v-if="isAndroid15OrHigher")
+    .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 右下の現在地ボタン --
   .right-bottom-buttons
     .current-button
@@ -88,10 +90,10 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-crosshairs-gps
-    .bottom-android-15-or-higher(v-if="isAndroid15OrHigher")
+    .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 右上のアカウントボタン --
   .right-top-buttons
-    .top-android-15-or-higher(v-if="isAndroid15OrHigher")
+    .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
     .account-button
       .button(
         v-ripple
@@ -210,7 +212,7 @@ div(style="height: 100%; width: 100%")
     fullscreen
   )
     v-card
-      .top-android-15-or-higher(v-if="isAndroid15OrHigher")
+      .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
       v-card-actions
         p.ml-2(class="headline" style="font-size: 1.3em") ようこそ
         v-spacer
@@ -232,7 +234,7 @@ div(style="height: 100%; width: 100%")
             style="text-align: center;"
           )
             p(
-              v-if="myProfile && myProfile.userId && !myProfile.guest"
+              v-if="myProfile.userId && !myProfile.guest"
               style="font-size: 1.2em; margin: 0; padding: 0;"
               ) {{ myProfile.name ? myProfile.name : myProfile.userId }}
             p(
@@ -240,9 +242,9 @@ div(style="height: 100%; width: 100%")
               style="font-size: 1.2em; margin: 0; padding: 0;"
               ) ログインしていません
             p(style="margin: 0; padding: 0;")
-              | {{ myProfile && myProfile.userId && !myProfile.guest ? `@${myProfile.userId}` : 'データは同期されていません' }}
+              | {{ myProfile.userId && !myProfile.guest ? `@${myProfile.userId}` : 'データは同期されていません' }}
             v-btn.my-2(
-              v-if="myProfile && myProfile.userId && !myProfile.guest"
+              v-if="myProfile.userId && !myProfile.guest"
               text
               @click="$router.push(`/user/${myProfile.userId}`)"
               append-icon="mdi-account-outline"
@@ -323,8 +325,9 @@ div(style="height: 100%; width: 100%")
       v-card-text
         p このアプリはバックグラウンドでも動き続けます。端末側の設定画面より、以下の操作を実行してください。
         ol.ma-6
-          li 「アプリ情報」画面から、「バッテリー使用量」を開く
-          li 「バックグラウンドでの実行を許可」を開き、「制限なし」を選択
+          li 「ええで！」を押して「バッテリー使用量設定」を開く
+          li リストから「Nomad Pulse」を選択する
+          li 「バックグラウンドでの使用を許可」を開き、「制限なし」を選択
           li その後、「戻る」操作でこのアプリまで戻ってきてください！
         br
         p ちなみに、タスクキルをすると位置情報が更新できなくなるため、タスクキルはしないようにお願いします。
@@ -348,7 +351,7 @@ div(style="height: 100%; width: 100%")
     transition="dialog-bottom-transition"
   )
     v-card
-      .top-android-15-or-higher(v-if="isAndroid15OrHigher")
+      .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
       v-card-actions
         p.ml-2(class="headline" style="font-size: 1.3em") タイムライン
         v-spacer
@@ -384,37 +387,20 @@ div(style="height: 100%; width: 100%")
   import { Browser } from '@capacitor/browser'
   import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core'
   import { Device } from '@capacitor/device'
-  import { Geolocation } from '@capacitor/geolocation'
+  import { Geolocation, type Position } from '@capacitor/geolocation'
   import { Toast } from '@capacitor/toast'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
+  import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
   import MarkerCluster from '@/components/MarkerCluster.vue'
   import muniArray from '@/js/muni'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
+
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
   import 'leaflet/dist/leaflet.css'
   const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>('BackgroundGeolocation')
 
-  interface profile {
-    [key: string]: any
-    coverImg: string | null
-    createdAt: number | null
-    icon: string | null
-    message: string | null
-    name: string | null
-    status: string | null
-    userId: string
-    userToken: string | null | undefined
-    lastGetLocationTime: Date | null
-    location: [
-      lat: number,
-      lng: number,
-    ] | null
-    battery: {
-      parsent: number
-      chargingNow: boolean | undefined
-    } | null | undefined
-    guest: boolean | undefined
-  }
   export default {
     components: {
       LMap,
@@ -447,14 +433,10 @@ div(style="height: 100%; width: 100%")
         detailCardTargetAddress: null as string | null,
         /** オプションダイアログの表示フラグ */
         optionsDialog: false,
-        /** Android 15以上かどうか */
-        isAndroid15OrHigher: true,
         /** タイムラインモードかどうか */
         timelineMode: false,
-        /** 自分のユーザーID */
-        myUserId: null as string | null,
         /** 自分のプロフィール */
-        myProfile: null as profile | null | undefined,
+        myProfile: useMyProfileStore(),
         /** 自分の位置情報を最後にいつ取得したか？ */
         lastGetMyLocationTime: null as Date | null,
         /** 最後にサーバーに位置情報を送信した時間 */
@@ -479,6 +461,8 @@ div(style="height: 100%; width: 100%")
         updateLocationInterval: null as any,
         /** 友達リスト */
         friendList: [] as any[],
+
+        settings: useSettingsStore(),
       }
     },
     watch: {
@@ -543,41 +527,26 @@ div(style="height: 100%; width: 100%")
       }
 
       /** ログイン情報 */
-      const myProfile: any = localStorage.getItem('profile')
-      if (myProfile && myProfile != 'null' && myProfile.guest) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
+      if (this.myProfile.$state.guest == false) {
+        if (this.myProfile.lastGetLocationTime) {
           this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
         }
 
         setTimeout(async () => {
-          const token = this.myProfile?.userToken
-          const profile: profile | null = await this.getProfile(this.myUserId ?? '')
+          const token = this.myProfile.userToken
+          const profile: any = await this.getProfile(this.myProfile.userId ?? '')
           if (profile) {
             profile.userToken = token
-            profile.battery = this.myProfile?.battery
+            profile.battery = this.myProfile.battery
+            profile.guest = false
+            this.myProfile = {
+              ...this.myProfile,
+              ...profile,
+            }
           }
-          localStorage.setItem('profile', JSON.stringify(profile))
-          this.myProfile = profile
         }, 100)
       } else {
-        this.myProfile = {
-          coverImg: null,
-          createdAt: null,
-          icon: null,
-          message: null,
-          name: 'ゲスト',
-          status: null,
-          userId: 'guest',
-          lastGetLocationTime: null,
-          location: null,
-          battery: null,
-          guest: true,
-          userToken: null,
-        }
+        this.myProfile.reset()
       }
 
       const locationList = localStorage.getItem('locationList')
@@ -587,19 +556,6 @@ div(style="height: 100%; width: 100%")
         for (const friend of this.friendList) {
           this.friendList[cnt].friendProfile.lastGetLocationTime = new Date(friend.location.unixtime * 1000)
           cnt++
-        }
-      }
-
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
         }
       }
 
@@ -716,7 +672,7 @@ div(style="height: 100%; width: 100%")
 
       // 5秒に一回、位置情報に関わらずサーバーにリクエストを送る
       setInterval(() => {
-        if (this.lastGetLocation[0]) {
+        if (this.lastGetLocation[0] && this.lastGetLocation[1]) {
           this.watchPosition({
             coords: {
               latitude: this.lastGetLocation[0],
@@ -736,8 +692,8 @@ div(style="height: 100%; width: 100%")
 
       // 承認していない友達リクエストがあったらポップアップを表示
       const res: any = await this.sendAjaxWithAuth('/getMyFriendList.php', {
-        id: this.myProfile?.userId,
-        token: this.myProfile?.userToken,
+        id: this.myProfile.userId,
+        token: this.myProfile.userToken,
         withLocation: true,
       })
       if (res && res.body) {
@@ -769,11 +725,16 @@ div(style="height: 100%; width: 100%")
     },
     methods: {
       /** 位置情報監視のコールバック */
-      async watchPosition (position: any) {
+      async watchPosition (position: {
+        coords: {
+          [key: string]: any
+        }
+      } | null) {
         if (this.diffSeconds(this.lastUpdateMyLocationTime) < 5) {
           // 5秒以内に更新があったら処理をキャンセル
           return false
         }
+        // console.log('最終更新:', new Date(this.lastUpdateMyLocationTime))
         if (position) {
           const lat: number = position.coords.latitude
           const lng: number = position.coords.longitude
@@ -781,18 +742,15 @@ div(style="height: 100%; width: 100%")
           this.myLocation = [lat, lng]
           const lastGetMyLocationTime = new Date()
           localStorage.setItem('latlng', JSON.stringify(this.myLocation))
-          if (this.myProfile) {
-            this.myProfile.lastGetLocationTime = lastGetMyLocationTime
-            this.myProfile.location = [lat, lng]
-            localStorage.setItem('profile', JSON.stringify(this.myProfile))
-          }
+          this.myProfile.lastGetLocationTime = lastGetMyLocationTime
+          this.myProfile.location = [lat, lng]
+
           const now = new Date()
           // if (this.isWithin10Seconds(this.lastUpdateMyLocationTime, now)) {
           //   console.log('10秒以内の位置情報更新はサーバーに送信しません')
           //   return
           // }
           this.lastUpdateMyLocationTime = now
-          console.log('サーバーアップロード中…')
 
           /** バッテリー情報を取得 */
           const info = await Device.getBatteryInfo()
@@ -956,8 +914,12 @@ div(style="height: 100%; width: 100%")
       },
       /** 位置情報のバックグラウンド追跡設定を開く */
       async requestBackground () {
-        await BackgroundGeolocation.openSettings()
+        await NativeSettings.open({
+          optionAndroid: AndroidSettings.BatteryOptimization,
+          optionIOS: IOSSettings.App,
+        })
         this.requestBackgroundDialog = false
+        this.setCurrentPosition()
       },
       /** 友達を検索 */
       async searchFriend (searchId: string) {
@@ -970,8 +932,8 @@ div(style="height: 100%; width: 100%")
         }
         const userData = await this.getProfile(
           searchId,
-          this.myProfile ? this.myProfile.userId : undefined,
-          this.myProfile ? this.myProfile.userToken : undefined,
+          this.myProfile.userId,
+          this.myProfile.userToken,
         )
         if (userData) {
           this.$router.push(`/user/${userData.userId}`)

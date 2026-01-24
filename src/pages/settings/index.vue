@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 設定
@@ -21,8 +21,11 @@ v-card(
           v-icon mdi-palette-outline
         .text
           p.title 外観
-          p.description テーマ、色
-      .setting-item(v-ripple)
+          p.description テーマ、色、言語
+      .setting-item(
+        v-ripple
+        @click="openNotificationSettings"
+        )
         .icon
           v-icon mdi-bell-outline
         .text
@@ -55,7 +58,7 @@ v-card(
           p.title このアプリについて
           p.description バージョン情報
       .setting-item(
-        v-if="developerOptionEnabled"
+        v-if="settings.developerOptions.enabled"
         v-ripple
         @click="$router.push('/settings/developer-options')"
         )
@@ -69,7 +72,7 @@ v-card(
       .setting-item(
         v-ripple
         @click="logoutRequest()"
-        v-if="myUserId"
+        v-if="!myProfile.guest"
         )
         .icon(style="background: rgba(var(--v-theme-error), 1);")
           v-icon mdi-logout
@@ -101,61 +104,34 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import { Device } from '@capacitor/device'
+  import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
+  import { useMyProfileStore } from '@/stores/myProfile'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     name: 'SettingsPage',
     data () {
       return {
         logoutDialog: false,
-        developerOptionEnabled: false,
-        isAndroid15OrHigher: false,
-        myUserId: null as string | null,
-        myProfile: {} as {
-          [key: string]: any
-        } | null,
+        myProfile: useMyProfileStore(),
+        settings: useSettingsStore(),
       }
     },
-    async mounted () {
-      const developerOptionEnabled = localStorage.getItem('developerOptionEnabled')
-      if (developerOptionEnabled === 'true') {
-        this.developerOptionEnabled = true
-      }
-
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-
-      /** ログイン情報 */
-      const myProfile = localStorage.getItem('profile')
-      if (myProfile) {
-        this.myProfile = JSON.parse(myProfile)
-        if (this.myProfile?.lastGetLocationTime) {
-          this.myProfile.lastGetLocationTime = new Date(this.myProfile.lastGetLocationTime)
-        }
-        if (this.myProfile?.userId) {
-          this.myUserId = this.myProfile.userId
-        }
-      }
-    },
+    async mounted () {},
     methods: {
       logoutRequest () {
         this.logoutDialog = true
       },
       logout () {
         this.logoutDialog = false
-        localStorage.removeItem('userId')
-        localStorage.removeItem('profile')
+        this.myProfile.reset()
         this.$router.push('/login')
+      },
+      async openNotificationSettings () {
+        await NativeSettings.open({
+          optionAndroid: AndroidSettings.AppNotification,
+          optionIOS: IOSSettings.AppNotification,
+        })
       },
     },
   }

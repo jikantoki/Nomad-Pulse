@@ -104,8 +104,8 @@
           ) ログイン
 </template>
 
-<script>
-  import mixins from '~/mixins/mixins'
+<script lang="ts">
+  import mixins from '@/mixins/mixins'
   export default {
     mixins: [mixins],
     data () {
@@ -117,7 +117,7 @@
         token: '',
         loading: false,
         loadingToken: false,
-        errorMessage: null,
+        errorMessage: '',
         newPassword: null,
         newRePassword: null,
         showPassword: false,
@@ -125,7 +125,7 @@
         page: 0,
         pageTitle: 'パスワードをリセットする',
         /** メアド検証用 */
-        mailRules: [v => !!v || '', v => /.+@.+\..+/.test(v) || ''],
+        mailRules: [(v: string) => !!v || '', (v: string) => /.+@.+\..+/.test(v) || ''],
       }
     },
     mounted () {
@@ -140,6 +140,7 @@
       /** ログイン前の二段階認証をリクエスト */
       async requestToken () {
         this.loading = true
+        // @ts-ignore
         this.sendAjaxWithAuth('/requestTokenForgotAccount.php', {
           id: this.userName,
           mailAddress: this.mailAddress,
@@ -147,14 +148,14 @@
           .then(e => {
             if (e.body.status === 'ok') {
               this.page = 1
-              this.errorMessage = null
+              this.errorMessage = ''
               this.pageTitle = 'メールに送信したトークンと新規パスワードを入力'
             } else {
               this.errorMessage = 'ユーザー名またはメールアドレスが間違っています'
             }
             this.loading = false
           })
-          .catch(error => {
+          .catch((error: any) => {
             console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loading = false
@@ -166,6 +167,7 @@
           this.errorMessage = 'パスワードが一致しません'
           return false
         }
+        // @ts-ignore
         this.sendAjaxWithAuth('/resetPassword.php', {
           id: this.userName,
           mailAddress: this.mailAddress,
@@ -182,7 +184,7 @@
             }
             this.loadingToken = false
           })
-          .catch(error => {
+          .catch((error: any) => {
             console.error(error)
             this.errorMessage = 'ネットワークエラー'
             this.loadingToken = false

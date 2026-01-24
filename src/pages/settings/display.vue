@@ -1,7 +1,7 @@
 <template lang="pug">
 v-card(
   style="width: 100%; height: 100%;"
-  :class="isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
+  :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
     p.ml-2(style="font-size: 1.3em") 外観
@@ -19,68 +19,86 @@ v-card(
         .text
           p.title テーマ
           p.description アプリをライトテーマで表示するか、ダークテーマで表示するかが選べます
-      .setting-button-item
+      .setting-button-item.mb-4
         .li(
           v-ripple
-          :class="options.theme === undefined ? 'selected' : null"
-          @click="options.theme = undefined"
-        )
+          :class="settings.display.theme === 'system' ? 'selected' : null"
+          @click="settings.display.theme = 'system'"
+          )
           v-icon(size="x-large") mdi-brightness-auto
           p システム
         .li(
           v-ripple
-          :class="options.theme === true ? 'selected' : null"
-          @click="options.theme = true"
-        )
+          :class="settings.display.theme === 'light' ? 'selected' : null"
+          @click="settings.display.theme = 'light'"
+          )
           v-icon(size="x-large") mdi-brightness-7
           p ライト
         .li(
           v-ripple
-          :class="options.theme === false ? 'selected' : null"
-          @click="options.theme = false"
-        )
+          :class="settings.display.theme === 'dark' ? 'selected' : null"
+          @click="settings.display.theme = 'dark'"
+          )
           v-icon(size="x-large") mdi-brightness-3
           p ダーク
+    .settings-list
+      .setting-item
+        .icon
+          v-icon mdi-translate-variant
+        .text
+          p.title 言語
+          p.description Switch language
+      v-select(
+        label="Language"
+        :items="['日本語']"
+        v-model="settings.display.language"
+      )
       .my-16
 </template>
 
 <script lang="ts">
+  import { Capacitor } from '@capacitor/core'
   import { Device } from '@capacitor/device'
   import { StatusBar, Style } from '@capacitor/status-bar'
+  import { useSettingsStore } from '@/stores/settings'
 
   export default {
     data () {
       return {
-        options: {
-          theme: undefined as boolean | undefined,
-        },
-        isAndroid15OrHigher: false,
+        settings: useSettingsStore(),
       }
     },
     watch: {
-      options: {
-        handler (newOptions) {
-          localStorage.setItem('themeOptions', JSON.stringify(newOptions))
-
-          switch (newOptions.theme) {
-            case true: {
+      settings: {
+        handler () {
+          switch (this.settings.display.theme) {
+            case 'light': {
               this.$vuetify.theme.change('light')
-              StatusBar.setStyle({ style: Style.Light })
+              if (Capacitor.getPlatform() !== 'web') {
+                StatusBar.setStyle({ style: Style.Light })
+              }
               break
             }
-            case false: {
+            case 'dark': {
               this.$vuetify.theme.change('dark')
-              StatusBar.setStyle({ style: Style.Dark })
+              if (Capacitor.getPlatform() !== 'web') {
+                StatusBar.setStyle({ style: Style.Dark })
+              }
 
               break
             }
-            case undefined: {
+            case 'system': {
               const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
               if (systemTheme) {
-                StatusBar.setStyle({ style: Style.Dark })
+                if (Capacitor.getPlatform() !== 'web') {
+                  StatusBar.setStyle({ style: Style.Dark })
+                }
                 this.$vuetify.theme.change('dark')
               } else {
-                StatusBar.setStyle({ style: Style.Light })
+                if (Capacitor.getPlatform() !== 'web') {
+                  StatusBar.setStyle({ style: Style.Light })
+                }
+
                 this.$vuetify.theme.change('light')
               }
               break
@@ -91,27 +109,7 @@ v-card(
         deep: true,
       },
     },
-    async mounted () {
-      const optionsJson = localStorage.getItem('themeOptions')
-      if (optionsJson) {
-        const options = JSON.parse(optionsJson)
-        this.options = {
-          ...options,
-        }
-      }
-      /** ステータスバーがWebViewをオーバーレイしないように設定 */
-      const info = await Device.getInfo()
-      this.isAndroid15OrHigher = info.platform === 'android' && Number(info.osVersion) >= 15 ? true : false
-
-      // 開発者オプション
-      const developerOptions = localStorage.getItem('developerOptions')
-      if (developerOptions) {
-        const options = JSON.parse(developerOptions)
-        if (options.statusBarNotch !== undefined) {
-          this.isAndroid15OrHigher = options.statusBarNotch
-        }
-      }
-    },
+    async mounted () {},
   }
 </script>
 
