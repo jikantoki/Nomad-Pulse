@@ -770,6 +770,10 @@ div(style="height: 100%; width: 100%")
     methods: {
       /** 位置情報監視のコールバック */
       async watchPosition (position: any) {
+        if (this.diffSeconds(this.lastUpdateMyLocationTime) < 5) {
+          // 5秒以内に更新があったら処理をキャンセル
+          return false
+        }
         if (position) {
           const lat: number = position.coords.latitude
           const lng: number = position.coords.longitude

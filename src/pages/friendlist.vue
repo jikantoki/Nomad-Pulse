@@ -209,21 +209,23 @@ v-dialog(
         this.friendList = []
         this.acceptList = []
         this.requestList = []
-        for (const friend of allFriendList) {
-          friend.friendProfile.userId = friend.friendRealId
-          if (friend.status == 'request') {
-            if (friend.fromUserId == res.body.mySecretId) {
-              this.requestList.push(friend.friendProfile)
-            } else {
-              this.acceptList.push(friend.friendProfile)
+        if (allFriendList) {
+          for (const friend of allFriendList) {
+            friend.friendProfile.userId = friend.friendRealId
+            if (friend.status == 'request') {
+              if (friend.fromUserId == res.body.mySecretId) {
+                this.requestList.push(friend.friendProfile)
+              } else {
+                this.acceptList.push(friend.friendProfile)
+              }
+            } else if (friend.status == 'friend') {
+              this.friendList.push(friend.friendProfile)
             }
-          } else if (friend.status == 'friend') {
-            this.friendList.push(friend.friendProfile)
           }
+          localStorage.setItem('friendList', JSON.stringify(this.friendList))
+          localStorage.setItem('acceptList', JSON.stringify(this.acceptList))
+          localStorage.setItem('requestList', JSON.stringify(this.requestList))
         }
-        localStorage.setItem('friendList', JSON.stringify(this.friendList))
-        localStorage.setItem('acceptList', JSON.stringify(this.acceptList))
-        localStorage.setItem('requestList', JSON.stringify(this.requestList))
       }
     },
     methods: {
