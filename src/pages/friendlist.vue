@@ -95,7 +95,7 @@ v-card(
         .friend(
           v-ripple
           v-for="(friend, cnt) of friendList"
-          @click="$router.push(`/user/${friend.userId}`)"
+          @click="detailCardTarget = friend; detailCardDialog = true"
           )
           .icon
             img(
@@ -126,6 +126,46 @@ v-card(
         br
         span トップページの検索ボタンから探してみよう！
     .my-16.pa-2
+  //- 地図で押したアカウントの詳細カード
+  v-dialog.detail-card-target(
+    v-model="detailCardDialog"
+  )
+    v-card()
+      v-card-actions
+        p.ml-2(
+          style="display: flex; align-items: center;"
+        )
+          img.mr-2(
+            :src="detailCardTarget.icon && detailCardTarget.icon.length ? detailCardTarget.icon : '/account_default.jpg'"
+            style="height: 1.5em; width: 1.5em; border-radius: 9999px;"
+            onerror="this.src='/account_default.jpg'"
+            )
+          span {{ detailCardTarget.name ? detailCardTarget.name : detailCardTarget.userId }}
+        v-spacer
+        v-btn(
+          text
+          @click="detailCardDialog = false"
+          icon="mdi-close"
+          )
+      v-card-text
+        .info
+          v-icon mdi-card-account-details-outline
+          p @{{ detailCardTarget.userId }}
+        .info
+          v-icon mdi-message-outline
+          p {{ detailCardTarget.message }}
+        v-btn.my-2(
+          text
+          @click="$router.push(`/?viewUser=${detailCardTarget.userId}`)"
+          prepend-icon="mdi-map-marker"
+          style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
+        ) 現在地を表示
+        v-btn.my-2(
+          text
+          @click="$router.push(`/user/${detailCardTarget.userId}`)"
+          prepend-icon="mdi-account-circle"
+          style="background-color: rgb(var(--v-theme-primary)); width: 100%;"
+        ) プロフィールを表示
 v-dialog(
   v-model="deleteDialog"
 )
@@ -150,6 +190,7 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { App } from '@capacitor/app'
   import { Device } from '@capacitor/device'
   import mixins from '@/mixins/mixins'
   import { useMyProfileStore } from '@/stores/myProfile'
@@ -179,6 +220,8 @@ v-dialog(
         settings: useSettingsStore(),
         /** 最初の読み込みフラグ */
         loading: false,
+        detailCardTarget: null as null | any,
+        detailCardDialog: false,
       }
     },
     async mounted () {
@@ -235,6 +278,19 @@ v-dialog(
         }
       }
       this.loading = false
+
+      App.addListener('backButton', () => {
+        if (this.detailCardDialog) {
+          this.detailCardDialog = false
+        } else if (this.deleteDialog) {
+          this.deleteDialog = false
+        } else {
+          this.$router.back()
+        }
+      })
+    },
+    unmounted () {
+      App.removeAllListeners()
     },
     methods: {
       /**
@@ -341,5 +397,15 @@ v-dialog(
 
 .top-android-15-or-higher {
   height: calc(100vh - 40px - 16px)!important;
+}
+
+.detail-card-target {
+  .info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    margin: 1em 0;
+  }
 }
 </style>

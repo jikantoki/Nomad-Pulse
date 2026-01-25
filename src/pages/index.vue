@@ -92,6 +92,7 @@ div(style="height: 100%; width: 100%")
         v-icon mdi-crosshairs-gps
   //-- 左上の友達リストボタン --
   .left-top-buttons
+    .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
     .current-button
       v-btn(
         size="x-large"
@@ -100,7 +101,6 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-account-multiple
-    .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 右上のアカウントボタン --
   .right-top-buttons
     .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
@@ -780,12 +780,43 @@ div(style="height: 100%; width: 100%")
         }
       }, 1000 * 5)
 
-      /** 現在地を取得し、地図の中心も移動 */
-      await this.setCurrentPosition()
+      // Getパラメータから友達IDがあればその人の位置情報場所に飛ぶ
+      const urlParams = new URLSearchParams(window.location.search)
+      const friendId = urlParams.get('viewUser')
+      if (friendId) {
+        const friend = this.friendList.find(f => f.friendProfile.userId === friendId)
+        if (friend) {
+          this.leaflet.center = [
+            friend.location.lat,
+            friend.location.lng,
+          ]
+        }
+        this.optionsDialog = false
+      } else {
+        /** 現在地を取得し、地図の中心も移動 */
+        await this.setCurrentPosition()
+      }
 
       /** 遅延も考慮して0.5秒後に再度中心移動 */
       setTimeout(() => {
-        this.setCurrentPosition()
+        // Getパラメータから友達IDがあればその人の位置情報場所に飛ぶ
+        const urlParams = new URLSearchParams(window.location.search)
+        const friendId = urlParams.get('viewUser')
+        if (friendId) {
+          const friend = this.friendList.find(f => f.friendProfile.userId === friendId)
+          if (friend) {
+            this.leaflet.center = [
+              friend.location.lat,
+              friend.location.lng,
+            ]
+          }
+          urlParams.delete('viewUser')
+          history.replaceState(null, '', window.location.pathname + '?' + urlParams.toString())
+          history.pushState(null, '', window.location.pathname + '?' + urlParams.toString())
+        } else {
+          /** 現在地を取得し、地図の中心も移動 */
+          this.setCurrentPosition()
+        }
       }, 500)
 
       // 承認していない友達リクエストがあったらポップアップを表示
