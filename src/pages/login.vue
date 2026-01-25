@@ -12,7 +12,7 @@
     img.ma-8(src="/icon.png")
     p.form-p.text-h6 {{ pageTitle }}
     v-container
-      p.error.pa-4.mb-4.relative(v-if="errorMessage")
+      .error.pa-4.mb-4.relative(v-if="errorMessage")
         v-icon mdi-alert-circle-outline
         p.px-4 {{ errorMessage }}
         v-icon.v-ripple.absolute.close-error(

@@ -15,7 +15,7 @@
       o.success.pa-4.ma-4.relative(v-if="page === 1")
         v-icon mdi-check
         p.px-4 新しいアカウントを追加しました！
-      p.error.pa-4.mb-4.relative(v-if="errorMessage && page === 0")
+      .error.pa-4.mb-4.relative(v-if="errorMessage && page === 0")
         v-icon mdi-alert-circle-outline
         p.px-4 {{ errorMessage }}
         v-icon.v-ripple.absolute.close-error(
