@@ -90,6 +90,16 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-crosshairs-gps
+  //-- 左上の友達リストボタン --
+  .left-top-buttons
+    .current-button
+      v-btn(
+        size="x-large"
+        icon
+        @click="$router.push('/friendlist')"
+        style="background-color: rgb(var(--v-theme-primary)); color: white"
+        )
+        v-icon mdi-account-multiple
     .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 右上のアカウントボタン --
   .right-top-buttons
@@ -369,8 +379,22 @@ div(style="height: 100%; width: 100%")
           @click="timelineMode = false"
           icon="mdi-close"
           )
-      v-card-text
+      v-card-text(style="height: inherit; overflow-y: auto;")
         p ここにタイムラインコンテンツを表示します。
+        .timeline(
+          v-for="(timeline, index) of sortedTimeline"
+          :key="index"
+        )
+          .timeline-entry
+            .timeline-entry-header
+            .timeline-entry-body
+              p(
+                v-if="timeline.address"
+              ) 住所: {{ timeline.address }}
+              p(
+                v-else
+              ) 位置: 緯度 {{ timeline.lat.toFixed(5) }}, 経度 {{ timeline.lng.toFixed(5) }}
+              p 時間: {{ new Date(timeline.startTimestamp).toLocaleString() }}～{{ new Date(timeline.endTimestamp).toLocaleString() }}
   v-dialog(
     v-model="acceptDialog"
     persistent
@@ -396,19 +420,26 @@ div(style="height: 100%; width: 100%")
   import { Browser } from '@capacitor/browser'
   import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core'
   import { Device } from '@capacitor/device'
+  import { Directory, Encoding, Filesystem, type ReadFileResult } from '@capacitor/filesystem'
   import { Geolocation, type Position } from '@capacitor/geolocation'
   import { Toast } from '@capacitor/toast'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
   import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
   import MarkerCluster from '@/components/MarkerCluster.vue'
   import muniArray from '@/js/muni'
+
   // @ts-ignore
   import mixins from '@/mixins/mixins'
-
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
   import 'leaflet/dist/leaflet.css'
   const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>('BackgroundGeolocation')
+
+  interface TimelineEntry {
+    lat: number
+    lng: number
+    timestamp: string
+  }
 
   export default {
     components: {
@@ -470,9 +501,33 @@ div(style="height: 100%; width: 100%")
         updateLocationInterval: null as any,
         /** 友達リスト */
         friendList: [] as any[],
-
+        /** 設定ストア */
         settings: useSettingsStore(),
+        /** タイムラインデータ */
+        timelineData: [] as {
+          lat: number
+          lng: number
+          /** Date.toLocaleString() */
+          startTimestamp: string
+          /** Date.toLocaleString() */
+          endTimestamp: string
+          address: string | null
+        }[],
+        lastUpdatedTimeline: {
+          lat: 0,
+          lng: 0,
+          timestamp: new Date(0).toLocaleDateString(),
+        } as TimelineEntry,
       }
+    },
+    computed: {
+      /** 新しい順タイムライン */
+      sortedTimeline () {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties, unicorn/no-array-sort
+        return this.timelineData.sort((a, b) => {
+          return new Date(b.endTimestamp).getTime() - new Date(a.endTimestamp).getTime()
+        })
+      },
     },
     watch: {
       /** プロフィール詳細を押された時に、現在の住所を表示する */
@@ -483,23 +538,7 @@ div(style="height: 100%; width: 100%")
             return
           } else {
             const latlng = newProfile.location
-            const geoCodingUrl = new URL(
-              'https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress',
-            )
-            geoCodingUrl.searchParams.set('lat', latlng[0])
-            geoCodingUrl.searchParams.set('lon', latlng[1])
-            const res = await fetch(geoCodingUrl.toString())
-            const json = await res.json()
-            const data = json.results
-            const muniData = muniArray[data.muniCd]
-            if (!muniData) {
-              return '住所不明'
-            }
-            const splitedMuniData = muniData.split(',')
-            const pref = splitedMuniData[1]
-            const city = splitedMuniData[3]
-            const address = data.lv01Nm
-            this.detailCardTargetAddress = `${pref}${city}${address}`
+            this.detailCardTargetAddress = await this.getAddress(latlng[0], latlng[1])
             return
           }
         },
@@ -508,8 +547,31 @@ div(style="height: 100%; width: 100%")
       },
       /** ようこそ画面の表示状態を保存 */
       optionsDialog: {
-        handler: async function (dialog) {
+        handler: async function (dialog: boolean) {
           localStorage.setItem('welcomeDialog', String(dialog))
+        },
+      },
+      timelineMode: {
+        handler: async function (mode: boolean) {
+          if (!mode) {
+            return
+          }
+          // タイムラインを開いたタイミングで、住所を取得する
+          let cnt = 0
+          for (const entry of this.timelineData) {
+            if (entry.address) {
+              cnt++
+              continue
+            }
+            this.timelineData[cnt]!.address = await this.getAddress(entry.lat, entry.lng)
+            cnt++
+          }
+          await Filesystem.writeFile({
+            path: 'timeline.json',
+            directory: Directory.Data,
+            encoding: Encoding.UTF8,
+            data: JSON.stringify(this.timelineData),
+          })
         },
       },
     },
@@ -630,6 +692,33 @@ div(style="height: 100%; width: 100%")
           this.$router.back()
         }
       })
+
+      // ローカルにタイムラインデータを保存
+      /** タイムラインデータ */
+      let file: ReadFileResult
+      try {
+        file = await Filesystem.readFile({
+          path: 'timeline.json',
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+        })
+      } catch {
+        await Filesystem.writeFile({
+          path: 'timeline.json',
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+          data: JSON.stringify([]),
+        })
+
+        file = await Filesystem.readFile({
+          path: 'timeline.json',
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+        })
+      }
+
+      // @ts-ignore
+      this.timelineData = JSON.parse(file.data)
 
       // Webの場合は従来のAPIで位置情報追跡
       if (Capacitor.getPlatform() === 'web') {
@@ -813,6 +902,61 @@ div(style="height: 100%; width: 100%")
               }
             }
           }
+
+          /** タイムラインデータをストレージと同期 */
+          let file: ReadFileResult
+          try {
+            file = await Filesystem.readFile({
+              path: 'timeline.json',
+              directory: Directory.Data,
+              encoding: Encoding.UTF8,
+            })
+          } catch {
+            await Filesystem.writeFile({
+              path: 'timeline.json',
+              directory: Directory.Data,
+              encoding: Encoding.UTF8,
+              data: JSON.stringify([]),
+            })
+
+            file = await Filesystem.readFile({
+              path: 'timeline.json',
+              directory: Directory.Data,
+              encoding: Encoding.UTF8,
+            })
+          }
+          // @ts-ignore
+          this.timelineData = JSON.parse(file.data)
+
+          // @ts-ignore
+          const distance = this.calcDistance(
+            [lat, lng],
+            [this.lastUpdatedTimeline.lat, this.lastUpdatedTimeline.lng],
+          )
+          if (distance < 20 && this.timelineData.length > 0) {
+            // 20メートル以内の移動なら、最後のデータの終了時間を更新するだけにする
+            this.timelineData.at(-1)!.endTimestamp = new Date().toLocaleString()
+          } else {
+            this.timelineData.push({
+              lat,
+              lng,
+              startTimestamp: new Date().toLocaleString(),
+              endTimestamp: new Date().toLocaleString(),
+              address: null,
+            })
+            this.lastUpdatedTimeline = {
+              lat,
+              lng,
+              timestamp: new Date().toLocaleString(),
+            }
+          }
+          // ローカルにタイムラインデータを保存
+          await Filesystem.writeFile({
+            path: 'timeline.json',
+            directory: Directory.Data,
+            encoding: Encoding.UTF8,
+            data: JSON.stringify(this.timelineData),
+          })
         }
 
         return
@@ -845,14 +989,14 @@ div(style="height: 100%; width: 100%")
         /** バックグラウンドでの使用許可設定メソッドへの準備 */
         this.requestBackgroundDialog = true
       },
-      /** 2地点間の距離を計算 */
+      /** 2地点間の距離（メートル）を計算 */
       calcDistance (latlng1: [number, number], latlng2: [number, number]) {
         const R = Math.PI / 180
         const lat1 = latlng1[0] * R
         const lat2 = latlng2[0] * R
         const lng1 = latlng1[1] * R
         const lng2 = latlng2[1] * R
-        return 6371e3 * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1))
+        return 6371e3 * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)) as number
       },
       /** バッテリーアイコンを選択 */
       chooseBatteryIcon (batteryPersent: number | undefined, chargingNow: boolean | undefined) {
@@ -993,6 +1137,35 @@ div(style="height: 100%; width: 100%")
         const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime())
         return diffInMilliseconds <= 10_000
       },
+      /**
+       * 緯度経度から住所を取得
+       * @param lat 緯度
+       * @param lng 経度
+       */
+      async getAddress (lat: number, lng: number) {
+        const geoCodingUrl = new URL(
+          'https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress',
+        )
+        geoCodingUrl.searchParams.set('lat', String(lat))
+        geoCodingUrl.searchParams.set('lon', String(lng))
+        return fetch(geoCodingUrl.toString())
+          .then(res => res.json())
+          .then(json => {
+            const data = json.results
+            const muniData = muniArray[data.muniCd]
+            if (!muniData) {
+              return '住所不明'
+            }
+            const splitedMuniData = muniData.split(',')
+            const pref = splitedMuniData[1]
+            const city = splitedMuniData[3]
+            const address = data.lv01Nm
+            return `${pref}${city}${address}`
+          })
+          .catch(() => {
+            return null
+          })
+      },
     },
   }
 </script>
@@ -1016,6 +1189,20 @@ div(style="height: 100%; width: 100%")
 .right-top-buttons {
   position: fixed;
   right: 16px;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+
+  .account-button {
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+.left-top-buttons {
+  position: fixed;
+  left: 16px;
   top: 16px;
   display: flex;
   flex-direction: column;

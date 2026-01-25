@@ -17,7 +17,7 @@ v-card(
       v-show="loading"
     )
       v-progress-circular(
-        :size="64"
+        :size="32"
         indeterminate
       )
     //-- 承認待ちリスト

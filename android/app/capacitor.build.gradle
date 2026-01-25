@@ -17,6 +17,7 @@ dependencies {
     implementation project(':capacitor-camera')
     implementation project(':capacitor-clipboard')
     implementation project(':capacitor-device')
+    implementation project(':capacitor-filesystem')
     implementation project(':capacitor-geolocation')
     implementation project(':capacitor-push-notifications')
     implementation project(':capacitor-share')

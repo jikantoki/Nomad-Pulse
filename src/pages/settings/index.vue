@@ -36,10 +36,19 @@ v-card(
         @click="$router.push('/settings/privacy')"
         )
         .icon
-          v-icon mdi-file-document-outline
+          v-icon mdi-lock-outline
         .text
           p.title 位置情報とプライバシー
-          p.description タイムラン、マップ履歴
+          p.description 位置情報の共有条件の設定
+      .setting-item(
+        v-ripple
+        @click="$router.push('/settings/timeline')"
+        )
+        .icon
+          v-icon mdi-file-document-outline
+        .text
+          p.title タイムライン
+          p.description 履歴データの管理
       .setting-item(
         v-ripple
         @click="$router.push('/terms')"

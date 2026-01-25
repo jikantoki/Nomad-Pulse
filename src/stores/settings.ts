@@ -39,6 +39,8 @@ export const useSettingsStore = defineStore('settings', {
         distance: 0,
       },
     },
+    /** タイムライン設定 */
+    timeline: {},
     /** 開発者オプション */
     developerOptions: {
       /** 開発者オプションが有効 */
