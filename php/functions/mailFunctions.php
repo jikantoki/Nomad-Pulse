@@ -8,7 +8,8 @@ use PHPMailer\PHPMailer\Exception;
 
 // 本当はここenvから取得したい
 define('MailHeader', "<p>
-<img src=\"https://nomadpulse.enoki.xyz/wp-content/uploads/2026/01/icon.png\" alt=\"Nomad Pulse\">
+<img src=\"https://nomadpulse.enoki.xyz/wp-content/uploads/2026/01/icon.png\" alt=\"Nomad Pulse\" height=\"64px\">
+<br>
 いつも Nomad Pulse をご利用いただきありがとうございます。
 <hr>
 </p>");
