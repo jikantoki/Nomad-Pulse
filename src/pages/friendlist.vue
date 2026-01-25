@@ -83,6 +83,11 @@ v-card(
               span.name {{ (friend.name && friend.name.length) ? friend.name : friend.userId }}
               span.id @{{ friend.userId }}
             .description {{ friend.message }}
+          .action-buttons
+            v-btn.trash(
+              icon="mdi-trash-can-outline"
+              @click.stop="deleteDialog = true; deleteTarget = friend"
+            )
     //-- フレンドリスト
     .friend-list(v-if="friendList.length")
       p {{ friendList.length }}人の友達
@@ -126,7 +131,7 @@ v-dialog(
 )
   v-card
     v-card-title 友達の削除
-    v-card-text {{ deleteTarget.name?.length ? deleteTarget.name : deleteTarget.userId }}@{{ deleteTarget.userId }}を友達から削除しますか？
+    v-card-text {{ deleteTarget.name?.length ? deleteTarget.name : deleteTarget.userId }}@{{ deleteTarget.userId }}を友達/申請リストから削除しますか？
     v-card-actions
       v-btn(
         @click="deleteDialog = false"
@@ -251,6 +256,14 @@ v-dialog(
           if (friend.userId == userId) {
             friendProfile = this.acceptList[cnt]
             this.acceptList.splice(cnt, 1)
+            break
+          }
+          cnt++
+        }
+        for (const friend of this.requestList) {
+          if (friend.userId == userId) {
+            friendProfile = this.requestList[cnt]
+            this.requestList.splice(cnt, 1)
             break
           }
           cnt++
