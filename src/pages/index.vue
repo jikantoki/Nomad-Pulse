@@ -118,7 +118,7 @@ div(style="height: 100%; width: 100%")
   .detail-card-target
     v-card(
       v-if="detailCardTarget"
-      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; height: 24em; border-radius: 16px 16px 0 0;"
+      style="position: fixed; bottom: 0; left: 0; z-index: 1000; width: 100%; border-radius: 16px 16px 0 0;"
     )
       v-card-actions
         p.ml-2(
@@ -154,6 +154,12 @@ div(style="height: 100%; width: 100%")
         .info
           v-icon mdi-clock-outline
           p {{ diffLastGetTime(detailCardTarget.lastGetLocationTime) }}
+        .info.pa-4(
+          style="background-color: rgba(255, 255, 0, 0.3); border-radius: 16px;"
+          v-show="diffSeconds(detailCardTarget.lastGetLocationTime) > 60 * 60"
+        )
+          v-icon mdi-information-outline
+          p この友達は圏外、電源オフ、または位置情報の共有を停止している可能性があります。
         v-btn.my-2(
           text
           v-if="!detailCardTarget.guest"
