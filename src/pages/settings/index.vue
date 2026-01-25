@@ -51,6 +51,15 @@ v-card(
           p.description 履歴データの管理
       .setting-item(
         v-ripple
+        @click="openBatterySettings"
+        )
+        .icon
+          v-icon mdi-battery
+        .text
+          p.title バッテリーのバックグラウンド設定
+          p.description 位置情報を追跡するために、バッテリーの最適化を無効化してください
+      .setting-item(
+        v-ripple
         @click="$router.push('/terms')"
         )
         .icon
@@ -140,6 +149,12 @@ v-dialog(
         await NativeSettings.open({
           optionAndroid: AndroidSettings.AppNotification,
           optionIOS: IOSSettings.AppNotification,
+        })
+      },
+      async openBatterySettings () {
+        await NativeSettings.open({
+          optionAndroid: AndroidSettings.BatteryOptimization,
+          optionIOS: IOSSettings.App,
         })
       },
     },
