@@ -46,6 +46,16 @@ if ($passwordLength < 4 || $passwordLength > 64) {
 
 $response = makeAccount($username, $password, $mailAddress);
 if (!$response) {
+  sendMail(
+    $mailAddress,
+    'アカウント作成完了のお知らせ',
+    "
+    <p>アカウントの作成が完了しました。</p>
+    <br>
+    <h3>ユーザー名: {$username}</h3>
+    <br>
+    <p>引き続き Nomad Pulse をよろしくお願いいたします。</p>"
+  );
   //アカウント作れた
   echo json_encode([
     'status' => 'ok',
