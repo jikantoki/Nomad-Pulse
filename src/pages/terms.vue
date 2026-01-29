@@ -4,7 +4,7 @@ v-card(
   :class="settings.hidden.isAndroid15OrHigher ? 'top-android-15-or-higher' : ''"
   )
   v-card-actions
-    p.ml-2(style="font-size: 1.3em") 利用規約・プライバシーポリシー
+    p.ml-2(style="font-size: 1.3em") 利用規約
     v-spacer
     v-btn(
       text
@@ -33,21 +33,16 @@ v-card(
       li その前に謝ってくれたら和解も検討するよ！
     hr.my-4
     h1.my-4 プライバシーポリシー
-    h2.my-2 個人情報の取得範囲
-    ul.ml-8
-      li 任意で入力したユーザーID
-      li メールアドレス
-      li 暗号化されたパスワード
-      li 正確な位置情報
-      hr.my-4
-    h2.my-2 個人情報の提供について
-    ul.ml-8
-      li Nomad Pulseは、無償又は有償でも個人情報の提供をいたしません
-      li 但し、サーバーに被害が生じた、または損害賠償を請求する場合のIPアドレスやメールアドレスは除きます
+    p プライバシーポリシーについては、以下のリンクをご参照ください。
+    v-btn.my-4(
+      @click="openURL('https://enoki.xyz/privacy')"
+      style="background-color: rgb(var(--v-theme-primary)); color: white;"
+    ) プライバシーポリシー
     .my-16
 </template>
 
 <script lang="ts">
+  import { Browser } from '@capacitor/browser'
   import { useSettingsStore } from '@/stores/settings'
 
   export default {
@@ -57,6 +52,12 @@ v-card(
       }
     },
     async mounted () {},
+    methods: {
+      /** URLをブラウザで開く */
+      async openURL (url: string) {
+        await Browser.open({ url: url })
+      },
+    },
   }
 </script>
 

@@ -303,7 +303,11 @@ div(style="height: 100%; width: 100%")
           v-list-item.item( @click="$router.push('/terms')" )
             .icon-and-text
               v-icon mdi-file-document-outline
-              v-list-item-title 利用規約・プライバシーポリシー
+              v-list-item-title 利用規約
+          v-list-item.item( @click="openURL('https://enoki.xyz/privacy')" )
+            .icon-and-text
+              v-icon mdi-shield-lock-outline
+              v-list-item-title プライバシーポリシー
           v-list-item.item( @click="$router.push('/about')" )
             .icon-and-text
               v-icon mdi-information
@@ -315,11 +319,24 @@ div(style="height: 100%; width: 100%")
     max-width="400"
   )
     v-card
-      v-card-title(class="headline") 位置情報の利用許可
+      v-card-title(class="headline") 位置情報利用のお願い
       v-card-text
-        | このアプリは位置情報を利用します。 位置情報の利用を許可してください。
-        br
-        | また、バックグラウンドでの位置情報取得と通知の許可も必要です。
+        .text-content
+          p このアプリは現在地の表示、及びお互いに承認した友達と共有するために位置情報を利用します。
+          .my-2
+          p アプリを閉じている間や使用していない間も、正確な移動履歴を記録するためにバックグラウンドで位置情報を取得します。
+          .my-2
+          p また、バックグラウンドでもアプリを動かすために、通知の許可も必要です。
+          .my-2
+          p 続行するには、以下の「ええで！」を押してください。
+        .privacy-policy-link.mt-4
+          p
+            span 詳細は
+            a.pa-2.ma-2(
+              @click="openURL('https://enoki.xyz/privacy')"
+              style="background-color: rgb(var(--v-theme-primary)); color: white; cursor: pointer; border-radius: 8px;"
+            ) プライバシーポリシー
+            span をご覧ください。
       v-card-actions
         v-spacer
         v-btn(

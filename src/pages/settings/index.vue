@@ -65,7 +65,16 @@ v-card(
         .icon
           v-icon mdi-file-document-outline
         .text
-          p.title 利用規約・プライバシーポリシー
+          p.title 利用規約
+      .setting-item(
+        v-ripple
+        @click="openURL('https://enoki.xyz/privacy')"
+        )
+        .icon
+          v-icon mdi-shield-lock-outline
+        .text
+          p.title プライバシーポリシー
+          p.description 外部リンクが立ち上がります
       .setting-item(
         v-ripple
         @click="$router.push('/about')"
@@ -122,6 +131,7 @@ v-dialog(
 </template>
 
 <script lang="ts">
+  import { Browser } from '@capacitor/browser'
   import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
@@ -156,6 +166,10 @@ v-dialog(
           optionAndroid: AndroidSettings.BatteryOptimization,
           optionIOS: IOSSettings.App,
         })
+      },
+      /** URLをブラウザで開く */
+      async openURL (url: string) {
+        await Browser.open({ url: url })
       },
     },
   }
