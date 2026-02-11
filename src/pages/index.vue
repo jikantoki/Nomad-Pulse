@@ -90,6 +90,7 @@ div(style="height: 100%; width: 100%")
         style="background-color: rgb(var(--v-theme-primary)); color: white"
         )
         v-icon mdi-crosshairs-gps
+    .bottom-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
   //-- 左上の友達リストボタン --
   .left-top-buttons
     .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
