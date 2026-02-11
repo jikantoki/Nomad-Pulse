@@ -312,6 +312,10 @@ div(style="height: 100%; width: 100%")
             .icon-and-text
               v-icon mdi-information
               v-list-item-title このアプリについて
+          v-list-item.item( @click="share('https://play.google.com/store/apps/details?id=xyz.enoki.nomadpulse', 'Nomad Pulse')" )
+            .icon-and-text
+              v-icon mdi-share-variant
+              v-list-item-title このアプリを共有する
   //-- 位置情報利用許可ダイアログ --
   v-dialog(
     v-model="requestGeoPermissionDialog"
@@ -439,12 +443,13 @@ div(style="height: 100%; width: 100%")
   import { Device } from '@capacitor/device'
   import { Directory, Encoding, Filesystem, type ReadFileResult } from '@capacitor/filesystem'
   import { Geolocation, type Position } from '@capacitor/geolocation'
+  import { Share } from '@capacitor/share'
   import { Toast } from '@capacitor/toast'
   import { LIcon, LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
   import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings'
   import MarkerCluster from '@/components/MarkerCluster.vue'
-  import muniArray from '@/js/muni'
 
+  import muniArray from '@/js/muni'
   // @ts-ignore
   import mixins from '@/mixins/mixins'
   import { useMyProfileStore } from '@/stores/myProfile'
@@ -1213,6 +1218,13 @@ div(style="height: 100%; width: 100%")
           .catch(() => {
             return null
           })
+      },
+      /** シェアダイアログ */
+      async share (content: string, title = '') {
+        await Share.share({
+          url: content,
+          title: title,
+        })
       },
     },
   }
