@@ -1,13 +1,16 @@
 package xyz.enoki.nomadpulse;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 
 public class LocationForegroundService extends Service {
@@ -53,7 +56,7 @@ public class LocationForegroundService extends Service {
         
         // Schedule restart when service is destroyed
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
-        restartServiceIntent.setAction("RestartService");
+        restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
         sendBroadcast(restartServiceIntent);
     }
 
@@ -64,15 +67,28 @@ public class LocationForegroundService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        // Recreate the service when task is removed
-        Intent restartServiceIntent = new Intent(getApplicationContext(), LocationForegroundService.class);
-        restartServiceIntent.setPackage(getPackageName());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(restartServiceIntent);
-        } else {
-            startService(restartServiceIntent);
-        }
         super.onTaskRemoved(rootIntent);
+        
+        // Use AlarmManager for more reliable restart
+        Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
+        restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
+        
+        PendingIntent restartPendingIntent = PendingIntent.getBroadcast(
+            getApplicationContext(),
+            1,
+            restartServiceIntent,
+            PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+        );
+        
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            // Schedule restart in 1 second
+            alarmManager.set(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 1000,
+                restartPendingIntent
+            );
+        }
     }
 
     private void createNotificationChannel() {
