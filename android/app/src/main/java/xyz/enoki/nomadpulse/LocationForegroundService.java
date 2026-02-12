@@ -57,6 +57,7 @@ public class LocationForegroundService extends Service {
         // Schedule restart when service is destroyed
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
         restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
+        restartServiceIntent.setPackage(getPackageName());
         sendBroadcast(restartServiceIntent);
     }
 
@@ -72,6 +73,7 @@ public class LocationForegroundService extends Service {
         // Use AlarmManager for more reliable restart
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
         restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
+        restartServiceIntent.setPackage(getPackageName());
         
         PendingIntent restartPendingIntent = PendingIntent.getBroadcast(
             getApplicationContext(),
