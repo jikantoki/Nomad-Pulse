@@ -64,7 +64,7 @@
         <receiver
             android:name=".ServiceRestartReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE" />
