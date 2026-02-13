@@ -230,7 +230,9 @@ div(style="height: 100%; width: 100%")
     transition="dialog-bottom-transition"
     fullscreen
   )
-    v-card
+    v-card(
+      style="width: 100%; height: 100%;"
+    )
       .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
       v-card-actions
         p.ml-2(class="headline" style="font-size: 1.3em") ようこそ
@@ -391,7 +393,9 @@ div(style="height: 100%; width: 100%")
     fullscreen
     transition="dialog-bottom-transition"
   )
-    v-card
+    v-card(
+      style="width: 100%; height: 100%;"
+    )
       .top-android-15-or-higher(v-if="settings.hidden.isAndroid15OrHigher")
       v-card-actions
         p.ml-2(class="headline" style="font-size: 1.3em") タイムライン
