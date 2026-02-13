@@ -921,6 +921,12 @@ div(style="height: 100%; width: 100%")
           }
           this.chargeingNow = info.isCharging
 
+          // 位置情報共有の判定を行う
+          if (!this.shouldShareLocation(lat, lng)) {
+            console.log('位置情報共有の条件を満たしていません')
+            return
+          }
+
           if (this.myProfile && !this.myProfile.guest) {
             /** 取得した情報をサーバーに送信 */
             try {
@@ -1226,6 +1232,63 @@ div(style="height: 100%; width: 100%")
           url: content,
           title: title,
         })
+      },
+      /** 位置情報共有が許可されているかチェック */
+      shouldShareLocation (lat: number, lng: number): boolean {
+        // 一時停止中なら共有しない
+        if (this.settings.location.pause) {
+          return false
+        }
+
+        // 時間制限が有効な場合、現在時刻をチェック
+        if (this.settings.location.shareTime.enabled && !this.isWithinTimeRange()) {
+          return false
+        }
+
+        // 場所制限が有効な場合、距離をチェック
+        if (this.settings.location.shareLocation.enabled && !this.isWithinLocationRange(lat, lng)) {
+          return false
+        }
+
+        return true
+      },
+      /** 現在時刻が共有時間範囲内かチェック */
+      isWithinTimeRange (): boolean {
+        const now = new Date()
+        const currentHour = now.getHours()
+        const currentMin = now.getMinutes()
+        const currentTime = currentHour * 60 + currentMin
+
+        const startTime = this.settings.location.shareTime.start.hour * 60
+          + this.settings.location.shareTime.start.min
+        const endTime = this.settings.location.shareTime.end.hour * 60
+          + this.settings.location.shareTime.end.min
+
+        // 時間が日をまたぐ場合（例: 22:00～6:00）
+        return startTime > endTime ? currentTime >= startTime || currentTime <= endTime : currentTime >= startTime && currentTime <= endTime
+      },
+      /** 現在地が共有範囲内かチェック（距離計算） */
+      isWithinLocationRange (lat: number, lng: number): boolean {
+        const centerLat = this.settings.location.shareLocation.centerLatlng[0]
+        const centerLng = this.settings.location.shareLocation.centerLatlng[1]
+        const maxDistance = this.settings.location.shareLocation.distance
+
+        // 中心座標が設定されていない場合は範囲外とみなす
+        if (centerLat === undefined || centerLng === undefined || centerLat === 0 && centerLng === 0) {
+          return false
+        }
+
+        // Haversine公式で2点間の距離を計算（メートル）
+        const R = 6_371_000 // 地球の半径（メートル）
+        const dLat = (lat - centerLat) * Math.PI / 180
+        const dLng = (lng - centerLng) * Math.PI / 180
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+          + Math.cos(centerLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180)
+          * Math.sin(dLng / 2) * Math.sin(dLng / 2)
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        const distance = R * c
+
+        return distance <= maxDistance
       },
     },
   }
