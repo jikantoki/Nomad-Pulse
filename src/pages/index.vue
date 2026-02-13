@@ -1265,7 +1265,13 @@ div(style="height: 100%; width: 100%")
           + this.settings.location.shareTime.end.min
 
         // 時間が日をまたぐ場合（例: 22:00～6:00）
-        return startTime > endTime ? currentTime >= startTime || currentTime <= endTime : currentTime >= startTime && currentTime <= endTime
+        if (startTime > endTime) {
+          // 日をまたぐ場合: 開始時刻以降 または 終了時刻以前
+          return currentTime >= startTime || currentTime <= endTime
+        } else {
+          // 通常の場合: 開始時刻以降 かつ 終了時刻以前
+          return currentTime >= startTime && currentTime <= endTime
+        }
       },
       /** 現在地が共有範囲内かチェック（距離計算） */
       isWithinLocationRange (lat: number, lng: number): boolean {

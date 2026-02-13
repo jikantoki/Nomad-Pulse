@@ -258,7 +258,9 @@ v-card(
             position.coords.longitude,
           ]
         } catch (error) {
-          console.error('位置情報の取得に失敗しました', error)
+          console.error('位置情報の取得エラー:', error)
+          // ユーザーにわかりやすいエラーメッセージを表示
+          alert('位置情報の取得に失敗しました。位置情報の権限が許可されているか確認してください。')
         }
       },
     },
