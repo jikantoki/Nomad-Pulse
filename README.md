@@ -6,6 +6,30 @@
 
 [最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/Nomad-Pulse/refs/heads/main/nomad-pulse.apk)
 
+## バックグラウンド動作について
+
+このアプリは、以下の機能によりバックグラウンドでの永続的な動作を実現しています：
+
+### 実装内容
+
+1. **フォアグラウンドサービス**: `LocationForegroundService` により、位置情報の継続的な取得を実現
+2. **永続的な通知**: `setOngoing(true)` により、ユーザーが通知を簡単に消せない設定（Android 13以降のタスクマネージャーからの停止を除く）
+3. **自動再起動**: `START_STICKY` と `onTaskRemoved` により、アプリがタスクキルされてもサービスが自動的に再起動
+4. **起動時の自動開始**: `BOOT_COMPLETED` により、デバイス起動時に自動的にサービスを開始
+
+### 注意事項
+
+- Android 13 (API 33) 以降では、ユーザーが通知ドロワーのタスクマネージャーから「停止」ボタンでアプリを停止できます
+- この場合、システムによって強制的にアプリが終了され、サービスも停止します
+- これはAndroidの仕様であり、セキュリティとバッテリー管理のため回避できません
+
+### 必要な権限
+
+- `FOREGROUND_SERVICE`: フォアグラウンドサービスの実行
+- `FOREGROUND_SERVICE_LOCATION`: 位置情報用フォアグラウンドサービス
+- `RECEIVE_BOOT_COMPLETED`: デバイス起動時の自動起動
+- `ACCESS_BACKGROUND_LOCATION`: バックグラウンドでの位置情報取得
+
 ## Nuxt4 Template
 
 Nuxt を簡単にインストールしてすぐ使うためのテンプレート
