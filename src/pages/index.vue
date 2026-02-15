@@ -1269,6 +1269,7 @@ div(style="height: 100%; width: 100%")
           + this.settings.location.shareTime.end.min
 
         // 時間が日をまたぐ場合（例: 22:00～6:00）
+        // eslint-disable-next-line unicorn/prefer-ternary
         if (startTime > endTime) {
           // 日をまたぐ場合: 開始時刻以降 または 終了時刻以前
           return currentTime >= startTime || currentTime <= endTime
@@ -1284,6 +1285,7 @@ div(style="height: 100%; width: 100%")
         const maxDistance = this.settings.location.shareLocation.distance
 
         // 中心座標が設定されていない場合は範囲外とみなす
+        // eslint-disable-next-line @stylistic/no-mixed-operators
         if (centerLat === undefined || centerLng === undefined || centerLat === 0 && centerLng === 0) {
           return false
         }
