@@ -188,7 +188,7 @@ v-card(
           ) キャンセル
         v-btn(
           text
-          color="primary"
+          style="background-color: rgb(var(--v-theme-primary)); color: white;"
           @click="saveLocationSettings"
           ) 保存
 </template>
@@ -252,10 +252,13 @@ v-card(
       },
       async setCurrentLocation () {
         try {
-          const position = await Geolocation.getCurrentPosition()
+          if (!this.myProfile.location || !this.myProfile.location[0] || !this.myProfile.location[1]) {
+            alert('現在地の情報がプロフィールに保存されていません。位置情報の権限が許可されているか確認してください。')
+            return
+          }
           this.tempLocation.centerLatlng = [
-            position.coords.latitude,
-            position.coords.longitude,
+            this.myProfile.location[0],
+            this.myProfile.location[1],
           ]
         } catch (error) {
           console.error('位置情報の取得エラー:', error)
