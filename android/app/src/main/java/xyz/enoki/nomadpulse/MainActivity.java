@@ -12,8 +12,8 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Start the foreground service only if it's not already running
-        if (!isServiceRunning(LocationForegroundService.class)) {
+        // Start the foreground service only if it's not already running AND we have location permissions
+        if (!isServiceRunning(LocationForegroundService.class) && PermissionUtils.hasLocationPermissions(this)) {
             Intent serviceIntent = new Intent(this, LocationForegroundService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
