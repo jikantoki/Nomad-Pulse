@@ -22,18 +22,23 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
         // Verify that the intent is one we expect and from a trusted source
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             // BOOT_COMPLETED is a system action, safe to handle
-            startLocationService(context);
+            startLocationServiceIfPermitted(context);
         } else if (ACTION_RESTART_SERVICE.equals(action)) {
             // Our custom action - verify it's from our own package
             if (context.getPackageName().equals(intent.getPackage()) || 
                 intent.getComponent() != null && 
                 context.getPackageName().equals(intent.getComponent().getPackageName())) {
-                startLocationService(context);
+                startLocationServiceIfPermitted(context);
             }
         }
     }
 
-    private void startLocationService(Context context) {
+    private void startLocationServiceIfPermitted(Context context) {
+        // Only start the service if we have location permissions
+        if (!PermissionUtils.hasLocationPermissions(context)) {
+            return;
+        }
+
         Intent serviceIntent = new Intent(context, LocationForegroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent);
