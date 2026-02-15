@@ -1,12 +1,9 @@
 package xyz.enoki.nomadpulse;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
-import androidx.core.content.ContextCompat;
 
 public class ServiceRestartReceiver extends BroadcastReceiver {
     private static final String ACTION_RESTART_SERVICE = "xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE";
@@ -38,7 +35,7 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
 
     private void startLocationServiceIfPermitted(Context context) {
         // Only start the service if we have location permissions
-        if (!hasLocationPermissions(context)) {
+        if (!PermissionUtils.hasLocationPermissions(context)) {
             return;
         }
 
@@ -48,21 +45,5 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
         } else {
             context.startService(serviceIntent);
         }
-    }
-
-    private boolean hasLocationPermissions(Context context) {
-        // Check for basic location permissions (FINE or COARSE)
-        boolean hasFineLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED;
-
-        boolean hasCoarseLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED;
-
-        // At least one of FINE or COARSE location permission is required
-        return hasFineLocation || hasCoarseLocation;
     }
 }

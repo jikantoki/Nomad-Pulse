@@ -1,13 +1,10 @@
 package xyz.enoki.nomadpulse;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -16,7 +13,7 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
 
         // Start the foreground service only if it's not already running AND we have location permissions
-        if (!isServiceRunning(LocationForegroundService.class) && hasLocationPermissions()) {
+        if (!isServiceRunning(LocationForegroundService.class) && PermissionUtils.hasLocationPermissions(this)) {
             Intent serviceIntent = new Intent(this, LocationForegroundService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
@@ -43,21 +40,5 @@ public class MainActivity extends BridgeActivity {
             }
         }
         return false;
-    }
-
-    private boolean hasLocationPermissions() {
-        // Check for basic location permissions (FINE or COARSE)
-        boolean hasFineLocation = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED;
-
-        boolean hasCoarseLocation = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED;
-
-        // At least one of FINE or COARSE location permission is required
-        return hasFineLocation || hasCoarseLocation;
     }
 }
