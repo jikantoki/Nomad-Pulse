@@ -18,7 +18,7 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
         if (action == null) {
             return;
         }
-        
+
         // Verify that the intent is one we expect and from a trusted source
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             // BOOT_COMPLETED is a system action, safe to handle

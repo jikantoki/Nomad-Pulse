@@ -11,7 +11,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Start the foreground service only if it's not already running
         if (!isServiceRunning(LocationForegroundService.class)) {
             Intent serviceIntent = new Intent(this, LocationForegroundService.class);
@@ -24,7 +24,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         // Don't stop the service when activity is destroyed
         // The service will continue running in the background

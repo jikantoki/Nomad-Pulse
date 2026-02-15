@@ -53,7 +53,7 @@ public class LocationForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        
+
         // Schedule restart when service is destroyed
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
         restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
@@ -69,19 +69,19 @@ public class LocationForegroundService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        
+
         // Use AlarmManager for more reliable restart
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
         restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
         restartServiceIntent.setPackage(getPackageName());
-        
+
         PendingIntent restartPendingIntent = PendingIntent.getBroadcast(
             getApplicationContext(),
             1,
             restartServiceIntent,
             PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
         );
-        
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (alarmManager != null) {
             // Schedule restart in 1 second
@@ -101,7 +101,7 @@ public class LocationForegroundService extends Service {
                 NotificationManager.IMPORTANCE_LOW
             );
             serviceChannel.setDescription("位置情報サービスの通知チャンネル");
-            
+
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);

@@ -9,19 +9,23 @@
 ### 必須要件への対応
 
 ✅ **通知を消しても復活する**
+
 - 通知を「進行中」として設定（`setOngoing(true)`）により、ユーザーが簡単に消せないようになっています
 - サービスが再起動すると通知も自動的に復活します
 
 ✅ **タスクキルしてもバックグラウンドで動き続ける**
+
 - 複数の再起動メカニズムを実装
 - アプリをスワイプで閉じても、サービスは自動的に再起動します
 
 ## 実装したファイル
 
 ### 1. LocationForegroundService.java
+
 **役割**: メインのバックグラウンドサービス
 
 **主な機能**:
+
 ```java
 // 永続的な通知を表示
 Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -32,19 +36,23 @@ Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
 ```
 
 **再起動メカニズム**:
+
 1. **START_STICKY**: システムがメモリ不足で強制終了した場合、自動的に再起動
 2. **AlarmManager**: タスクキルされた時に1秒後に再起動
 3. **Broadcast**: サービスが終了時に再起動信号を送信
 
 ### 2. ServiceRestartReceiver.java
+
 **役割**: サービスの再起動を管理
 
 **主な機能**:
+
 - デバイス起動時（BOOT_COMPLETED）にサービスを自動開始
 - カスタム再起動アクションを受信してサービスを再開
 - セキュリティのためインテントを検証
 
 **セキュリティ対策**:
+
 ```java
 // 信頼できるアクションのみ処理
 if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
@@ -59,9 +67,11 @@ if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
 ```
 
 ### 3. MainActivity.java
+
 **役割**: アプリ起動時にサービスを開始
 
 **主な機能**:
+
 - アプリ起動時にフォアグラウンドサービスを開始
 - すでに起動中か確認してから開始（重複起動を防止）
 - アクティビティが終了してもサービスは継続
@@ -76,9 +86,11 @@ if (!isServiceRunning(LocationForegroundService.class)) {
 ```
 
 ### 4. AndroidManifest.xml
+
 **追加した設定**:
 
 **サービス宣言**:
+
 ```xml
 <service
     android:name=".LocationForegroundService"
@@ -87,10 +99,12 @@ if (!isServiceRunning(LocationForegroundService.class)) {
     android:foregroundServiceType="location"
     android:stopWithTask="false" />
 ```
+
 - `foregroundServiceType="location"`: 位置情報用サービスとして宣言
 - `stopWithTask="false"`: タスクが終了してもサービスは継続
 
 **ブロードキャストレシーバー**:
+
 ```xml
 <receiver
     android:name=".ServiceRestartReceiver"
@@ -102,9 +116,11 @@ if (!isServiceRunning(LocationForegroundService.class)) {
     </intent-filter>
 </receiver>
 ```
+
 - `exported="true"`: システムからの信号を受信するため必須
 
 **パーミッション**:
+
 ```xml
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
@@ -115,7 +131,8 @@ if (!isServiceRunning(LocationForegroundService.class)) {
 ## 動作の流れ
 
 ### 1. アプリ起動時
-```
+
+```txt
 アプリ起動
     ↓
 MainActivity.onCreate()
@@ -128,7 +145,8 @@ LocationForegroundService開始
 ```
 
 ### 2. タスクキル時
-```
+
+```txt
 ユーザーがアプリをスワイプで終了
     ↓
 onTaskRemoved()が呼ばれる
@@ -143,7 +161,8 @@ LocationForegroundServiceを再起動
 ```
 
 ### 3. デバイス再起動時
-```
+
+```txt
 デバイス起動
     ↓
 BOOT_COMPLETEDシステム信号
@@ -156,7 +175,8 @@ LocationForegroundServiceを開始
 ```
 
 ### 4. システムによる強制終了時
-```
+
+```txt
 メモリ不足でシステムがサービスを終了
     ↓
 onDestroy()が呼ばれる
@@ -171,16 +191,19 @@ START_STICKYにより自動再起動もスケジュール
 ## 制限事項
 
 ### Android 13以降のタスクマネージャー
+
 - Android 13（API 33）以降では、ユーザーが通知ドロワーから「停止」ボタンでアプリを停止できます
 - この場合、アプリのプロセス全体が強制終了され、サービスも停止します
 - これはAndroidのシステム仕様で、回避できません
 
 ### 強制停止
+
 - 設定画面からアプリを「強制停止」した場合、サービスは停止します
 - ユーザーが再度アプリを開くまで再起動しません
 - これは想定された動作です
 
 ### バッテリー最適化
+
 - 一部のデバイスでは、積極的なバッテリー最適化がサービスを終了させる場合があります
 - ユーザーがアプリをバッテリー最適化の対象外にする必要がある場合があります
 - これはデバイス/メーカー固有の動作です
@@ -208,7 +231,8 @@ START_STICKYにより自動再起動もスケジュール
 ## テスト方法
 
 ### 1. タスク削除テスト
-```
+
+```txt
 1. アプリを開いて通知が表示されることを確認
 2. 最近使用したアプリからスワイプで削除
 3. 通知が残っていることを確認
@@ -216,14 +240,16 @@ START_STICKYにより自動再起動もスケジュール
 ```
 
 ### 2. デバイス再起動テスト
-```
+
+```txt
 1. デバイスを再起動
 2. アプリを開かずに通知が表示されることを確認
 3. 通知をタップしてアプリが開くことを確認
 ```
 
 ### 3. 長時間動作テスト
-```
+
+```txt
 1. アプリを起動してバックグラウンドに移動
 2. 数時間放置
 3. 定期的に通知が残っているか確認
@@ -267,6 +293,7 @@ START_STICKYにより自動再起動もスケジュール
 ## まとめ
 
 この実装により：
+
 - ✅ タスクキルしてもバックグラウンドで動き続ける
 - ✅ 通知が消せない（進行中として表示）
 - ✅ サービスが再起動すると通知も復活
@@ -279,6 +306,7 @@ START_STICKYにより自動再起動もスケジュール
 ## ドキュメント
 
 詳細な技術ドキュメント（英語）も用意されています：
+
 - `BACKGROUND_SERVICE.md` - 技術的な詳細
 - `SECURITY_SUMMARY.md` - セキュリティ分析
 - `IMPLEMENTATION_SUMMARY.md` - 実装の概要
