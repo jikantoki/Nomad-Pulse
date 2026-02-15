@@ -13,11 +13,19 @@ public final class PermissionUtils {
 
     /**
      * Check if the app has location permissions (FINE or COARSE)
-     * @param context The context to check permissions with
-     * @return true if at least one of FINE or COARSE location permission is granted, false if context is null
+     * <p>
+     * This method checks if the app has been granted either ACCESS_FINE_LOCATION or
+     * ACCESS_COARSE_LOCATION permission. At least one of these permissions is required
+     * to start location-based services.
+     * </p>
+     * @param context The context to check permissions with. Must not be null.
+     * @return true if at least one of FINE or COARSE location permission is granted,
+     *         false if context is null or if no location permissions are granted
      */
     public static boolean hasLocationPermissions(Context context) {
         // Validate context parameter
+        // Returning false instead of throwing exception to ensure safe failure
+        // (service won't start without valid context)
         if (context == null) {
             return false;
         }
