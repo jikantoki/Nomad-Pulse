@@ -176,8 +176,8 @@ The following permissions are required in `AndroidManifest.xml`:
 ```
 
 **Note on Alarm Permissions:**
-- `SCHEDULE_EXACT_ALARM`: Required for scheduling exact alarms on Android 12+ (API 31+). User can revoke this permission.
-- `USE_EXACT_ALARM`: Added for Android 14+ (API 34+). This permission is not revocable for apps that need exact alarms for core functionality (like background location tracking).
+- `SCHEDULE_EXACT_ALARM`: Required for scheduling exact alarms on Android 12+ (API 31+). User can revoke this permission. Apps must check if this permission is granted at runtime using `AlarmManager.canScheduleExactAlarms()`.
+- `USE_EXACT_ALARM`: Added for Android 14+ (API 34+). This permission is not revocable for apps that need exact alarms for core functionality (like background location tracking). No runtime check is needed as this permission cannot be revoked by the user.
 
 ## Limitations
 
