@@ -10,20 +10,37 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import androidx.core.app.NotificationCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
 
 public class LocationForegroundService extends Service {
     private static final String TAG = "LocationFgService";
     private static final String CHANNEL_ID = "LocationServiceChannel";
     private static final int NOTIFICATION_ID = 1;
+    private static final long LOCATION_UPDATE_INTERVAL = 15 * 60 * 1000; // 15分
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service created");
         createNotificationChannel();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        setupLocationUpdates();
     }
 
     @Override
@@ -60,6 +77,11 @@ public class LocationForegroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Service destroyed, scheduling restart");
+
+        // Remove location updates
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
 
         // Schedule restart when service is destroyed using AlarmManager for reliability
         Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
@@ -168,5 +190,85 @@ public class LocationForegroundService extends Service {
                 manager.createNotificationChannel(serviceChannel);
             }
         }
+    }
+
+    private void setupLocationUpdates() {
+        if (!PermissionUtils.hasLocationPermissions(this)) {
+            Log.w(TAG, "Location permissions not granted, stopping service");
+            stopSelf();
+            return;
+        }
+
+        try {
+            LocationRequest locationRequest = new LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                LOCATION_UPDATE_INTERVAL
+            )
+            .setMinUpdateIntervalMillis(LOCATION_UPDATE_INTERVAL)
+            .build();
+
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null) {
+                        Log.w(TAG, "Received null location result");
+                        return;
+                    }
+                    for (android.location.Location location : locationResult.getLocations()) {
+                        Log.d(TAG, "Location received: " + location.getLatitude() + ", " + location.getLongitude());
+                        sendLocationToServer(location.getLatitude(), location.getLongitude());
+                    }
+                }
+            };
+
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            );
+            Log.d(TAG, "Location updates requested");
+        } catch (SecurityException e) {
+            Log.e(TAG, "Security exception when requesting location updates: " + e.getMessage(), e);
+            stopSelf();
+        }
+    }
+
+    private void sendLocationToServer(double latitude, double longitude) {
+        new Thread(() -> {
+            try {
+                // TODO: Replace with your actual server URL
+                URL url = new URL("https://nomadpulse.enoki.xyz/php/update_location.php");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(10000);
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("lat", latitude);
+                jsonObject.put("lng", longitude);
+                jsonObject.put("timestamp", System.currentTimeMillis());
+
+                String jsonInputString = jsonObject.toString();
+                Log.d(TAG, "Sending location to server: " + jsonInputString);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInputString.getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                Log.d(TAG, "Server response code: " + responseCode);
+
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.d(TAG, "Location sent successfully");
+                } else {
+                    Log.w(TAG, "Server returned non-OK response: " + responseCode);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error sending location to server: " + e.getMessage(), e);
+            }
+        }).start();
     }
 }
