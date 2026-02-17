@@ -8,9 +8,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,11 +41,13 @@ public class MainActivity extends BridgeActivity {
                     startActivity(intent);
                 } catch (Exception e) {
                     // If direct request fails, open battery optimization settings
+                    Log.w(TAG, "Could not request battery optimization exemption directly: " + e.getMessage());
                     try {
                         Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
                         startActivity(intent);
                     } catch (Exception ex) {
-                        // Silently fail if settings cannot be opened
+                        // Log failure if settings cannot be opened
+                        Log.w(TAG, "Could not open battery optimization settings: " + ex.getMessage());
                     }
                 }
             }

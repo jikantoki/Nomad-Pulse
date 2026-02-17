@@ -9,6 +9,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -30,15 +32,24 @@ public class LocationForegroundService extends Service {
     private static final String CHANNEL_ID = "LocationServiceChannel";
     private static final int NOTIFICATION_ID = 1;
     private static final long LOCATION_UPDATE_INTERVAL = 15 * 60 * 1000; // 15分
+    private static final String SERVER_URL = "https://nomadpulse.enoki.xyz/php/update_location.php";
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
+    private HandlerThread handlerThread;
+    private Handler backgroundHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service created");
         createNotificationChannel();
+        
+        // Create background handler thread for location updates
+        handlerThread = new HandlerThread("LocationUpdateThread");
+        handlerThread.start();
+        backgroundHandler = new Handler(handlerThread.getLooper());
+        
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setupLocationUpdates();
     }
@@ -81,6 +92,11 @@ public class LocationForegroundService extends Service {
         // Remove location updates
         if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+
+        // Quit background handler thread
+        if (handlerThread != null) {
+            handlerThread.quitSafely();
         }
 
         // Schedule restart when service is destroyed using AlarmManager for reliability
@@ -224,7 +240,7 @@ public class LocationForegroundService extends Service {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
-                Looper.getMainLooper()
+                backgroundHandler.getLooper()
             );
             Log.d(TAG, "Location updates requested");
         } catch (SecurityException e) {
@@ -236,8 +252,7 @@ public class LocationForegroundService extends Service {
     private void sendLocationToServer(double latitude, double longitude) {
         new Thread(() -> {
             try {
-                // TODO: Replace with your actual server URL
-                URL url = new URL("https://nomadpulse.enoki.xyz/php/update_location.php");
+                URL url = new URL(SERVER_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setDoOutput(true);

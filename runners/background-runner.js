@@ -2,37 +2,16 @@
 /* このコードは@capacitor/background-runnerによって15分間隔で実行されます */
 
 // Capacitorプラグインを使用して位置情報を取得し、サーバーに送信
+// 注: background-runnerコンテキストでは、ネイティブ側（LocationForegroundService）が
+// 実際の位置情報取得とサーバー送信を担当します
+// このファイルは将来的な拡張のために残されています
+
 addEventListener('backgroundTask', async (event) => {
   try {
-    console.log('Background task started');
-
-    // 位置情報を取得
-    const position = await CapacitorGeolocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    });
-
-    console.log('Position obtained:', position.coords.latitude, position.coords.longitude);
-
-    // サーバーに送信
-    const response = await fetch('https://nomadpulse.enoki.xyz/php/update_location.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        timestamp: position.timestamp
-      })
-    });
-
-    const result = await response.json();
-    console.log('Location sent to server:', result);
-
+    console.log('Background task executed - location updates handled by native service');
+    // ネイティブサービス（LocationForegroundService）が位置情報の取得と送信を処理
   } catch (error) {
-    console.error('Background location error:', error);
+    console.error('Background task error:', error);
   }
 });
 
