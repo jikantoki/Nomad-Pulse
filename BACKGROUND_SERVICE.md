@@ -43,38 +43,110 @@ return START_STICKY;
 ```java
 @Override
 public void onTaskRemoved(Intent rootIntent) {
-    // Recreate the service when task is removed
-    Intent restartServiceIntent = new Intent(getApplicationContext(), LocationForegroundService.class);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        startForegroundService(restartServiceIntent);
-    } else {
-        startService(restartServiceIntent);
-    }
     super.onTaskRemoved(rootIntent);
+    Log.d(TAG, "Task removed, scheduling restart");
+
+    // Use AlarmManager for more reliable restart
+    Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
+    restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
+    restartServiceIntent.setPackage(getPackageName());
+
+    PendingIntent restartPendingIntent = PendingIntent.getBroadcast(
+        getApplicationContext(),
+        1,
+        restartServiceIntent,
+        PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+    );
+
+    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    if (alarmManager != null) {
+        try {
+            // Use setExactAndAllowWhileIdle for Android M+ for better reliability
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000,
+                    restartPendingIntent
+                );
+            } else {
+                alarmManager.set(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000,
+                    restartPendingIntent
+                );
+            }
+        } catch (SecurityException e) {
+            Log.w(TAG, "SecurityException scheduling alarm: " + e.getMessage());
+        }
+    }
+
+    // Stop the service to ensure it's properly cleaned up before restart
+    stopSelf();
 }
 ```
 - Restarts the service when the user removes the app from the recent apps list
+- Uses `AlarmManager.setExactAndAllowWhileIdle()` for reliable restart on Android 6.0+ (API 23+)
+- Calls `stopSelf()` to properly clean up the service before restart
+- Uses secured `PendingIntent` with `FLAG_IMMUTABLE` for Android 12+ compatibility
 
 #### onDestroy
 ```java
 @Override
 public void onDestroy() {
     super.onDestroy();
+    Log.d(TAG, "Service destroyed, scheduling restart");
+
+    // Schedule restart using AlarmManager for reliability
     Intent restartServiceIntent = new Intent(getApplicationContext(), ServiceRestartReceiver.class);
-    restartServiceIntent.setAction("RestartService");
-    sendBroadcast(restartServiceIntent);
+    restartServiceIntent.setAction("xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE");
+    restartServiceIntent.setPackage(getPackageName());
+
+    PendingIntent restartPendingIntent = PendingIntent.getBroadcast(
+        getApplicationContext(),
+        2,  // Different request code from onTaskRemoved
+        restartServiceIntent,
+        PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
+    );
+
+    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    if (alarmManager != null) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000,
+                    restartPendingIntent
+                );
+            } else {
+                alarmManager.set(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + 1000,
+                    restartPendingIntent
+                );
+            }
+        } catch (SecurityException e) {
+            // Fallback to broadcast if alarm scheduling fails
+            sendBroadcast(restartServiceIntent);
+        }
+    } else {
+        // Fallback to broadcast if AlarmManager is not available
+        sendBroadcast(restartServiceIntent);
+    }
 }
 ```
-- Broadcasts an intent to restart the service when it's destroyed
+- Schedules service restart when it's destroyed
+- Uses `AlarmManager` instead of direct broadcast for more reliable restart
+- Includes fallback to broadcast if `AlarmManager` is unavailable or throws `SecurityException`
 
 #### BOOT_COMPLETED
 ```xml
 <intent-filter>
     <action android:name="android.intent.action.BOOT_COMPLETED" />
-    <action android:name="RestartService" />
+    <action android:name="xyz.enoki.nomadpulse.ACTION_RESTART_SERVICE" />
 </intent-filter>
 ```
 - Starts the service automatically when the device boots up
+- Handles custom restart action from the service
 
 ### 3. Foreground Service Configuration
 
@@ -99,7 +171,13 @@ The following permissions are required in `AndroidManifest.xml`:
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+<uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 ```
+
+**Note on Alarm Permissions:**
+- `SCHEDULE_EXACT_ALARM`: Required for scheduling exact alarms on Android 12+ (API 31+). User can revoke this permission.
+- `USE_EXACT_ALARM`: Added for Android 14+ (API 34+). This permission is not revocable for apps that need exact alarms for core functionality (like background location tracking).
 
 ## Limitations
 
