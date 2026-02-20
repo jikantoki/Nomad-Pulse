@@ -1,135 +1,137 @@
 # Nomad Pulse
 
-位置情報記録アプリ
+位置情報を記録・共有するAndroidアプリ
 
 <img src="./public/icon.png" width="256px" alt="アイコン">
 
-[最新版ダウンロード](https://raw.githubusercontent.com/jikantoki/Nomad-Pulse/refs/heads/main/nomad-pulse.apk)
+[最新版APKダウンロード](https://raw.githubusercontent.com/jikantoki/Nomad-Pulse/refs/heads/main/nomad-pulse.apk)
 
-## バックグラウンド動作について
+---
 
-このアプリは、以下の機能によりバックグラウンドでの永続的な動作を実現しています：
+## このプロジェクトについて
 
-### 実装内容
+Nomad Pulse は、GPS位置情報をバックグラウンドで継続的に記録し、フレンドと現在地を共有できるAndroidアプリです。  
+Vue 3 + Capacitor で構築されたハイブリッドアプリで、PHPバックエンドとMySQL DBを組み合わせて動作します。
 
-1. **フォアグラウンドサービス**: `LocationForegroundService` により、位置情報の継続的な取得を実現
-2. **永続的な通知**: `setOngoing(true)` により、ユーザーが通知を簡単に消せない設定（Android 13以降のタスクマネージャーからの停止を除く）
-3. **自動再起動**: `START_STICKY` と `onTaskRemoved` により、アプリがタスクキルされてもサービスが自動的に再起動
-4. **起動時の自動開始**: `BOOT_COMPLETED` により、デバイス起動時に自動的にサービスを開始
+### 主な機能
 
-### 注意事項
+- バックグラウンドでの継続的な位置情報取得（フォアグラウンドサービス）
+- フレンドリスト・フレンド申請
+- フレンドとのリアルタイム位置情報共有（地図表示）
+- QRコードによるユーザー検索・フレンド追加
+- プッシュ通知
+- メールアドレス認証付きアカウント登録・ログイン
+- プロフィール設定
 
-- Android 13 (API 33) 以降では、ユーザーが通知ドロワーのタスクマネージャーから「停止」ボタンでアプリを停止できます
-- この場合、システムによって強制的にアプリが終了され、サービスも停止します
-- これはAndroidの仕様であり、セキュリティとバッテリー管理のため回避できません
+---
 
-### 必要な権限
+## 技術スタック
 
-- `FOREGROUND_SERVICE`: フォアグラウンドサービスの実行
-- `FOREGROUND_SERVICE_LOCATION`: 位置情報用フォアグラウンドサービス
-- `RECEIVE_BOOT_COMPLETED`: デバイス起動時の自動起動
-- `ACCESS_BACKGROUND_LOCATION`: バックグラウンドでの位置情報取得
+| 領域 | 技術 |
+| --- | --- |
+| フロントエンド | Vue 3 + TypeScript + Vite + Vuetify 3 |
+| モバイル | Capacitor 8（Android） |
+| 地図 | Leaflet（@vue-leaflet/vue-leaflet） |
+| 状態管理 | Pinia |
+| バックエンド | PHP |
+| データベース | MySQL |
+| プッシュ通知 | Web Push / Firebase Cloud Messaging |
 
-## Nuxt4 Template
+---
 
-Nuxt を簡単にインストールしてすぐ使うためのテンプレート
+## ファイル構成
 
-- NOLICENSED ご自由にお使いください
+```
+Nomad-Pulse/
+├── src/                        # Vue フロントエンドソース
+│   ├── pages/                  # ページコンポーネント（ファイルベースルーティング）
+│   │   ├── index.vue           # ホーム（地図表示）
+│   │   ├── login.vue           # ログイン
+│   │   ├── registar.vue        # アカウント登録
+│   │   ├── friendlist.vue      # フレンドリスト
+│   │   ├── qrcode.vue          # QRコード表示・読み取り
+│   │   ├── about.vue           # アプリについて
+│   │   ├── terms.vue           # 利用規約
+│   │   ├── tutorial.vue        # チュートリアル
+│   │   ├── password_reset.vue  # パスワードリセット
+│   │   ├── settings/           # 設定ページ群
+│   │   └── user/               # ユーザープロフィールページ
+│   ├── components/             # 共通コンポーネント
+│   ├── stores/                 # Pinia ストア
+│   ├── js/                     # ユーティリティ・API関数
+│   ├── mixins/                 # Vue ミックスイン
+│   ├── styles/                 # SCSS スタイル
+│   └── plugins/                # Vuetify等プラグイン設定
+├── android/                    # Capacitor Androidネイティブコード
+│   └── app/src/main/java/xyz/enoki/nomadpulse/
+│       ├── MainActivity.java               # アプリエントリポイント
+│       ├── LocationForegroundService.java  # バックグラウンド位置情報サービス
+│       ├── ServiceRestartReceiver.java     # サービス再起動ブロードキャストレシーバー
+│       └── PermissionUtils.java            # 権限チェックユーティリティ
+├── php/                        # PHP APIサーバー
+│   ├── createAccount.php       # アカウント登録
+│   ├── loginAccount.php        # ログイン
+│   ├── updateGeoLocation.php   # 位置情報更新
+│   ├── getMyFriendList.php     # フレンドリスト取得
+│   ├── friendRequest.php       # フレンド申請
+│   ├── getProfile.php          # プロフィール取得
+│   ├── updateProfile.php       # プロフィール更新
+│   ├── sendPushForAccount.php  # プッシュ通知送信
+│   └── ...
+├── public/                     # 静的ファイル（アイコン等）
+├── runners/                    # Capacitor バックグラウンドランナー
+├── database.sql                # MySQL スキーマ
+├── capacitor.config.ts         # Capacitor設定
+└── vite.config.mts             # Vite設定
+```
 
-## 前提
+---
 
-Node.js と npm と yarn くらい入ってるよね！（投げやり）
-デプロイ先は Vercel を想定してるけど多分どこでも動きます
-あと PHP の composer も用意してね
+## セットアップ
 
-## INCLUDED
+このアプリは **フロントエンド（Vite）** と **PHPバックエンド** の2つのサーバーが必要です。
 
-- Vue CLI Service
-- Vue3
-- Vuetify3
-- Vuetify ダークテーマ
-- Nuxt4
-- Vue-router
-- VSCode、Git、Eslint、Prettier 周りの設定ファイル
-- Pug と SASS
-- PWA Preset
-- Google Fonts
-- Vue Content Loader
+### 前提条件
 
-## 独自実装
+- Node.js + yarn
+- PHP + Composer
+- MySQL
+- Android Studio（Androidビルド時）
 
-- Cookie API
-- Ajax API
-- 画面を右スワイプでメニュー表示
-- イイカンジにカスタマイズされた SCSS ファイル
-- コピペで使える pug テンプレート
-- 汎用性の高い関数群
-- ダークテーマ切り替えボタン
-- Push API（使いやすいように改良）
-- Notification API（使いやすいように改良）
-- アカウント登録時のメールアドレス認証、アクセストークンの発行
-- MySQL 用 API
-
-## 制作予定
-
-- リッチエディタ
-
-## 注意
-
-ポート 12345 で動くようにしてあります  
-VSCode での利用を推奨
-
-~~Vue3 慣れてなくて Options API 使ってるけど許して~~
-
-## 参考資料
-
-WebPush <https://tech.excite.co.jp/entry/2021/06/30/104213>
-
-## Setup
-
-このプログラムは、表示用サーバーと処理用サーバーの 2 つが必要です
-
-### 表示用サーバー
+### 1. フロントエンドのセットアップ
 
 ```shell
-git clone git@github.com:jikantoki/nuxt4temp.git
-echo 'これだけでセットアップ完了！'
-echo 'Vercelとかでデプロイしたらそのまま動く'
+# リポジトリをクローン後
+yarn install
 ```
 
-### WebPush 用の鍵を作成
+#### 環境変数の設定
 
-ここで作れます <https://web-push-codelab.glitch.me/>
-
-#### ストレージを操作できる環境の場合
-
-ルートに.env ファイルを作成し、以下のように記述（クォーテーション不要）
+ルートに `.env` ファイルを作成し、以下を記述（クォーテーション不要）：
 
 ```env
-VUE_APP_WEBPUSH_PUBLICKEY=パブリックキーをコピー
-VUE_APP_WEBPUSH_PRIVATEKEY=プライベートキーをコピー
-
 VUE_APP_API_ID=default
-VUE_APP_API_TOKEN=後のPHPで作成するアクセストークン
-VUE_APP_API_ACCESSKEY=後のPHPで作成するアクセスキー
+VUE_APP_API_TOKEN=PHPサーバーで発行するアクセストークン
+VUE_APP_API_ACCESSKEY=PHPサーバーで発行するアクセスキー
+VUE_APP_API_HOST=APIサーバーのURL（例: https://api.example.com）
 
-VUE_APP_API_HOST=APIサーバーのホスト
+VUE_APP_WEBPUSH_PUBLICKEY=WebPush用パブリックキー
+VUE_APP_WEBPUSH_PRIVATEKEY=WebPush用プライベートキー
 ```
 
-#### それ以外（Vercel デプロイ等）
+WebPush用の鍵はこちらで生成できます: <https://web-push-codelab.glitch.me/>
 
-Project Settings → Enviroment Variables を開く  
-上記.env ファイルと同じ感じで設定
+### 2. PHPサーバーのセットアップ
 
-### PHP サーバー（内部処理用）
+レンタルサーバーや自前のPHP環境を用意し、`php/` ディレクトリをドキュメントルートに配置します。
 
-サーバーサイドは PHP で開発しているため、一部処理を実行するには PHP サーバーの用意が必要です  
-とりあえずレンタルサーバーでも借りれば実行できます
+```shell
+composer install
+```
 
-1. API 用のドメインをクライアント側（Vercel 等）とは別で用意する
-2. このリポジトリの php フォルダをドメインのルートにする（.htaccess 等で）
-3. （準備中！！！）に API 用のドメインを記述
-4. リポジトリルート直下に/env.php を用意し、以下の記述をする
+#### PHPの設定ファイル（`/env.php`）
+
+リポジトリルート直下（PHPサーバー側）に `env.php` を作成し、以下を記述：
 
 ```php
 <?php
@@ -138,208 +140,140 @@ define('DIRECTORY_NAME', '/プロジェクトルートのディレクトリ名')
 define('VUE_APP_WebPush_PublicKey', 'パブリックキー');
 define('VUE_APP_WebPush_PrivateKey', 'プライベートキー');
 define('WebPush_URL', 'プッシュ通知を使うドメイン');
-define('WebPush_URL_dev', 'プッシュ通知を使うドメイン（開発用）');//この行は無くても良い
-define('WebPush_icon', 'プッシュ通知がスマホに届いたときに表示するアイコンURL');
-define('Default_user_icon', 'アイコン未設定アカウント用の初期アイコンURL');
+define('WebPush_icon', 'プッシュ通知アイコンURL');
+define('Default_user_icon', 'デフォルトユーザーアイコンURL');
 
 define('MySQL_Host', 'MySQLサーバー');
 define('MySQL_DBName', 'DB名');
 define('MySQL_User', 'DB操作ユーザー名');
 define('MySQL_Password', 'DBパスワード');
 
-define('SMTP_Name', '自動メール送信時の差出名');
+define('SMTP_Name', '送信者名');
 define('SMTP_Username', 'SMTPユーザー名');
-define('SMTP_Mailaddress', '送信に使うメールアドレス');
+define('SMTP_Mailaddress', '送信メールアドレス');
 define('SMTP_Password', 'SMTPパスワード');
 define('SMTP_Server', 'SMTPサーバー');
-define('SMTP_Port', 587); //基本は587を使えば大丈夫
-
-$mailHeader = "<p>
-いつも Nomad Pulse をご利用いただきありがとうございます。
-<hr>
-</p>";
-$mailFooter = "<p>
-<hr>
-このメールに返信することはできません。
-<br>
-また、このメールに身に覚えのない場合は、エノキ電気までお問い合わせください。
-<br>
-<a href=\"https://nomadpulse.enoki.xyz\">Nomad Pulse</a> by <a href=\"https://enoki.xyz\">エノキ電気</a>
-</p>";
-
+define('SMTP_Port', 587);
 ```
 
-#### PHP サーバー用の.htaccess の用意
-
-大体こんな感じで設定する
+#### .htaccessの設定例
 
 ```htaccess
-#トップページを/nuxt4temp/php にする
 <IfModule mod_rewrite.c>
 RewriteEngine on
 RewriteBase /
-RewriteRule ^$ nuxt4temp/php/ [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)$ nuxt4temp/php/$1 [L]
+RewriteRule ^(.+)$ php/$1 [L]
 </IfModule>
-# 外部からのAPIへのアクセスを許可
 Header append Access-Control-Allow-Origin: "*"
-
 ```
 
-### MySQL の用意
+### 3. MySQLのセットアップ
 
-#### /database.sql ファイルをインポートする
-
-PHPMyAdmin が使える環境なら DB 直下にインポートして終わり、コマンドラインでやる方法は知らん
-
-#### ※インポートでエラーが出たら
-
-/database_VIEW.sql の中身をコピーして phpmyadmin で直接実行
-
-### デフォルト API のトークンを用意する
-
-このプログラムは独自のアクセストークンを利用して API にアクセスします。  
-そのため、初回 API を登録する作業が必要です。
-
-1. セットアップした API 用サーバーの/makeApiForAdmin.php にアクセス
-2. 初回アクセス時のみ MySQL で登録作業が行われるので、出てきた画面の内容をコピー
-3. .env にｲｲｶﾝｼﾞに内容を記述（書き方はさっき説明した）
-4. 以後、その値を使って API を操作できます
-
-**忘れたらリセット**するしかないので注意！（一部データは暗号化されており、管理者でも確認できません）
-
-#### デフォルト API トークンのリセット方法
-
-1. MySQL の api_list テーブルの secretId='default'を削除
-2. api_listForView の secretId='default'も同様に削除
-3. 初回登録と同じ感じでやる
-4. データベースに再度 default が追加されていることを確認
-
-## コンソール側で初期化
+`database.sql` をMySQLにインポートします：
 
 ```shell
+mysql -u ユーザー名 -p DB名 < database.sql
+```
+
+PHPMyAdminが使える環境であれば、GUIからインポートも可能です。
+
+### 4. デフォルトAPIトークンの発行
+
+このアプリは独自のアクセストークンでAPIを保護しています。初回セットアップ時に以下を実行してください：
+
+1. PHPサーバーの `/makeApiForAdmin.php` にブラウザでアクセス
+2. 表示されたトークン・キーをコピー
+3. `.env` の `VUE_APP_API_TOKEN` / `VUE_APP_API_ACCESSKEY` に記述
+
+> **注意**: トークンを紛失した場合は、MySQLの `api_list` テーブルの `secretId='default'` 行を削除し、再度 `/makeApiForAdmin.php` にアクセスしてリセットしてください。
+
+---
+
+## 開発コマンド
+
+```shell
+# 依存パッケージのインストール
 yarn install
-composer install #PHP用
-```
 
-### 実行
+# 開発サーバー起動（http://localhost:9000）
+yarn dev
 
-```shell
-yarn run dev
-```
-
-### 設定方法
-
-| 項目           | 設定箇所                     |
-| -------------- | ---------------------------- |
-| アプリ名       | /package.json                |
-| フォント       | /layout/default.vue          |
-| ナビゲーション | /items/itemNavigationList.js |
-| 404 ページ     | /error.vue                   |
-
-### Compiles and minifies for production
-
-```shell
+# 本番ビルド
 yarn build
-```
 
-### Lints and fixes files
+# 型チェック
+yarn type-check
 
-```shell
+# リント・自動修正
 yarn lint
+
+# Capacitor Android同期（ビルド後に実行）
+npx cap sync android
+
+# Android APKビルド
+cd android && ./gradlew assembleDebug
 ```
 
-### Customize configuration
+---
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## バックグラウンドサービスについて
+
+このアプリはバックグラウンドでの継続的な位置情報取得のため、Androidネイティブのフォアグラウンドサービスを実装しています。
+
+### 実装内容
+
+| クラス | 役割 |
+| --- | --- |
+| `LocationForegroundService` | 位置情報の継続取得・永続通知の表示 |
+| `ServiceRestartReceiver` | タスクキル・デバイス再起動時のサービス自動再起動 |
+| `MainActivity` | アプリ起動時のサービス開始・権限リクエスト |
+| `PermissionUtils` | 位置情報権限チェックのユーティリティ |
+
+### 再起動メカニズム
+
+- **START_STICKY**: システムがメモリ不足でサービスを終了した場合、自動再起動
+- **AlarmManager**: タスクキル時に1秒後の再起動をスケジュール
+- **BOOT_COMPLETED**: デバイス再起動時にサービスを自動開始
+
+### 必要な権限
+
+- `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_LOCATION`: フォアグラウンドサービス実行
+- `ACCESS_FINE_LOCATION` / `ACCESS_BACKGROUND_LOCATION`: 位置情報取得
+- `RECEIVE_BOOT_COMPLETED`: デバイス起動時の自動起動
+- `SCHEDULE_EXACT_ALARM`: 正確なタイマーによる再起動スケジュール
+- `POST_NOTIFICATIONS`: 通知表示（Android 13以降）
+
+### 制限事項
+
+- Android 13（API 33）以降では、通知ドロワーの「停止」ボタンでサービスを強制終了できます（システム仕様のため回避不可）
+- 設定画面からの「強制停止」を行うとサービスは停止し、ユーザーが再度アプリを開くまで再起動しません
+
+詳細は [`BACKGROUND_SERVICE.md`](./BACKGROUND_SERVICE.md) および [`IMPLEMENTATION_JAPANESE.md`](./IMPLEMENTATION_JAPANESE.md) を参照してください。
+
+---
 
 ## トラブルシューティング
 
-### PHP がおかしい
+### Androidビルドエラーが出る
 
-composer ちゃんと入れた？
+```shell
+cd android && ./gradlew clean
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
 
-## Vuetify (Default)
+### PHPサーバーに接続できない
 
-This is the official scaffolding tool for Vuetify, designed to give you a head start in building your new Vuetify application. It sets up a base template with all the necessary configurations and standard directory structure, enabling you to begin development without the hassle of setting up the project from scratch.
+- `env.php` の `MySQL_Host` や `SMTP_*` 設定を確認
+- `composer install` を実行済みか確認
 
-## ❗️ Important Links
+### 開発サーバーが起動しない
 
-- 📄 [Docs](https://vuetifyjs.com/)
-- 🚨 [Issues](https://issues.vuetifyjs.com/)
-- 🏬 [Store](https://store.vuetifyjs.com/)
-- 🎮 [Playground](https://play.vuetifyjs.com/)
-- 💬 [Discord](https://community.vuetifyjs.com)
-
-## 💿 Install
-
-Set up your project using your preferred package manager. Use the corresponding command to install the dependencies:
-
-| Package Manager                                           | Command        |
-| --------------------------------------------------------- | -------------- |
-| [yarn](https://yarnpkg.com/getting-started)               | `yarn install` |
-| [npm](https://docs.npmjs.com/cli/v7/commands/npm-install) | `npm install`  |
-| [pnpm](https://pnpm.io/installation)                      | `pnpm install` |
-| [bun](https://bun.sh/#getting-started)                    | `bun install`  |
-
-After completing the installation, your environment is ready for Vuetify development.
-
-## ✨ Features
-
-- 🖼️ **Optimized Front-End Stack**: Leverage the latest Vue 3 and Vuetify 3 for a modern, reactive UI development experience. [Vue 3](https://v3.vuejs.org/) | [Vuetify 3](https://vuetifyjs.com/en/)
-- 🗃️ **State Management**: Integrated with [Pinia](https://pinia.vuejs.org/), the intuitive, modular state management solution for Vue.
-- 🚦 **Routing and Layouts**: Utilizes Vue Router for SPA navigation and vite-plugin-vue-layouts-next for organizing Vue file layouts. [Vue Router](https://router.vuejs.org/) | [vite-plugin-vue-layouts-next](https://github.com/loicduong/vite-plugin-vue-layouts-next)
-- 💻 **Enhanced Development Experience**: Benefit from TypeScript's static type checking and the ESLint plugin suite for Vue, ensuring code quality and consistency. [TypeScript](https://www.typescriptlang.org/) | [ESLint Plugin Vue](https://eslint.vuejs.org/)
-- ⚡ **Next-Gen Tooling**: Powered by Vite, experience fast cold starts and instant HMR (Hot Module Replacement). [Vite](https://vitejs.dev/)
-- 🧩 **Automated Component Importing**: Streamline your workflow with unplugin-vue-components, automatically importing components as you use them. [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components)
-- 🛠️ **Strongly-Typed Vue**: Use vue-tsc for type-checking your Vue components, and enjoy a robust development experience. [vue-tsc](https://github.com/johnsoncodehk/volar/tree/master/packages/vue-tsc)
-
-These features are curated to provide a seamless development experience from setup to deployment, ensuring that your Vuetify application is both powerful and maintainable.
-
-## 💡 Usage
-
-This section covers how to start the development server and build your project for production.
-
-### Starting the Development Server
-
-To start the development server with hot-reload, run the following command. The server will be accessible at [http://localhost:3000](http://localhost:3000):
-
-```bash
+```shell
+yarn install
 yarn dev
 ```
 
-(Repeat for npm, pnpm, and bun with respective commands.)
-
-> Add NODE_OPTIONS='--no-warnings' to suppress the JSON import warnings that happen as part of the Vuetify import mapping. If you are on Node [v21.3.0](https://nodejs.org/en/blog/release/v21.3.0) or higher, you can change this to NODE_OPTIONS='--disable-warning=5401'. If you don't mind the warning, you can remove this from your package.json dev script.
-
-### Building for Production
-
-To build your project for production, use:
-
-```bash
-yarn build
-```
-
-(Repeat for npm, pnpm, and bun with respective commands.)
-
-Once the build process is completed, your application will be ready for deployment in a production environment.
-
-## 💪 Support Vuetify Development
-
-This project is built with [Vuetify](https://vuetifyjs.com/en/), a UI Library with a comprehensive collection of Vue components. Vuetify is an MIT licensed Open Source project that has been made possible due to the generous contributions by our [sponsors and backers](https://vuetifyjs.com/introduction/sponsors-and-backers/). If you are interested in supporting this project, please consider:
-
-- [Requesting Enterprise Support](https://support.vuetifyjs.com/)
-- [Sponsoring John on Github](https://github.com/users/johnleider/sponsorship)
-- [Sponsoring Kael on Github](https://github.com/users/kaelwd/sponsorship)
-- [Supporting the team on Open Collective](https://opencollective.com/vuetify)
-- [Becoming a sponsor on Patreon](https://www.patreon.com/vuetify)
-- [Becoming a subscriber on Tidelift](https://tidelift.com/subscription/npm/vuetify)
-- [Making a one-time donation with Paypal](https://paypal.me/vuetify)
-
-## 📑 License
-
-[MIT](http://opensource.org/licenses/MIT)
-
-Copyright (c) 2016-present Vuetify, LLC
+ポートが競合している場合は `vite.config.mts` の `server.port` を変更してください（デフォルト: 9000）。
