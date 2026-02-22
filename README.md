@@ -162,7 +162,7 @@ define('SMTP_Port', 587);
 <IfModule mod_rewrite.c>
 RewriteEngine on
 RewriteBase /
-RewriteRule ^(.+)$ nomad-pulse/php/ [L]
+RewriteRule ^$ nomad-pulse/php/ [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.+)$ nomad-pulse/php/$1 [L]
