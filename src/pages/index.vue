@@ -299,6 +299,10 @@ div(style="height: 100%; width: 100%")
             .icon-and-text
               v-icon mdi-account-multiple
               v-list-item-title 友達リスト
+          v-list-item.item( @click="$router.push('/tutorial')" )
+            .icon-and-text
+              v-icon mdi-book-open-page-variant
+              v-list-item-title チュートリアルを表示
           v-list-item.item( @click="$router.push('/settings')" )
             .icon-and-text
               v-icon mdi-cog
@@ -664,6 +668,11 @@ div(style="height: 100%; width: 100%")
           if (result.location === 'granted') {
             this.setCurrentPosition()
           } else {
+            /** ゲストモードかつ位置情報未許可の場合はチュートリアルへ */
+            if (this.myProfile.guest === true) {
+              this.$router.push('/tutorial')
+              return
+            }
             Geolocation.requestPermissions().then(result => {
               if (result.location === 'granted') {
                 this.setCurrentPosition()
@@ -679,6 +688,11 @@ div(style="height: 100%; width: 100%")
         /** スマホの場合、この方法で位置情報と通知を許可してもらう */
         const perm = await Geolocation.checkPermissions()
         if (perm.coarseLocation != 'granted' && perm.location != 'granted') {
+          /** ゲストモードかつ位置情報未許可の場合はチュートリアルへ */
+          if (this.myProfile.guest === true) {
+            this.$router.push('/tutorial')
+            return
+          }
           const permission = await BackgroundRunner.checkPermissions()
           if (permission.geolocation !== 'granted') {
             this.requestGeoPermissionDialog = true
