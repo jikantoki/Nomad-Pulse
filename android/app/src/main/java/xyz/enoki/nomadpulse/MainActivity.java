@@ -3,14 +3,22 @@ package xyz.enoki.nomadpulse;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.util.Log;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Request battery optimization exemption for reliable background operation
+        requestBatteryOptimizationExemption();
 
         // Start the foreground service only if it's not already running AND we have location permissions
         if (!isServiceRunning(LocationForegroundService.class) && PermissionUtils.hasLocationPermissions(this)) {
@@ -19,6 +27,29 @@ public class MainActivity extends BridgeActivity {
                 startForegroundService(serviceIntent);
             } else {
                 startService(serviceIntent);
+            }
+        }
+    }
+
+    private void requestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            if (powerManager != null && !powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    // If direct request fails, open battery optimization settings
+                    Log.w(TAG, "Could not request battery optimization exemption directly: " + e.getMessage());
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                        startActivity(intent);
+                    } catch (Exception ex) {
+                        // Log failure if settings cannot be opened
+                        Log.w(TAG, "Could not open battery optimization settings: " + ex.getMessage());
+                    }
+                }
             }
         }
     }
